@@ -148,4 +148,6 @@ data/                local working dir for downloads (git-ignored)
 
 - Pipeline: `cd pipeline && uv run mastr-radar --help`, `uv run pytest`,
   `uv run ruff check . && uv run ruff format --check .`
+- Station 1: `uv run mastr-radar download` (newest export, resumable, then
+  checked), `uv run mastr-radar check-download <zip>` (check only)
 - Web: (added in WP7)

@@ -16,11 +16,11 @@ def test_version():
 def test_settings_load():
     s = load_settings()
     assert s.min_capacity_mw == 1.0
-    assert "wind" in s.technologies
+    assert "wind_onshore" in s.technologies
     assert s.output_dir.parts[-3:] == ("web", "public", "data")
 
 
 def test_unimplemented_steps_fail_clearly():
-    result = runner.invoke(app, ["download"])
+    result = runner.invoke(app, ["extract"])
     assert result.exit_code == 1
-    assert "WP5" in result.stdout
+    assert "WP6" in result.stdout
