@@ -1,0 +1,41 @@
+# WP4 data check: can a free GitHub runner handle the full MaStR download?
+# Runs on manual trigger, or when this file changes.
+name: Data check (WP4)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/data-check.yml
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      OUTPUT_PATH: ${{ github.workspace }}/data/raw
+    steps:
+      - name: Disk before
+        run: df -h / && free -g
+      - uses: astral-sh/setup-uv@v6
+      - name: Install open-mastr
+        run: uv venv --python 3.12 && uv pip install open-mastr
+      - name: Download and measure
+        run: |
+          mkdir -p "$OUTPUT_PATH"
+          ( peak=0; while true; do u=$(du -sm "$OUTPUT_PATH" | cut -f1); [ "$u" -gt "$peak" ] && peak=$u && echo $peak > peak_mb.txt; sleep 5; done ) &
+          .venv/bin/python - <<'EOF'
+          import time, resource
+          from open_mastr import Mastr
+          t = time.time()
+          Mastr().download(data=["wind", "solar", "biomass", "hydro", "storage", "market"])
+          print("DURATION_S", round(time.time() - t))
+          print("PEAK_RSS_MB", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss // 1024)
+          EOF
+          echo "PEAK_DISK_MB $(cat peak_mb.txt)"
+      - name: Sizes after
+        if: always()
+        run: |
+          du -sh "$OUTPUT_PATH"/* || true
+          find "$OUTPUT_PATH" -name "*.db" -exec ls -lh {} \; || true
+          df -h /
