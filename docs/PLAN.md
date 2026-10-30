@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: WP3 of 24 · Phase 2 · Next: write the station contracts**
+**You are here: WP3 of 24 · Phase 2 · Contracts drafted, waiting for your approval**
 
 Progress: ██░░░░░░░░░░░░░░░░░░░░░░ 2 / 24
 
