@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP4 of 24 · Phase 2 · Next: data check (real download)**
+**You are here: WP4 done · Waiting for your decision on contract v1.1 (see docs/data-dictionary.md), then WP5**
 
-Progress: ███░░░░░░░░░░░░░░░░░░░░░ 3 / 24
+Progress: ████░░░░░░░░░░░░░░░░░░░░ 4 / 24
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -23,12 +23,15 @@ building anything wide. That way every problem in the chain shows up early.
   the output files, every column, its type and meaning. No code. You review
   it, then it's locked (v1).
   *Done when:* you've approved v1.
-- [ ] **WP4. Data check.** Real open-mastr download. Measure size, time and
+- [x] **WP4. Data check.** Real open-mastr download. Measure size, time and
   disk use on a GitHub runner. Confirm every contract column exists. Count
   units per technology and size class (this decides the size limit for
   unit-level map data). Record findings in `docs/data-dictionary.md`.
   *Done when:* we know the daily job fits on a free GitHub runner and the
   contract holds (or we've adjusted it, as its own step).
+  *Result:* runner is fine (86 GB disk); download needs resume/retry;
+  open-mastr 1.0.0 fails on all solar files. Details in
+  `docs/data-dictionary.md`.
 - [ ] **WP5. Station 2: Extract (wind).** SQLite → `units.parquet` for wind,
   validated against the contract.
   *Done when:* runs on the real data and a fixture test passes.
