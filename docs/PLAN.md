@@ -6,7 +6,7 @@ parallel once the JSON contract exists (milestone 4).
 
 ## Phase A: data foundation
 
-- [ ] **1. Pipeline skeleton.** `uv` project in `pipeline/`, package
+- [x] **1. Pipeline skeleton.** `uv` project in `pipeline/`, package
   `mastr_radar`, `typer` CLI stub, ruff + pytest, `.gitignore` for `data/`,
   `ci.yml` running lint and tests.
   *Done when:* `uv run mastr-radar --help` and `uv run pytest` pass in CI.
@@ -90,10 +90,12 @@ parallel once the JSON contract exists (milestone 4).
   (stale-data banner if the manifest is older than 48 h), README for
   contributors.
 
-## Open questions
+## Decisions
 
-1. **UI language:** English only, or English + German?
-2. **Snapshot storage:** GitHub Release assets (proposed), a `data` branch,
-   or object storage (e.g. Cloudflare R2)?
-3. **Size threshold** for operator and transaction views: 1 MW proposed.
-4. **Domain name** and whether the GitHub repo is public.
+1. **UI language:** English for now. Keep UI text in one place so German can
+   be added later. *(Still open.)*
+2. **Snapshot storage:** GitHub Release assets. No accounts or setup needed;
+   the daily Action uploads with its built-in token.
+3. **Size threshold** for operator and transaction views: **1 MW**.
+4. **Repo:** public. The site is publicly accessible on Vercel. *(Domain
+   still open.)*

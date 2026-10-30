@@ -1,0 +1,14 @@
+# Paths are relative to the repository root.
+data_dir: data            # downloads and SQLite (git-ignored)
+output_dir: web/public/data  # JSON the website reads
+
+# Operator and transaction views only include units at or above this size.
+min_capacity_mw: 1.0
+
+# open-mastr data names to download and process.
+technologies:
+  - wind
+  - solar
+  - storage
+  - biomass
+  - hydro
