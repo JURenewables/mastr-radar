@@ -9,7 +9,7 @@ app = typer.Typer(help="MaStR Radar data pipeline.", no_args_is_help=True)
 
 
 def _not_yet(step: str, milestone: int) -> None:
-    typer.echo(f"'{step}' is not implemented yet (planned for milestone {milestone}).")
+    typer.echo(f"'{step}' is not implemented yet (planned for WP{milestone}).")
     raise typer.Exit(code=1)
 
 
@@ -31,20 +31,20 @@ def config() -> None:
 
 @app.command()
 def download() -> None:
-    """Download the MaStR bulk export with open-mastr."""
-    _not_yet("download", 2)
+    """Download the MaStR bulk export (resumable)."""
+    _not_yet("download", 5)
 
 
 @app.command()
 def extract() -> None:
-    """Turn the downloaded database into slim Parquet files."""
-    _not_yet("extract", 3)
+    """Read the export zip into units.parquet."""
+    _not_yet("extract", 6)
 
 
 @app.command()
 def aggregate() -> None:
     """Write the JSON files the website reads."""
-    _not_yet("aggregate", 4)
+    _not_yet("aggregate", 7)
 
 
 if __name__ == "__main__":

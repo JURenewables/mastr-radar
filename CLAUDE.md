@@ -26,7 +26,7 @@ the market and are short on time. They want to:
 
 | Layer | Choice |
 |---|---|
-| Data pipeline | Python 3.12, [`open-mastr`](https://github.com/OpenEnergyPlatform/open-MaStR) (bulk export → SQLite), pandas/pyarrow, `uv` |
+| Data pipeline | Python 3.12, own streaming reader for the BNetzA bulk export (XML in a zip), pandas/pyarrow, `uv`. Not open-mastr: v1.0.0 failed on all solar files (WP4) |
 | Schedule | GitHub Actions, daily cron (BNetzA publishes the bulk export daily) |
 | Outputs | Parquet + small JSON files, served as static files by the website |
 | Frontend | Next.js (App Router, TypeScript) + Tailwind CSS, hosted on Vercel |
@@ -41,14 +41,16 @@ the output of the station before it.
 
 ```
 1 Download ──▶ 2 Extract ──▶ 3 Build explorer files ──▶ 4 Website
-BNetzA export   raw SQLite →    units + summaries +        reads only the
-→ raw SQLite    units.parquet   manifest (web/public/data)  explorer files
+BNetzA export   export zip →    units + summaries +        reads only the
+→ export zip    units.parquet   manifest (web/public/data)  explorer files
 ```
 
-1. **Download:** open-mastr fetches the bulk export into a local SQLite DB
-   in `data/` (git-ignored, discarded after each run).
-2. **Extract:** SQLite → `data/extract/units.parquet`, one clean table of all
-   units with fixed English column names.
+1. **Download:** our downloader fetches the bulk export zip into `data/raw/`
+   (git-ignored, discarded after each run), with resume and retry, because
+   the BNetzA server is slow and drops connections.
+2. **Extract:** the XML files in the zip → `data/extract/units.parquet`, one
+   clean table of all units with fixed English column names. Catalogue
+   numbers are decoded with `Katalogwerte.xml` from the same zip.
 3. **Build explorer files:** `units.parquet` → files in `web/public/data/`:
    unit-level data for larger units, summary tables that include every unit,
    region boundaries and `manifest.json` (as-of date, version, row counts).
@@ -130,7 +132,7 @@ data/                local working dir for downloads (git-ignored)
 ## How we work
 
 - One work package (WP) per session, about 30 minutes, from `docs/PLAN.md`.
-- **Start of session:** say where we are ("WP5 of 24, Phase 2") and what
+- **Start of session:** say where we are ("WP5 of 25, Phase 2") and what
   "done" means for this WP.
 - **During:** only that WP. Note anything else as a follow-up in PLAN.md
   instead of doing it.

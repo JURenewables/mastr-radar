@@ -1,4 +1,4 @@
-# Station contracts — v1 (locked)
+# Station contracts — v1.1 (locked)
 
 These contracts define exactly what each station of the data chain outputs.
 They are **locked**: changing one is its own work package,
@@ -11,62 +11,62 @@ with a version bump, and pipeline and website are updated together.
 Each station reads **only** the output of the station before it, and each has
 a **check** that must pass before the next station runs.
 
-Source column names (German, from the MaStR export) are *expected* names.
-WP4 (data check) confirms them against the real download; any difference is
-fixed in the column mapping, not in these contracts.
+Source column names (German) were confirmed against the real export of
+30 Oct 2026 in WP4 (see `docs/data-dictionary.md`).
 
 ---
 
-## Decisions in this contract (approved 2026-10-30)
+## Decisions in this contract
 
-| # | Decision | Proposal |
+| # | Decision | Rule |
 |---|---|---|
 | D1 | Which capacity figure | **Gross capacity** (`Bruttoleistung`), as in BNetzA's own statistics. Net capacity is kept as a second column. |
 | D2 | What counts as "installed" | Status **operating** only, for headline "installed capacity" figures. All statuses (planned, temporarily and permanently shut down) are kept in all files and are fully explorable via a status filter. |
-| D3 | Which registrations | Only **active** registrations. Deleted or deactivated entries are dropped. |
+| D3 | Which registrations | Only **active** registrations (`EinheitSystemstatus` = Aktiviert). |
 | D4 | Private individuals | Units of natural persons get **no unit name, no operator name and no coordinates**. They appear in regional totals only. |
-| D5 | Map points | Units **≥ 100 kW** appear as individual points (final value set in WP4, after counting rows and file size). Smaller units only in regional totals. |
+| D5 | Map points | Units **≥ 100 kW** appear as individual points (about 157 000 units, confirmed in WP4). Smaller units only in regional totals. |
 | D6 | Size classes | `<10 kW`, `10–100 kW`, `100 kW–1 MW`, `1–10 MW`, `≥10 MW` |
 | D7 | Place names | German, as in the register (Bayern, not Bavaria). Region keys use official municipality codes (AGS). |
-| D8 | Offshore wind | Offshore units with no municipality get one of two extra regions: **Nordsee (offshore)** (`state_key` = `OFF_N`) or **Ostsee (offshore)** (`OFF_O`), split by longitude (< 9.5° E = Nordsee). Their `district_key` is the same value. Parks that MaStR assigns to a coastal municipality stay in that state. |
-| D9 | Technologies | Onshore wind, offshore wind, solar, battery storage, biomass, hydro. (Phase 2 only builds onshore wind.) |
+| D8 | Offshore wind | **All** offshore wind units go to one of two extra regions, using MaStR's own sea field (`Seelage`): **Nordsee (offshore)** (`state_key` = `OFF_N`) or **Ostsee (offshore)** (`OFF_O`). Their `district_key` is the same value. This includes the 96 coastal-water turbines MaStR lists under Niedersachsen or Mecklenburg-Vorpommern; none of them has a municipality. |
+| D9 | Technologies | Onshore wind, offshore wind, solar, storage, biomass, hydro. **Storage covers all electricity storage**: batteries, pumped hydro and other types, told apart by `storage_technology`. (Phase 2 only builds onshore wind.) |
+| D10 | "Possibly incomplete" | Set **per technology**, because registration delays differ a lot (90% of wind within 3 weeks, storage about 4.5 months). |
+| D11 | How the export is read | **Our own reader**, not open-mastr. Station 1 downloads the export zip with resume and retry; station 2 reads the XML files from the zip directly. (open-mastr 1.0.0 failed on all solar files in WP4.) |
 
 ---
 
 ## Station 1 — Download
 
-**Reads:** the BNetzA bulk export (via open-mastr).
+**Reads:** the BNetzA bulk export ("Gesamtdatenexport") from
+marktstammdatenregister.de.
 **Writes:** `data/raw/` (git-ignored, deleted after each daily run).
 
 | File | Content |
 |---|---|
-| `data/raw/open-mastr.db` | SQLite database written by open-mastr |
-| `data/raw/download_meta.json` | export date, open-mastr version, download size, duration |
+| `data/raw/Gesamtdatenexport_YYYYMMDD.zip` | the export, unchanged |
+| `data/raw/download_meta.json` | export date, source URL, size in bytes, SHA-256, duration, number of attempts |
 
-Tables used from the database:
-
-| Table | Used for |
-|---|---|
-| `EinheitenWind` | wind units |
-| `EinheitenSolar` | solar units |
-| `EinheitenStromSpeicher` | battery storage units |
-| `EinheitenBiomasse` | biomass units |
-| `EinheitenWasser` | hydro units |
-| `AnlagenStromSpeicher` | storage capacity in kWh |
-| `Marktakteure` | operator names and whether an operator is a natural person |
+The download resumes where it broke off and retries with increasing waits.
 
 **Check:**
-- all tables above exist;
-- row counts are plausible (e.g. wind ≥ 30 000 units, solar ≥ 3 000 000);
-- the export date is no older than 3 days.
+- the zip opens, and the integrity test (CRC) passes for every file we use;
+- these files are present: `EinheitenWind*.xml`, `EinheitenSolar_*.xml`,
+  `EinheitenStromSpeicher_*.xml`, `AnlagenStromSpeicher_*.xml`,
+  `EinheitenBiomasse*.xml`, `EinheitenWasser*.xml`, `Marktakteure_*.xml`,
+  `Katalogwerte.xml`;
+- the export date is no older than 3 days;
+- size is at least 1.5 GB (the 30 Oct 2026 export was 2.55 GB).
 
 ---
 
 ## Station 2 — Extract
 
-**Reads:** `data/raw/open-mastr.db`
+**Reads:** `data/raw/Gesamtdatenexport_YYYYMMDD.zip`
 **Writes:** `data/extract/units.parquet`: one row per unit, all technologies,
 all statuses, English column names.
+
+The XML stores many values as catalogue numbers (e.g. status `35`). These are
+decoded with `Katalogwerte.xml` from the same zip. The source names below are
+the decoded fields.
 
 ### Columns
 
@@ -75,10 +75,10 @@ all statuses, English column names.
 | Column | Type | Meaning | Source |
 |---|---|---|---|
 | `unit_id` | string, **unique, required** | MaStR unit number, e.g. `SEE912345678901` | `EinheitMastrNummer` |
-| `technology` | enum, required | `wind_onshore`, `wind_offshore`, `solar`, `storage`, `biomass`, `hydro` | table + `Lage` for wind |
+| `technology` | enum, required | `wind_onshore`, `wind_offshore`, `solar`, `storage`, `biomass`, `hydro` | file + `WindAnLandOderAufSee` for wind |
 | `status` | enum, required | `operating`, `planned`, `temporarily_shut_down`, `permanently_shut_down` | `EinheitBetriebsstatus` |
 | `name` | string, nullable | unit name (null for natural persons, D4) | `NameStromerzeugungseinheit` |
-| `eeg_id` | string, nullable | EEG register number (kept for later auction linking) | `EegMastrNummer` |
+| `eeg_id` | string, nullable | EEG register number (kept for later auction linking) | `EegMastrNummer` (`EegMaStRNummer` in solar) |
 
 **Capacity**
 
@@ -102,7 +102,7 @@ all statuses, English column names.
 
 | Column | Type | Meaning | Source |
 |---|---|---|---|
-| `state` | string, nullable | federal state | `Bundesland` |
+| `state` | string, nullable | federal state; `Nordsee (offshore)` / `Ostsee (offshore)` for offshore (D8) | `Bundesland`, `Seelage` |
 | `district` | string, nullable | district (Landkreis) | `Landkreis` |
 | `municipality` | string, nullable | municipality | `Gemeinde` |
 | `municipality_key` | string (8 digits), nullable | official municipality code (AGS) | `Gemeindeschluessel` |
@@ -116,8 +116,8 @@ all statuses, English column names.
 | Column | Type | Meaning | Source |
 |---|---|---|---|
 | `operator_id` | string, nullable | MaStR number of the operator | `AnlagenbetreiberMastrNummer` |
-| `operator_name` | string, nullable | operator name (null for natural persons) | `Marktakteure` |
-| `operator_is_person` | bool, required | operator is a natural person | `Marktakteure` (Personenart) |
+| `operator_name` | string, nullable | operator name (null for natural persons) | `Marktakteure.Firmenname` |
+| `operator_is_person` | bool, required | operator is a natural person | `Marktakteure.Personenart` |
 
 **Technology details** (null where not applicable)
 
@@ -128,8 +128,9 @@ all statuses, English column names.
 | `hub_height_m` | float | wind | `Nabenhoehe` |
 | `rotor_diameter_m` | float | wind | `Rotordurchmesser` |
 | `wind_park` | string | wind | `NameWindpark` |
-| `solar_type` | enum: `ground_mounted`, `rooftop`, `balcony`, `other` | solar | `Lage` / `ArtDerSolaranlage` |
-| `storage_capacity_kwh` | float | storage | `AnlagenStromSpeicher.NutzbareSpeicherkapazitaet` |
+| `solar_type` | enum: `ground_mounted`, `rooftop`, `balcony`, `other` | solar | `ArtDerSolaranlage` (Freifläche / Gebäude / Steckerfertig / Sonstige) |
+| `storage_technology` | enum: `battery`, `pumped_hydro`, `other` | storage | `Technologie` |
+| `storage_capacity_kwh` | float | storage | `AnlagenStromSpeicher.NutzbareSpeicherkapazitaet`, linked via `SpeMastrNummer` |
 | `battery_technology` | string | storage | `Batterietechnologie` |
 | `fuel` | string | biomass | `Hauptbrennstoff` |
 | `hydro_type` | string | hydro | `ArtDerWasserkraftanlage` |
@@ -138,6 +139,8 @@ all statuses, English column names.
 
 - `unit_id` unique and never empty; required columns have no nulls.
 - Enums contain only the listed values.
+- Row counts are plausible: wind ≥ 40 000, solar ≥ 6 000 000,
+  storage ≥ 2 500 000, biomass ≥ 20 000, hydro ≥ 8 000.
 - `capacity_kw` ≥ 0. Values above 2 000 MW are flagged as outliers.
 - Dates are between 1890 and the export date. Planned dates may be in the
   future.
@@ -157,22 +160,22 @@ all statuses, English column names.
 
 | File | Built from | Content |
 |---|---|---|
-| `manifest.json` | WP6 | as-of date, contract version, file list with row counts |
-| `kpis.json` | WP6 | headline numbers per technology |
-| `units.parquet` | WP10 | individual units ≥ 100 kW (D5), for map points and tables |
-| `summary.parquet` | WP10 | totals for **all** units, incl. small ones |
-| `boundaries/states.geojson` | WP10 | state outlines (BKG), keyed by `state_key` |
-| `boundaries/districts.geojson` | WP10 | district outlines (BKG), keyed by `district_key` |
+| `manifest.json` | WP7 | as-of date, contract version, file list with row counts |
+| `kpis.json` | WP7 | headline numbers per technology |
+| `units.parquet` | WP11 | individual units ≥ 100 kW (D5), for map points and tables |
+| `summary.parquet` | WP11 | totals for **all** units, incl. small ones |
+| `boundaries/states.geojson` | WP11 | state outlines (BKG), keyed by `state_key` |
+| `boundaries/districts.geojson` | WP11 | district outlines (BKG), keyed by `district_key` |
 
 ### `manifest.json`
 
 | Field | Meaning |
 |---|---|
-| `contract_version` | `"1"` |
+| `contract_version` | `"1.1"` |
 | `as_of` | export date of the MaStR data (`YYYY-MM-DD`) |
 | `generated_at` | when the pipeline ran (UTC timestamp) |
 | `pipeline_version` | version of the pipeline code |
-| `incomplete_after` | date after which data is likely incomplete because of late registrations (as-of minus about 2 months, measured in WP11) |
+| `incomplete_after` | **per technology** (D10): `{ "wind_onshore": "YYYY-MM-DD", … }`, the date after which that technology's data is likely incomplete because of late registrations (measured in WP12) |
 | `files` | for each file: name, row count, size in bytes |
 
 ### `kpis.json`
@@ -225,7 +228,8 @@ The website must always:
 - show the footer `© Bundesnetzagentur, DL-DE-BY-2.0` (linked to the
   licence), "Data processed by MaStR Radar" and, where maps are used,
   `© GeoBasis-DE / BKG`;
-- mark periods after `incomplete_after` as possibly incomplete in charts;
+- mark periods after a technology's `incomplete_after` date as possibly
+  incomplete in charts;
 - refuse to load and show a clear message if `contract_version` is not one it
   understands.
 
@@ -236,3 +240,4 @@ The website must always:
 | Version | Date | Change |
 |---|---|---|
 | 1 | 2026-10-30 | First version, approved and locked |
+| 1.1 | 2026-10-30 | After WP4 data check: own reader instead of open-mastr (D11); station 1 writes the export zip; offshore regions from `Seelage`, all offshore units included (D8); storage includes pumped hydro, new `storage_technology` column (D9); `incomplete_after` per technology (D10); confirmed source names and plausible row counts |

@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP4 done · Waiting for your decision on contract v1.1 (see docs/data-dictionary.md), then WP5**
+**You are here: WP5 of 25 · Phase 2 · Next: station 1, the downloader**
 
-Progress: ████░░░░░░░░░░░░░░░░░░░░ 4 / 24
+Progress: ████░░░░░░░░░░░░░░░░░░░░░ 4 / 25
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -32,16 +32,22 @@ building anything wide. That way every problem in the chain shows up early.
   *Result:* runner is fine (86 GB disk); download needs resume/retry;
   open-mastr 1.0.0 fails on all solar files. Details in
   `docs/data-dictionary.md`.
-- [ ] **WP5. Station 2: Extract (wind).** SQLite → `units.parquet` for wind,
+- [ ] **WP5. Station 1: Download.** Own downloader for the BNetzA export:
+  resumes after a broken connection, retries with increasing waits, then
+  checks the zip (integrity, required files, date, size) and writes
+  `download_meta.json`.
+  *Done when:* the real export downloads and passes the check, and tests on
+  a tiny fixture zip pass (incl. a simulated broken download).
+- [ ] **WP6. Station 2: Extract (wind).** Export zip → `units.parquet` for wind,
   validated against the contract.
   *Done when:* runs on the real data and a fixture test passes.
-- [ ] **WP6. Station 3: First explorer file.** `manifest.json` (as-of date)
+- [ ] **WP7. Station 3: First explorer file.** `manifest.json` (as-of date)
   and `kpis.json` (total installed onshore wind), validated.
   *Done when:* files are generated and checked.
-- [ ] **WP7. Station 4: Website shell.** Next.js + Tailwind on Vercel showing
+- [ ] **WP8. Station 4: Website shell.** Next.js + Tailwind on Vercel showing
   that number, the as-of date and the licence footer.
   *Done when:* a public Vercel URL shows the correct number.
-- [ ] **WP8. Daily automation.** GitHub Action runs stations 1–3 each morning
+- [ ] **WP9. Daily automation.** GitHub Action runs stations 1–3 each morning
   and commits new files; Vercel redeploys.
   *Done when:* a manual run succeeds and the site updates by itself.
 
@@ -49,41 +55,42 @@ building anything wide. That way every problem in the chain shows up early.
 
 ## Phase 3: Explorer data
 
-- [ ] **WP9. Extract all technologies.** Solar, storage, biomass, hydro,
+- [ ] **WP10. Extract all technologies.** Solar, storage, biomass, hydro,
   offshore wind added to `units.parquet`.
-- [ ] **WP10. Explorer files.** Unit-level Parquet for larger units, summary
+- [ ] **WP11. Explorer files.** Unit-level Parquet for larger units, summary
   tables covering all units (incl. small rooftop solar), state and district
   boundaries.
-- [ ] **WP11. Data quality notes.** Late registrations, missing coordinates,
+- [ ] **WP12. Data quality notes.** Late registrations (sets each technology's
+  "possibly incomplete" date), missing coordinates, placeholder dates,
   outliers: measured and written up for the methodology page.
 
 ## Phase 4: Explorer website
 
-- [ ] **WP12. Design system.** Fonts, colours, technology palette, dark mode,
+- [ ] **WP13. Design system.** Fonts, colours, technology palette, dark mode,
   chart and map styling.
-- [ ] **WP13. Data engine.** DuckDB-WASM loads the explorer files in the
+- [ ] **WP14. Data engine.** DuckDB-WASM loads the explorer files in the
   browser; the current filter lives in the URL so every view is shareable.
-- [ ] **WP14. Filters.** Technology, status, state/district, size class,
+- [ ] **WP15. Filters.** Technology, status, state/district, size class,
   commissioning date range (year or month).
-- [ ] **WP15. Map 1: units.** Points for larger units, sized by MW, coloured
+- [ ] **WP16. Map 1: units.** Points for larger units, sized by MW, coloured
   by technology. *E.g. "everything that went online in 2026".*
-- [ ] **WP16. Map 2: regions.** States and districts shaded by MW, including
+- [ ] **WP17. Map 2: regions.** States and districts shaded by MW, including
   small units.
-- [ ] **WP17. Charts 1: build-out over time.** Monthly and yearly additions by
+- [ ] **WP18. Charts 1: build-out over time.** Monthly and yearly additions by
   technology, with the late-registration caveat.
-- [ ] **WP18. Charts 2: structure.** Size classes, regional ranking, largest
+- [ ] **WP19. Charts 2: structure.** Size classes, regional ranking, largest
   units.
-- [ ] **WP19. Table and download.** Sortable table of the current selection,
+- [ ] **WP20. Table and download.** Sortable table of the current selection,
   CSV export.
-- [ ] **WP20. Start page.** Headline numbers and ready-made views ("Went
+- [ ] **WP21. Start page.** Headline numbers and ready-made views ("Went
   online this month", "Largest solar parks of 2026", …).
-- [ ] **WP21. Methodology and licence page.**
+- [ ] **WP22. Methodology and licence page.**
 
 ## Phase 5: Launch
 
-- [ ] **WP22. Quality pass.** Mobile, accessibility, speed.
-- [ ] **WP23. Sharing.** Link previews, shareable views.
-- [ ] **WP24. Launch checks.** Domain, warning banner if data is older than
+- [ ] **WP23. Quality pass.** Mobile, accessibility, speed.
+- [ ] **WP24. Sharing.** Link previews, shareable views.
+- [ ] **WP25. Launch checks.** Domain, warning banner if data is older than
   48 h, contributor README.
 
 🏁 **Milestone: public MaStR exploration suite.**
@@ -116,3 +123,6 @@ Each becomes its own phase once the explorer is live.
 3. **Operator names:** legal entities only, units ≥ 1 MW.
 4. **Repo:** public. Site public on Vercel. *(Domain still open.)*
 5. **Scope:** exploration suite first; auctions and yield later.
+6. **Contract v1.1** (after WP4): own reader instead of open-mastr; offshore
+   regions from MaStR's `Seelage`; storage includes pumped hydro;
+   "possibly incomplete" per technology.

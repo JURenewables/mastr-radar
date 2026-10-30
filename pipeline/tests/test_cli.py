@@ -23,4 +23,4 @@ def test_settings_load():
 def test_unimplemented_steps_fail_clearly():
     result = runner.invoke(app, ["download"])
     assert result.exit_code == 1
-    assert "milestone 2" in result.stdout
+    assert "WP5" in result.stdout
