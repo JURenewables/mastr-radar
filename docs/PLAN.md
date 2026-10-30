@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP3 of 24 · Phase 2 · Contracts drafted, waiting for your approval**
+**You are here: WP4 of 24 · Phase 2 · Next: data check (real download)**
 
-Progress: ██░░░░░░░░░░░░░░░░░░░░░░ 2 / 24
+Progress: ███░░░░░░░░░░░░░░░░░░░░░ 3 / 24
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -19,7 +19,7 @@ committed and checked. "Done when" is the test for ticking it off.
 Push a single figure through all four stations to a live website before
 building anything wide. That way every problem in the chain shows up early.
 
-- [ ] **WP3. Station contracts.** Write `docs/contracts.md`: for each station,
+- [x] **WP3. Station contracts.** Write `docs/contracts.md`: for each station,
   the output files, every column, its type and meaning. No code. You review
   it, then it's locked (v1).
   *Done when:* you've approved v1.

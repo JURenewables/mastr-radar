@@ -1,7 +1,7 @@
-# Station contracts — v1 (draft, awaiting approval)
+# Station contracts — v1 (locked)
 
 These contracts define exactly what each station of the data chain outputs.
-Once approved, they are **locked**: changing one is its own work package,
+They are **locked**: changing one is its own work package,
 with a version bump, and pipeline and website are updated together.
 
 ```
@@ -17,18 +17,18 @@ fixed in the column mapping, not in these contracts.
 
 ---
 
-## Decisions in this contract (please confirm)
+## Decisions in this contract (approved 2026-10-30)
 
 | # | Decision | Proposal |
 |---|---|---|
 | D1 | Which capacity figure | **Gross capacity** (`Bruttoleistung`), as in BNetzA's own statistics. Net capacity is kept as a second column. |
-| D2 | What counts as "installed" | Status **operating** only. Planned, temporarily shut down and permanently shut down are kept, but shown separately. |
+| D2 | What counts as "installed" | Status **operating** only, for headline "installed capacity" figures. All statuses (planned, temporarily and permanently shut down) are kept in all files and are fully explorable via a status filter. |
 | D3 | Which registrations | Only **active** registrations. Deleted or deactivated entries are dropped. |
 | D4 | Private individuals | Units of natural persons get **no unit name, no operator name and no coordinates**. They appear in regional totals only. |
 | D5 | Map points | Units **≥ 100 kW** appear as individual points (final value set in WP4, after counting rows and file size). Smaller units only in regional totals. |
 | D6 | Size classes | `<10 kW`, `10–100 kW`, `100 kW–1 MW`, `1–10 MW`, `≥10 MW` |
 | D7 | Place names | German, as in the register (Bayern, not Bavaria). Region keys use official municipality codes (AGS). |
-| D8 | Offshore wind | No district. Region shown as "Offshore (AWZ)". |
+| D8 | Offshore wind | Offshore units with no municipality get one of two extra regions: **Nordsee (offshore)** (`state_key` = `OFF_N`) or **Ostsee (offshore)** (`OFF_O`), split by longitude (< 9.5° E = Nordsee). Their `district_key` is the same value. Parks that MaStR assigns to a coastal municipality stay in that state. |
 | D9 | Technologies | Onshore wind, offshore wind, solar, battery storage, biomass, hydro. (Phase 2 only builds onshore wind.) |
 
 ---
@@ -106,8 +106,8 @@ all statuses, English column names.
 | `district` | string, nullable | district (Landkreis) | `Landkreis` |
 | `municipality` | string, nullable | municipality | `Gemeinde` |
 | `municipality_key` | string (8 digits), nullable | official municipality code (AGS) | `Gemeindeschluessel` |
-| `district_key` | string (5 digits), nullable | first 5 digits of the AGS | derived |
-| `state_key` | string (2 digits), nullable | first 2 digits of the AGS | derived |
+| `district_key` | string, nullable | first 5 digits of the AGS; `OFF_N` / `OFF_O` for offshore (D8) | derived |
+| `state_key` | string, nullable | first 2 digits of the AGS; `OFF_N` / `OFF_O` for offshore (D8) | derived |
 | `postcode` | string (5 digits), nullable | postcode | `Postleitzahl` |
 | `lat`, `lon` | float, nullable | coordinates (null for natural persons, D4) | `Breitengrad`, `Laengengrad` |
 
@@ -199,7 +199,7 @@ One row per combination of:
 | Column | Meaning |
 |---|---|
 | `technology`, `status`, `size_class` | as in station 2 |
-| `state_key`, `district_key` | region (offshore: `"AWZ"`) |
+| `state_key`, `district_key` | region (offshore: `OFF_N` / `OFF_O`, D8) |
 | `commissioning_month` | `YYYY-MM`, null for units not yet online |
 
 Values: `unit_count`, `capacity_kw`.
@@ -235,4 +235,4 @@ The website must always:
 
 | Version | Date | Change |
 |---|---|---|
-| 1 (draft) | 2026-10-30 | First version, awaiting approval |
+| 1 | 2026-10-30 | First version, approved and locked |
