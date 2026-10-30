@@ -1,7 +1,7 @@
 [project]
 name = "mastr-radar"
 version = "0.1.0"
-description = "Data pipeline for MaStR Radar: German renewables pipeline and M&A signals from the Marktstammdatenregister"
+description = "Data pipeline for MaStR Radar, an exploration suite for the German Marktstammdatenregister"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

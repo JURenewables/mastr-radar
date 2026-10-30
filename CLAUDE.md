@@ -1,104 +1,111 @@
 # MaStR Radar
 
-A public dashboard on German renewables data from the Bundesnetzagentur's
-**Marktstammdatenregister (MaStR)**, built to surface **M&A and pipeline
-signals** for energy investors and strategy teams.
+A public, free-to-use **exploration suite** for the Bundesnetzagentur's
+**Marktstammdatenregister (MaStR)**: maps, charts and tables to explore
+Germany's renewable energy units the way an energy company or energy
+consultancy would.
 
-The question every page should answer: *"What changed, who is behind it, and
-why does it matter for deal flow?"* Volume charts are context; changes are
-the product.
+Example question it must answer well: *"Which wind and solar projects went
+online (commissioning date) in 2026, or in March 2026, and where are they?"*
+
+Later, optional modules (not in scope now): pipeline & competitors,
+repowering, grid connection, auction analysis with yield estimates, daily
+change tracking. See `docs/PLAN.md`.
 
 ## Audience
 
-Energy investors, M&A advisors, corporate strategy and business development
-teams. They know the market and are short on time. They want:
+Energy companies, project developers, investors and consultancies. They know
+the market and are short on time. They want to:
 
-- **Pipeline:** what is planned or permitted but not yet built, where, how
-  many MW, and by whom.
-- **Transactions:** operator changes on existing assets (a sign of
-  acquisitions), who is buying and selling, and how many MW changed hands.
-- **Concentration:** who the large operators are, how their portfolios grow,
-  and in which regions and technologies.
-- **Trust:** a clear as-of date, sources and method, and known limitations.
+- filter the register by technology, status, region, size and commissioning
+  date, and see the result on a map, in charts and in a table;
+- trust what they see: a clear as-of date, sources, method and known gaps;
+- share a view by link, and download the data behind it.
 
 ## Stack
 
 | Layer | Choice |
 |---|---|
-| Data pipeline | Python 3.12, [`open-mastr`](https://github.com/OpenEnergyPlatform/open-MaStR) (bulk XML export → SQLite), pandas/pyarrow, `uv` for envs |
+| Data pipeline | Python 3.12, [`open-mastr`](https://github.com/OpenEnergyPlatform/open-MaStR) (bulk export → SQLite), pandas/pyarrow, `uv` |
 | Schedule | GitHub Actions, daily cron (BNetzA publishes the bulk export daily) |
-| Outputs | Slim **Parquet** (snapshots, for diffing) + small aggregated **JSON** (what the site reads) |
-| Frontend | Next.js (App Router, TypeScript) + Tailwind CSS |
-| Hosting | Vercel. Pages are statically generated from the JSON at build time, with no runtime database or API |
-| Charts | Observable Plot (D3 underneath); MapLibre or D3-geo for maps |
+| Outputs | Parquet + small JSON files, served as static files by the website |
+| Frontend | Next.js (App Router, TypeScript) + Tailwind CSS, hosted on Vercel |
+| In-browser queries | DuckDB-WASM reads the Parquet files directly, so filtering needs no server |
+| Charts | Observable Plot (D3 underneath) |
+| Maps | MapLibre GL, OpenFreeMap basemap (free, no key), BKG VG250 boundaries for states and districts |
 
-### Data flow
+## The data chain (locked structure)
+
+Data moves left to right through four stations. Each station reads **only**
+the output of the station before it.
 
 ```
-BNetzA bulk export ──open-mastr──▶ SQLite (runner disk, discarded)
-        │
-        ▼ extract.py
-  slim Parquet snapshot (today) ──diff vs yesterday──▶ change events
-        │                                              │
-        ▼ aggregate.py                                 ▼
-  web/public/data/*.json  ◀────────────────────────────┘
-        │  (committed by the Action → Vercel redeploys)
-        ▼
-  Next.js static pages
+1 Download ──▶ 2 Extract ──▶ 3 Build explorer files ──▶ 4 Website
+BNetzA export   raw SQLite →    units + summaries +        reads only the
+→ raw SQLite    units.parquet   manifest (web/public/data)  explorer files
 ```
 
-- Raw downloads and SQLite never get committed. Only aggregates and the slim
-  snapshots leave the runner.
-- Every JSON output is described by a schema in `pipeline/src/mastr_radar/schemas.py`
-  (pydantic). TypeScript types in `web/lib/types.ts` mirror it. If you change
-  one, change the other in the same commit.
-- `web/public/data/manifest.json` records the as-of date of the export, the
-  pipeline version, row counts and the generated timestamp. The site shows
-  this date on every page.
-- Keep the committed JSON small (target < 10 MB total). Anything bigger goes
-  to a GitHub Release asset, not git.
+1. **Download:** open-mastr fetches the bulk export into a local SQLite DB
+   in `data/` (git-ignored, discarded after each run).
+2. **Extract:** SQLite → `data/extract/units.parquet`, one clean table of all
+   units with fixed English column names.
+3. **Build explorer files:** `units.parquet` → files in `web/public/data/`:
+   unit-level data for larger units, summary tables that include every unit,
+   region boundaries and `manifest.json` (as-of date, version, row counts).
+4. **Website:** reads only those files.
+
+Rules that keep it locked:
+
+- **Contracts first.** Every station's output is defined in
+  `docs/contracts.md` (file, columns, types, meaning) before code is written.
+  The user approves a contract, and then it is locked.
+- **A check per station.** Each output is validated against its contract by
+  a test or a validation step that fails loudly. A broken station must never
+  reach the website.
+- **Changing a locked contract is its own work package**, never a side
+  effect of other work. Bump the contract version and update both pipeline
+  and website in the same commit.
+- German source column names exist only in station 1–2 code. The mapping to
+  English names lives in one place (`pipeline/config/`).
+- Committed JSON/Parquet in `web/public/data/` stays small (target < 25 MB).
 
 ## Data rules
 
 - **Licence:** MaStR data is © Bundesnetzagentur under the
   [Datenlizenz Deutschland – Namensnennung – Version 2.0](https://www.govdata.de/dl-de/by-2-0)
   (DL-DE-BY-2.0). Attribution is mandatory, and we must state that the data
-  was processed.
-- **Privacy:** many small units (rooftop PV, home storage) belong to private
-  individuals. Never show operator-level detail for natural persons. Operator
-  views and transaction feeds cover legal entities only, and by default only
-  units at or above a capacity threshold (set in `pipeline/config`).
-- **Honesty about signals:** an operator change in MaStR is a *signal*, not a
-  confirmed transaction. It can also be a rename, a merger of entities, a
-  data correction or a late registration. The UI must say so, and the
-  pipeline should flag likely false positives rather than hide them.
-- Use MaStR IDs (`EinheitMastrNummer`, `MastrNummer` of the Marktakteur) as
-  keys. Never match on names alone.
-- German source column names stay in raw and extract layers. Aggregates use
-  clean English `snake_case` names, mapped in one place.
+  was processed. BKG boundary data carries its own attribution
+  (© GeoBasis-DE / BKG).
+- **Privacy:** many small units belong to private individuals, and MaStR
+  publishes no coordinates for them. Never show names or exact locations of
+  natural persons. Show small units only as regional totals. Operator names
+  only for legal entities and units ≥ 1 MW.
+- **Late registrations:** units can be registered weeks after commissioning,
+  so the most recent months are incomplete. Every chart that ends near the
+  as-of date must say so.
+- Use MaStR IDs (`EinheitMastrNummer`, operator `MastrNummer`) as keys.
+  Never match on names alone.
 
 ## Design: premium data journalism
 
-Reference points: FT, The Economist, Bloomberg Green, Datawrapper charts.
-Calm, editorial, dense with information but never cluttered.
+Reference points: FT, The Economist, Bloomberg Green, Datawrapper. Calm,
+editorial, information-dense, never cluttered.
 
-- **Typography:** a serif for headlines (e.g. Source Serif / Newsreader) and a
-  neutral sans for UI and body (e.g. Inter). Use **tabular numerals** for all
-  figures. Keep the type scale small; hierarchy comes from weight and space.
-- **Colour:** off-white paper background, near-black ink, warm greys, one
-  accent colour. Technology colours are muted and consistent everywhere
-  (solar, wind onshore, wind offshore, storage, biomass, hydro). Full dark
-  mode. Colour is never the only carrier of meaning.
-- **Charts:** a headline that states the finding ("Solar pipeline doubled
-  since 2023"), not the variable. Direct labels instead of legends where
-  possible. Light gridlines, no chart junk, annotations for key events. A
-  source line under every chart: "Source: Marktstammdatenregister, as of DD
-  Mon YYYY".
-- **Numbers:** MW/GW with sensible rounding, thin-space thousands separators,
-  explicit units, deltas with sign and period ("+1.2 GW vs. 30 days ago").
-- **Layout:** generous whitespace, a narrow reading column for text, wide
-  breakout for charts, a sticky as-of stamp. Mobile first; tables collapse
-  well.
+- **Typography:** serif headlines (e.g. Source Serif / Newsreader), neutral
+  sans for UI and body (e.g. Inter), tabular numerals for all figures.
+- **Colour:** off-white paper, near-black ink, warm greys, one accent colour.
+  Fixed, muted technology colours everywhere (solar, wind onshore, wind
+  offshore, storage, biomass, hydro). Full dark mode. Colour is never the
+  only carrier of meaning.
+- **Charts:** a headline that states the finding, direct labels instead of
+  legends where possible, light gridlines, no chart junk. A source line under
+  every chart: "Source: Marktstammdatenregister, as of DD Mon YYYY".
+- **Maps:** quiet greyscale basemap so the data stands out, points sized by
+  capacity, regional shading for totals, clear legend and scale.
+- **Numbers:** MW/GW with sensible rounding, explicit units, deltas with sign
+  and period.
+- **Layout:** mobile first, generous whitespace, the as-of date always
+  visible.
 - **Footer (every page):** `© Bundesnetzagentur, DL-DE-BY-2.0` linked to the
   licence, plus "Data processed by MaStR Radar" and a link to the methodology
   page.
@@ -107,29 +114,36 @@ Calm, editorial, dense with information but never cluttered.
 
 ```
 pipeline/            Python data pipeline (uv project)
-  src/mastr_radar/   download, extract, snapshot, diff, aggregate, schemas, cli
-  config/            thresholds, technology mapping, column maps
-  tests/             unit tests on small synthetic fixtures
+  src/mastr_radar/   one module per station + cli
+  config/            settings, column mapping, technology mapping
+  tests/             tests on small synthetic fixtures
 web/                 Next.js + Tailwind site
   app/               routes
-  components/        charts/, ui/, layout/
-  lib/               data loading, types, formatting
-  public/data/       generated JSON (written by the pipeline, do not hand-edit)
-docs/                PLAN.md, methodology.md, data-dictionary.md
+  components/        map/, charts/, filters/, ui/, layout/
+  lib/               data engine, types, formatting
+  public/data/       explorer files (written by the pipeline, never hand-edited)
+docs/                PLAN.md, contracts.md, data-dictionary.md, methodology.md
 .github/workflows/   ci.yml, pipeline-daily.yml
 data/                local working dir for downloads (git-ignored)
 ```
 
-## Working conventions
+## How we work
 
-- Work milestone by milestone from `docs/PLAN.md`. Tick off what is done and
-  note anything deferred.
-- Small, focused commits with imperative messages ("Add pipeline aggregate for
-  operator changes").
-- Pipeline code is tested against tiny fixtures. Never require the multi-GB
-  download for unit tests.
-- No secrets are needed: the bulk export is public. If a key ever becomes
-  necessary, it goes in GitHub/Vercel secrets, never in the repo.
-- Commands (fill in as they are created):
-  - Pipeline: `cd pipeline && uv run mastr-radar --help`, `uv run pytest`
-  - Web: `cd web && npm run dev`, `npm run build`, `npm run lint`
+- One work package (WP) per session, about 30 minutes, from `docs/PLAN.md`.
+- **Start of session:** say where we are ("WP5 of 24, Phase 2") and what
+  "done" means for this WP.
+- **During:** only that WP. Note anything else as a follow-up in PLAN.md
+  instead of doing it.
+- **End of session:** checks pass, tick the WP in PLAN.md, update the
+  "You are here" line, commit, push, and give a one-line summary plus what's
+  next.
+- The user works mostly from a phone: keep summaries short and plain.
+- Small, focused commits with imperative messages.
+- Unit tests use tiny fixtures. Never require the multi-GB download for tests.
+- No secrets needed: the bulk export is public.
+
+## Commands
+
+- Pipeline: `cd pipeline && uv run mastr-radar --help`, `uv run pytest`,
+  `uv run ruff check . && uv run ruff format --check .`
+- Web: (added in WP7)
