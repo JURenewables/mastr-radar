@@ -155,4 +155,6 @@ data/                local working dir for downloads (git-ignored)
 - Station 3: `uv run mastr-radar aggregate` (`units.parquet` → `web/public/data/`,
   then checked, then cross-checked against Energy-Charts: warning only,
   report in `data/reports/crosscheck.json`)
-- Web: (added in WP7)
+- Web: `cd web && npm run dev` (local), `npm run lint`, `npm run build`.
+  Next.js 16: read `web/node_modules/next/dist/docs/` before using unfamiliar APIs.
+  Live: https://mastr-radar.vercel.app (from `main`); branches get preview links.

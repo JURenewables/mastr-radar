@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+/* Design tokens: off-white paper, near-black ink, warm greys, one accent.
+   Technology colours are fixed and muted, used everywhere on the site. */
+:root {
+  --paper: #f7f4ee;
+  --ink: #1a1816;
+  --ink-muted: #5f5a53;
+  --rule: #d9d3c7;
+  --accent: #b4441e;
+  --tech-wind-onshore: #3e6f8f;
+  --tech-wind-offshore: #1f3f5b;
+  --tech-solar: #d39b2a;
+  --tech-storage: #7a5c99;
+  --tech-biomass: #6b8a3a;
+  --tech-hydro: #3d8f87;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #161513;
+    --ink: #ece7de;
+    --ink-muted: #a39d93;
+    --rule: #34312c;
+    --accent: #e0774f;
+    --tech-wind-onshore: #7fa9c7;
+    --tech-wind-offshore: #9bb7d4;
+    --tech-solar: #e3b45a;
+    --tech-storage: #a68bc4;
+    --tech-biomass: #9bb86a;
+    --tech-hydro: #73bdb4;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-rule: var(--rule);
+  --color-accent: var(--accent);
+  --color-wind-onshore: var(--tech-wind-onshore);
+  --color-wind-offshore: var(--tech-wind-offshore);
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+/* All figures line up in columns. */
+.figures {
+  font-variant-numeric: tabular-nums lining-nums;
+}
