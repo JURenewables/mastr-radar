@@ -1,0 +1,83 @@
+# Daily data update: stations 1–3, then commit fresh explorer files.
+# Vercel redeploys the site when the commit lands.
+name: Daily data update
+
+on:
+  schedule:
+    - cron: "17 4 * * *"  # 04:17 UTC; BNetzA publishes the export around 02:30 UTC
+  workflow_dispatch:      # "Run workflow" button
+  push:                   # test run whenever this file changes
+    paths:
+      - .github/workflows/pipeline-daily.yml
+
+permissions:
+  contents: write  # commit the data
+  issues: write    # open an issue when the run fails
+
+concurrency:
+  group: daily-data-update-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install pipeline
+        working-directory: pipeline
+        run: uv sync --python 3.12
+
+      - name: "Station 1: download and check"
+        working-directory: pipeline
+        run: uv run mastr-radar download
+
+      - name: "Station 2: extract and check"
+        working-directory: pipeline
+        run: uv run mastr-radar extract
+
+      - name: "Station 3: build explorer files, check, cross-check"
+        working-directory: pipeline
+        run: uv run mastr-radar aggregate
+
+      - name: Run summary
+        if: always()
+        working-directory: pipeline
+        run: uv run mastr-radar summary >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Commit fresh data (only if it changed)
+        run: |
+          # Ignore the timestamp line, so a rerun on the same export makes no commit.
+          if git diff --quiet -I '"generated_at"' -- web/public/data; then
+            echo "Data unchanged, nothing to commit."
+            exit 0
+          fi
+          AS_OF=$(python3 -c "import json;print(json.load(open('web/public/data/manifest.json'))['as_of'])")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/public/data
+          git commit -m "Update MaStR data (as of $AS_OF)"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo "Committed data as of $AS_OF." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open or update an issue on failure
+        if: failure() && github.event_name != 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          TITLE="Daily data update failed"
+          NUM=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number --jq '.[0].number')
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body "Failed again: $RUN_URL"
+          else
+            gh issue create --title "$TITLE" --body "The daily pipeline failed. The website keeps showing the last good data.
+
+          Run: $RUN_URL"
+          fi

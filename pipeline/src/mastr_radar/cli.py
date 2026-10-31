@@ -177,5 +177,14 @@ def aggregate() -> None:
         typer.echo(f"WARNING: {w}")
 
 
+@app.command()
+def summary() -> None:
+    """Print a Markdown run summary (headline numbers, cross-check) for GitHub."""
+    from mastr_radar import report
+
+    s = load_settings()
+    typer.echo(report.markdown_summary(s.output_dir, s.data_dir / "reports" / "crosscheck.json"))
+
+
 if __name__ == "__main__":
     app()
