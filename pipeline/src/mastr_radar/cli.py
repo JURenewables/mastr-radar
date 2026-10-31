@@ -183,6 +183,37 @@ def aggregate() -> None:
         typer.echo(f"WARNING: {w}")
 
 
+@app.command("hub-fetch")
+def hub_fetch() -> None:
+    """Hub H1: download SMARD series for the last 12 months (cached)."""
+    from datetime import date
+
+    from mastr_radar import hub
+
+    s = load_settings()
+    n = hub.fetch_smard(s.hub, s.data_dir / "hub" / "smard", date.today())
+    typer.echo(f"SMARD: {n} files downloaded.")
+
+
+@app.command("hub-build")
+def hub_build() -> None:
+    """Hub H2: build day files in web/public/data/days/, then check them."""
+    from datetime import date
+
+    from mastr_radar import hub
+
+    s = load_settings()
+    result = hub.build_days(s.hub, s.data_dir / "hub" / "smard", s.output_dir, date.today())
+    try:
+        hub.check_days(s.output_dir, s.hub)
+    except hub.HubCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"Check passed: {result['written']} days ({result['first']} – {result['last']}).")
+    if result["skipped"]:
+        typer.echo(f"WARNING: skipped incomplete days: {', '.join(result['skipped'][-5:])}")
+
+
 @app.command()
 def summary() -> None:
     """Print a Markdown run summary (headline numbers, cross-check) for GitHub."""

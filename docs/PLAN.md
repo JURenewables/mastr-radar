@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP35 of 48 · Phase 7 · Hub contract v1.4 (draft)**
+**You are here: WP37 of 48 · Phase 7 · DWD weather import**
 
-Progress: Part 1 done (25 / 25) · Part 2: 9 / 23
+Progress: Part 1 done (25 / 25) · Part 2: 11 / 23
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -174,9 +174,13 @@ real stress signals (line loading itself is not published).
   *Result:* `docs/sources.md`. SMARD and DWD are CC BY 4.0 and ready; SMARD
   prices excluded (HEDWIG); population via BKG VG1000-EW; ENTSO-E and
   netztransparenz need your free accounts; OSM share-alike needs your OK.
-- [ ] **WP35. Hub contract v1.4 (draft).** Day files, catalogue, size budget.
-- [ ] **WP36. SMARD import.** 15-minute generation per technology and demand
+- [x] **WP35. Hub contract v1.4 (draft).** Day files, catalogue, size budget.
+  *Result:* separate chain H1 fetch → H2 day files; budget 40 MB; awaiting
+  your approval together with the 24-hour section.
+- [x] **WP36. SMARD import.** 15-minute generation per technology and demand
   per grid area; back-filled for the last 12 months.
+  *Result:* 364 days, 10 MB; nuclear left out (no values since Apr 2023); 6
+  night-time solar spikes cleaned; own daily workflow `hub-daily.yml`.
 - [ ] **WP37. DWD import.** Hourly sunshine and wind per weather station;
   back-filled.
 - [ ] **WP38. Section "Germany in 24 hours".** Date picker, generation stacked
