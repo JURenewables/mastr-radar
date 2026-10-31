@@ -42,7 +42,7 @@ export type Status = keyof typeof STATUS_LABELS;
 export const SIZE_CLASSES = ["<10 kW", "10–100 kW", "100 kW–1 MW", "1–10 MW", "≥10 MW"] as const;
 export type SizeClass = (typeof SIZE_CLASSES)[number];
 
-/** Basemaps: quiet greyscale, so the data stands out (OpenFreeMap, no key needed). */
+/** Basemaps: quiet and light, so the data stands out (OpenFreeMap, no key needed). */
 export const BASEMAP = {
   light: "https://tiles.openfreemap.org/styles/positron",
   dark: "https://tiles.openfreemap.org/styles/dark",

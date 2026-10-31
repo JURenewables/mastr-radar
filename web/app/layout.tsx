@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Newsreader } from "next/font/google";
+import { Manrope } from "next/font/google";
 
 import { Footer } from "@/components/layout/Footer";
 import { StaleDataBanner } from "@/components/layout/StaleDataBanner";
@@ -7,8 +7,7 @@ import { loadExplorerData } from "@/lib/data";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
-const newsreader = Newsreader({ variable: "--font-newsreader", subsets: ["latin"] });
-const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+const manrope = Manrope({ variable: "--font-manrope", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -23,7 +22,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const data = await loadExplorerData();
   const asOf = data.ok ? data.manifest.as_of : null;
   return (
-    <html lang="en" className={`${newsreader.variable} ${inter.variable} h-full antialiased`}>
+    <html lang="en" className={`${manrope.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         {asOf && <StaleDataBanner asOf={asOf} />}
         {children}

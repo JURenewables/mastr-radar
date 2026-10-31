@@ -7,10 +7,13 @@ export function Header({ asOf, wide = false }: { asOf?: string; wide?: boolean }
         className={`mx-auto flex ${wide ? "max-w-6xl" : "max-w-3xl"} flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-5 py-4`}
       >
         <div className="flex items-baseline gap-5">
-          <Link href="/" className="font-serif text-xl font-semibold tracking-tight">
+          <Link href="/" className="font-serif text-lg">
             MaStR Radar
           </Link>
           <nav className="flex gap-4 text-sm text-ink-muted">
+            <Link href="/" className="hover:text-ink">
+              Monitor
+            </Link>
             <Link href="/explore" className="hover:text-ink">
               Explore
             </Link>

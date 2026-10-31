@@ -1,47 +1,56 @@
 @import "tailwindcss";
 
-/* Design tokens: off-white paper, near-black ink, warm greys, one accent.
-   Technology colours are fixed and muted, used everywhere on the site. */
+/* "Product" design (WP26): white, light grey-blue panels, near-black ink, one
+   vivid blue accent, fixed technology colours, Manrope throughout.
+   Variable names are shared with the explorer, so everything restyles at once. */
 :root {
-  --paper: #f7f4ee;
-  --ink: #1a1816;
-  --ink-muted: #5f5a53;
-  --rule: #d9d3c7;
-  --accent: #b4441e;
-  --tech-wind-onshore: #3e6f8f;
-  --tech-wind-offshore: #1f3f5b;
-  --tech-solar: #d39b2a;
-  --tech-storage: #7a5c99;
-  --tech-biomass: #6b8a3a;
-  --tech-hydro: #3d8f87;
+  --paper: #ffffff;
+  --surface: #f3f5f8;
+  --ink: #0d1520;
+  --ink-muted: #5a6574;
+  --rule: #e3e7ed;
+  --accent: #0a62ff;
+  --tech-solar: #f2a300;
+  --tech-wind-onshore: #0a62ff;
+  --tech-wind-offshore: #0b2f7a;
+  --tech-storage: #8b5cf6;
+  --tech-biomass: #3f9b4f;
+  --tech-hydro: #0f9fa8;
+  --map-base: #eef1f5;
+  --map-line: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #161513;
-    --ink: #ece7de;
-    --ink-muted: #a39d93;
-    --rule: #34312c;
-    --accent: #e0774f;
-    --tech-wind-onshore: #7fa9c7;
-    --tech-wind-offshore: #9bb7d4;
-    --tech-solar: #e3b45a;
-    --tech-storage: #a68bc4;
-    --tech-biomass: #9bb86a;
-    --tech-hydro: #73bdb4;
+    --paper: #0b0f16;
+    --surface: #141a24;
+    --ink: #e8edf5;
+    --ink-muted: #95a0b2;
+    --rule: #232b38;
+    --accent: #4d8dff;
+    --tech-solar: #ffb53d;
+    --tech-wind-onshore: #4d8dff;
+    --tech-wind-offshore: #8ea6ff;
+    --tech-storage: #b493ff;
+    --tech-biomass: #6cc27b;
+    --tech-hydro: #3cc7cf;
+    --map-base: #141a24;
+    --map-line: #0b0f16;
+    color-scheme: dark;
   }
 }
 
 @theme inline {
   --color-paper: var(--paper);
+  --color-surface: var(--surface);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-rule: var(--rule);
   --color-accent: var(--accent);
   --color-wind-onshore: var(--tech-wind-onshore);
   --color-wind-offshore: var(--tech-wind-offshore);
-  --font-serif: var(--font-newsreader), Georgia, serif;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-manrope), system-ui, sans-serif;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
 }
 
 body {
@@ -50,7 +59,34 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Headings and big numbers: bold and tight. */
+h1,
+h2,
+h3,
+.font-serif {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
 /* All figures line up in columns. */
 .figures {
   font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Horizontal chip rows scroll on phones without a visible scrollbar. */
+.scroll-row {
+  scrollbar-width: none;
+}
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+html {
+  scroll-behavior: smooth;
 }

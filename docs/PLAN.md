@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP27 of 43 · Phase 6 · Next: animation data for "Germany lights up"**
+**You are here: Phase 6 done on the branch (preview). Waiting for: your look at the preview, approval of contract v1.3, merge. Next: WP34 data hub**
 
-Progress: Part 1 done (25 / 25) · Part 2: 1 / 18
+Progress: Part 1 done (25 / 25) · Part 2: 8 / 18
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -137,15 +137,30 @@ look).
   *Result:* you chose **C · Product** (map reads best). The running total
   stays top right on the map. Light by default, automatic dark version when
   the phone is in dark mode. Mock-up: https://claude.ai/artifact/Eoju75aXD7jXJAvgMh7Evq
-- [ ] **WP27. Animation data.** Build-out per year by district/municipality,
+- [x] **WP27. Animation data.** Build-out per year by district/municipality,
   plus plant points; contract update (v1.3).
-- [ ] **WP28. "Germany lights up": solar.** Play button, year slider.
-- [ ] **WP29. Same for onshore wind, offshore wind, storage.**
-- [ ] **WP30. Monitor page.** One scrolling page, section navigation; becomes
+  *Result:* `monitor/buildout.json`, `points.json`, `stats.json` (0.9 MB);
+  contract v1.3 **draft**, awaiting approval.
+- [x] **WP28. "Germany lights up": solar.** Play button, year slider.
+  *Result:* canvas map, play 1990–today, year slider, districts per km²,
+  plants ≥ 1 MW flash in their year.
+- [x] **WP29. Same for onshore wind, offshore wind, storage.**
+  *Result:* switch for solar, onshore, offshore, storage, all.
+- [x] **WP30. Monitor page.** One scrolling page, section navigation; becomes
   the start page.
-- [ ] **WP31. Section: build-out per year vs 2030 targets.**
-- [ ] **WP32. Section: states compared** (per km² and per resident).
-- [ ] **WP33. Section: the storage boom.**
+  *Result:* scrolling monitor is the new start page; sticky section bar;
+  whole site restyled to Product (Manrope, white, blue accent).
+- [x] **WP31. Section: build-out per year vs 2030 targets.**
+  *Result:* progress to target, annual additions and 2030 pace line; plus
+  "this year vs previous years" race chart.
+- [x] **WP32. Section: states compared** (per km² and per resident).
+  *Result:* states per km² or total, densest districts. Per resident needs
+  population data: moves to the data hub (WP34+).
+- [x] **WP33. Section: the storage boom.**
+  *Result:* batteries per year: home, commercial, large; GW or GWh.
+- [x] **Extra sections (your request for more analyses):** balcony-solar boom,
+  turbines keep growing (drawn to scale), the next wave (planned onshore wind
+  map), the ageing fleet (repowering candidates).
 
 ## Phase 7: Data hub
 
