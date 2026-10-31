@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP9 final check: first daily run on `main` after the merge. Then all 25 done.**
+**You are here: Phase 6 done on the branch (preview). Waiting for: your look at the preview, approval of contract v1.3, merge. Next: WP34 data hub**
 
-Progress: ████████████████████████░ 24 / 25
+Progress: Part 1 done (25 / 25) · Part 2: 8 / 18
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -56,11 +56,12 @@ building anything wide. That way every problem in the chain shows up early.
   *Result:* built and deployed as a Vercel preview of our branch (behind
   Vercel login, the default for previews); shows 71.5 GW, as-of date and
   footer. The public URL shows it once the branch is merged into `main`.
-- [ ] **WP9. Daily automation.** GitHub Action runs stations 1–3 each morning
+- [x] **WP9. Daily automation.** GitHub Action runs stations 1–3 each morning
   and commits new files; Vercel redeploys.
   *Done when:* a manual run succeeds and the site updates by itself.
-  *Result:* all three stations ran on GitHub (download 45 min); the first
-  test's commit step clashed with a parallel push, a fresh test run follows.
+  *Result:* first run on `main` (31 Oct 2026) succeeded end to end: download
+  70 min, extract 9 min, checks passed, data committed, Vercel deployed; the
+  live site showed data as of 31 Oct 2026 by itself.
 
 🏁 **Milestone: a live public site with one correct number that updates daily.**
 
@@ -120,6 +121,67 @@ building anything wide. That way every problem in the chain shows up early.
 
 ---
 
+# Part 2: Monitor, data hub, auctions
+
+Order agreed on 31 Oct 2026: monitor and maps first, then the data hub, then
+auctions. English. The scrolling monitor becomes the start page (can change).
+Style goal: state of the art, futuristic; inspiration from Zeit Online's
+energy monitor and Fraunhofer Energy-Charts (flow and storytelling, not their
+look).
+
+## Phase 6: Monitor and maps
+
+- [x] **WP26. Design session.** Three visual directions (Paper, Night,
+  Product) as a clickable page with real data: animated "Germany lights up"
+  map, key figures, build-out vs 2030 target. You choose or mix.
+  *Result:* you chose **C · Product** (map reads best). The running total
+  stays top right on the map. Light by default, automatic dark version when
+  the phone is in dark mode. Mock-up: https://claude.ai/artifact/Eoju75aXD7jXJAvgMh7Evq
+- [x] **WP27. Animation data.** Build-out per year by district/municipality,
+  plus plant points; contract update (v1.3).
+  *Result:* `monitor/buildout.json`, `points.json`, `stats.json` (0.9 MB);
+  contract v1.3 approved.
+- [x] **WP28. "Germany lights up": solar.** Play button, year slider.
+  *Result:* canvas map, play 1990–today, year slider, districts per km²,
+  plants ≥ 1 MW flash in their year.
+- [x] **WP29. Same for onshore wind, offshore wind, storage.**
+  *Result:* switch for solar, onshore, offshore, storage, all.
+- [x] **WP30. Monitor page.** One scrolling page, section navigation; becomes
+  the start page.
+  *Result:* scrolling monitor is the new start page; sticky section bar;
+  whole site restyled to Product (Manrope, white, blue accent).
+- [x] **WP31. Section: build-out per year vs 2030 targets.**
+  *Result:* progress to target, annual additions and 2030 pace line; plus
+  "this year vs previous years" race chart.
+- [x] **WP32. Section: states compared** (per km² and per resident).
+  *Result:* states per km² or total, densest districts. Per resident needs
+  population data: moves to the data hub (WP34+).
+- [x] **WP33. Section: the storage boom.**
+  *Result:* batteries per year: home, commercial, large; GW or GWh.
+- [x] **Extra sections (your request for more analyses):** balcony-solar boom,
+  turbines keep growing (drawn to scale), the next wave (planned onshore wind
+  map), the ageing fleet (repowering candidates).
+
+## Phase 7: Data hub
+
+- [ ] **WP34. Sources and licences.** MaStR, SMARD, Energy-Charts, Eurostat,
+  ENTSO-E (free account), IEA (check: much is paid). Your input: which ones.
+- [ ] **WP35. Catalogue format and hub contract.**
+- [ ] **WP36. First outside source: SMARD** (generation, prices).
+- [ ] **WP37. Access for agents:** catalogue page, `llms.txt`, stable links.
+- [ ] **WP38. ENTSO-E** (after you register for a key).
+
+## Phase 8: Auctions
+
+- [ ] **WP39. Import award lists** (onshore since 2017), link to MaStR via the
+  EEG number.
+- [ ] **WP40. Rounds overview:** volumes, competition, published prices.
+- [ ] **WP41. Winners map and time to going online.**
+- [ ] **WP42. Run-up before bid dates.**
+- [ ] **WP43. Optional: energy yield estimate.**
+
+---
+
 ## Follow-ups noted
 
 - [x] Automatic cross-check: each `aggregate` run compares installed capacity
@@ -167,3 +229,5 @@ Each becomes its own phase once the explorer is live.
 8. **Domain:** keep the free https://mastr-radar.vercel.app for now. To change
    later: add the domain in Vercel (Settings → Domains) and update
    `web/lib/site.ts`.
+
+9. **Contract v1.3** (31 Oct 2026, approved): monitor files and region areas.

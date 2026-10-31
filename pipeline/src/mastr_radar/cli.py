@@ -150,7 +150,12 @@ def aggregate() -> None:
     if not units.exists():
         typer.echo("No units.parquet. Run `mastr-radar extract` first.", err=True)
         raise typer.Exit(code=1)
-    manifest = ag.build(units, s.output_dir, operator_name_min_kw=s.min_capacity_mw * 1000)
+    manifest = ag.build(
+        units,
+        s.output_dir,
+        operator_name_min_kw=s.min_capacity_mw * 1000,
+        monitor_settings=s.monitor,
+    )
     try:
         ag.check_explorer_files(s.output_dir, units)
     except ag.ExplorerCheckError as exc:

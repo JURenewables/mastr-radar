@@ -28,6 +28,7 @@ TOLERANCE_DEG = 0.004  # about 300–400 m; fine for national and state maps
 DECIMALS = 4
 
 _utm_to_wgs84 = Transformer.from_crs("EPSG:25832", "EPSG:4326", always_xy=True)
+_wgs84_to_laea = Transformer.from_crs("EPSG:4326", "EPSG:3035", always_xy=True)  # equal-area
 
 
 def to_wgs84(xy: np.ndarray) -> np.ndarray:
@@ -54,12 +55,23 @@ def convert(shp: Path, key_len: int) -> dict:
     features = []
     for key in sorted(parts):
         p = parts[key]
-        geom = unary_union(p["geoms"]).simplify(TOLERANCE_DEG, preserve_topology=True)
+        full = unary_union(p["geoms"])
+        # Area from the unsimplified outline, in an equal-area projection (km²).
+        laea = shapely.transform(
+            full, lambda xy: np.column_stack(_wgs84_to_laea.transform(xy[:, 0], xy[:, 1]))
+        )
+        area_km2 = round(laea.area / 1e6, 1)
+        geom = full.simplify(TOLERANCE_DEG, preserve_topology=True)
         g = mapping(geom)
         features.append(
             {
                 "type": "Feature",
-                "properties": {"key": key, "name": p["name"], "type": p["type"]},
+                "properties": {
+                    "key": key,
+                    "name": p["name"],
+                    "type": p["type"],
+                    "area_km2": area_km2,
+                },
                 "geometry": {"type": g["type"], "coordinates": _round(g["coordinates"])},
             }
         )

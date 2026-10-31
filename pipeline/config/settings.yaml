@@ -45,3 +45,14 @@ crosscheck:
     wind_offshore: Wind offshore
     solar: Solar DC
     biomass: Biomass
+
+# Station 3 monitor files (contract v1.3).
+monitor:
+  first_year: 1990
+  # Legal 2030 targets in MW: EEG 2023 §4 (solar, onshore wind) and WindSeeG §1 (offshore).
+  targets_2030_mw:
+    solar: 215000
+    wind_onshore: 115000
+    wind_offshore: 30000
+  point_min_kw: 1000        # plants on the animated map
+  repowering_age_years: 20  # onshore turbines older than this count as repowering candidates
