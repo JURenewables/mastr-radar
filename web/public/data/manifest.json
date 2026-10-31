@@ -1,7 +1,7 @@
 {
   "contract_version": "1.1",
   "as_of": "2026-10-30",
-  "generated_at": "2026-10-31T11:46:36+00:00",
+  "generated_at": "2026-10-31T12:10:20+00:00",
   "pipeline_version": "0.1.0",
   "incomplete_after": {
     "biomass": "2026-06-07",
@@ -20,12 +20,12 @@
     {
       "name": "units.parquet",
       "rows": 156646,
-      "bytes": 7852352
+      "bytes": 7852287
     },
     {
       "name": "summary.parquet",
-      "rows": 449862,
-      "bytes": 2602464
+      "rows": 449241,
+      "bytes": 2600284
     },
     {
       "name": "boundaries/states.geojson",

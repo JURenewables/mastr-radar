@@ -210,3 +210,50 @@ Offshore matches exactly; onshore is within about 1–2%. The remaining gaps
 are consistent with small differences in status handling and update timing.
 
 **Verdict:** station 2 and 3 numbers agree with Energy-Charts.
+
+## 12. All technologies and data quality (WP10–WP12, 31 Oct 2026)
+
+**Full run:** 9 601 290 units in about 17 min, peak memory 5.6 GB. Explorer
+files total 11 MB: `units.parquet` 156 646 units ≥ 100 kW (7.9 MB),
+`summary.parquet` 449 862 rows (2.6 MB), boundaries 0.5 MB.
+
+**Installed (operating, gross) vs Energy-Charts:**
+
+| Technology | Ours | Energy-Charts | Difference |
+|---|---|---|---|
+| Solar | 132.13 GW | 132.08 GW (DC) | +0.03% |
+| Onshore wind | 71.54 GW | 71.62 GW | −0.1% |
+| Offshore wind | 11.64 GW | 11.64 GW | 0 |
+| Biomass | 9.04 GW | 9.03 GW | +0.14% |
+| Batteries | 22.17 GW · 34.68 GWh | 22.06 GW · 34.61 GWh | +0.5% · +0.2% |
+
+Storage in total: 32.1 GW (batteries 22.2 GW, pumped hydro 9.9 GW). Hydro
+5.4 GW.
+
+**Quality rules added in station 2 (counted in `extract_report.json`):**
+
+| Rule | Units affected |
+|---|---|
+| Storage capacity belongs to the plant: split evenly over its linked units | plants with 2–3 units (pumped hydro) |
+| Storage capacity > 24 h per kW (pumped hydro > 100 h) → emptied | 1 029 |
+| Commissioning date impossible (solar before 1983, batteries before 2000) → emptied | 1 367 |
+| Coordinates outside Germany → emptied | 58 |
+| Broken municipality code | 54 |
+| Unknown operator → treated as private | 72 153 |
+
+Without these rules, battery capacity summed to 65 GWh and pumped hydro to an
+impossible 2 495 GWh.
+
+**Remaining caveats:**
+- Pumped hydro capacity is 77.7 GWh, above the usual ~40 GWh for Germany. The
+  register also lists foreign plants connected to the German grid
+  (`BestandteilGrenzkraftwerk`), which likely explains part of it.
+- Placeholder date 1 Jan 1900: 116 hydro, 22 solar, 2 storage units (kept;
+  charts start in 2000).
+- Units ≥ 100 kW without a public location (private owners): solar 25%,
+  biomass 22%, hydro 16%, storage 15%, onshore wind 9%.
+
+**Registration delay** (90% of units registered within; sets "possibly
+incomplete after"): onshore wind 25 days, offshore 16 days, solar about
+2 months, storage about 2.5 months, hydro about 2 months, biomass about
+5 months.

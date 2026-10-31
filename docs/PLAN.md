@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP9 of 25 · Phase 2 · Next: daily automation (GitHub Action). First: merge the branch into `main` so the site goes public.**
+**You are here: WP25 of 25 · Waiting for your decisions: custom domain, contract v1.2 wording, merge to `main`**
 
-Progress: ████████░░░░░░░░░░░░░░░░░ 8 / 25
+Progress: ███████████████████████░░ 23 / 25
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -59,48 +59,62 @@ building anything wide. That way every problem in the chain shows up early.
 - [ ] **WP9. Daily automation.** GitHub Action runs stations 1–3 each morning
   and commits new files; Vercel redeploys.
   *Done when:* a manual run succeeds and the site updates by itself.
+  *Result:* all three stations ran on GitHub (download 45 min); the first
+  test's commit step clashed with a parallel push, a fresh test run follows.
 
 🏁 **Milestone: a live public site with one correct number that updates daily.**
 
 ## Phase 3: Explorer data
 
-- [ ] **WP10. Extract all technologies.** Solar, storage, biomass, hydro,
+- [x] **WP10. Extract all technologies.** Solar, storage, biomass, hydro,
   offshore wind added to `units.parquet`.
-- [ ] **WP11. Explorer files.** Unit-level Parquet for larger units, summary
+  *Result:* 9.6 M units in ~17 min; all checks passed.
+- [x] **WP11. Explorer files.** Unit-level Parquet for larger units, summary
   tables covering all units (incl. small rooftop solar), state and district
   boundaries.
-- [ ] **WP12. Data quality notes.** Late registrations (sets each technology's
+  *Result:* 156 646 units ≥ 100 kW, 449 862 summary rows, BKG outlines;
+  11 MB in total.
+- [x] **WP12. Data quality notes.** Late registrations (sets each technology's
   "possibly incomplete" date), missing coordinates, placeholder dates,
   outliers: measured and written up for the methodology page.
+  *Result:* storage split per plant, plausibility limits, impossible
+  dates; batteries now match Energy-Charts (34.7 vs 34.6 GWh).
 
 ## Phase 4: Explorer website
 
-- [ ] **WP13. Design system.** Fonts, colours, technology palette, dark mode,
+- [x] **WP13. Design system.** Fonts, colours, technology palette, dark mode,
   chart and map styling.
-- [ ] **WP14. Data engine.** DuckDB-WASM loads the explorer files in the
+  *Result:* colour tokens, chart frame, chips, map style.
+- [x] **WP14. Data engine.** DuckDB-WASM loads the explorer files in the
   browser; the current filter lives in the URL so every view is shareable.
-- [ ] **WP15. Filters.** Technology, status, state/district, size class,
+  *Result:* DuckDB-WASM over HTTP range requests; filters in the URL,
+  validated before reaching SQL (5 tests).
+- [x] **WP15. Filters.** Technology, status, state/district, size class,
   commissioning date range (year or month).
-- [ ] **WP16. Map 1: units.** Points for larger units, sized by MW, coloured
+- [x] **WP16. Map 1: units.** Points for larger units, sized by MW, coloured
   by technology. *E.g. "everything that went online in 2026".*
-- [ ] **WP17. Map 2: regions.** States and districts shaded by MW, including
+- [x] **WP17. Map 2: regions.** States and districts shaded by MW, including
   small units.
-- [ ] **WP18. Charts 1: build-out over time.** Monthly and yearly additions by
+- [x] **WP18. Charts 1: build-out over time.** Monthly and yearly additions by
   technology, with the late-registration caveat.
-- [ ] **WP19. Charts 2: structure.** Size classes, regional ranking, largest
+- [x] **WP19. Charts 2: structure.** Size classes, regional ranking, largest
   units.
-- [ ] **WP20. Table and download.** Sortable table of the current selection,
+- [x] **WP20. Table and download.** Sortable table of the current selection,
   CSV export.
-- [ ] **WP21. Start page.** Headline numbers and ready-made views ("Went
+- [x] **WP21. Start page.** Headline numbers and ready-made views ("Went
   online this month", "Largest solar parks of 2026", …).
-- [ ] **WP22. Methodology and licence page.**
+- [x] **WP22. Methodology and licence page.**
 
 ## Phase 5: Launch
 
-- [ ] **WP23. Quality pass.** Mobile, accessibility, speed.
-- [ ] **WP24. Sharing.** Link previews, shareable views.
+- [x] **WP23. Quality pass.** Mobile, accessibility, speed.
+  *Result:* map first on phones, share link, map description for screen
+  readers. Follow-up: speed check on a real phone.
+- [x] **WP24. Sharing.** Link previews, shareable views.
+  *Result:* link preview image with headline numbers, sitemap, robots.
 - [ ] **WP25. Launch checks.** Domain, warning banner if data is older than
   48 h, contributor README.
+  *Status:* banner and README done. Open: custom domain (your decision).
 
 🏁 **Milestone: public MaStR exploration suite.**
 

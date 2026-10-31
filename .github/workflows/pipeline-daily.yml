@@ -1,5 +1,6 @@
 # Daily data update: stations 1–3, then commit fresh explorer files.
-# Vercel redeploys the site when the commit lands.
+# Vercel redeploys the site when the commit lands. Full run: about 70 min
+# (download ~45 min, extract ~18 min).
 name: Daily data update
 
 on:
