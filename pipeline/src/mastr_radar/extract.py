@@ -156,6 +156,14 @@ def read_catalog(zf: zipfile.ZipFile) -> dict[str, str]:
     return {r["Id"]: r["Wert"] for r in iter_records(zf, "Katalogwerte.xml", "Katalogwert")}
 
 
+def read_lookup(zf: zipfile.ZipFile, spec: dict) -> dict[str, str]:
+    """Read a key → value table, e.g. storage plant number → usable capacity (kWh)."""
+    return {
+        _get(r, spec["key"]): r.get(spec["value"])
+        for r in iter_records(zf, spec["files"], spec["record"])
+    }
+
+
 def read_operators(
     zf: zipfile.ZipFile, cfg: dict, catalog: dict[str, str], wanted: set[str] | None = None
 ) -> dict[str, tuple[str | None, bool]]:
@@ -216,10 +224,13 @@ def size_class(capacity_kw: float | None) -> str | None:
 class Transformer:
     """Turns one raw record into one contract row, counting every fix in the report."""
 
-    def __init__(self, cfg, src_cfg, catalog, operators, export_date: date, report: Report):
+    def __init__(
+        self, cfg, src_cfg, catalog, operators, export_date: date, report: Report, lookups=None
+    ):
         self.cfg, self.src, self.catalog = cfg, src_cfg, catalog
         self.operators, self.export_date, self.report = operators, export_date, report
         self.catalog_fields = set(cfg["catalog_fields"])
+        self.lookups = lookups or {}
 
     def raw(self, rec: dict, source) -> str | None:
         value = _get(rec, source)
@@ -312,11 +323,19 @@ class Transformer:
                 rep.privacy_blanked += 1
             row.update(name=None, operator_name=None, lat=None, lon=None)
 
-        # Technology details
+        # Technology details. Value maps turn German values into contract enums;
+        # an unmapped value stays as it is, so the check fails loudly.
+        value_maps = self.src.get("detail_values", {})
         for col, source in self.src.get("details", {}).items():
             value = self.raw(rec, source)
+            if col in value_maps and value is not None:
+                vmap = value_maps[col]
+                value = vmap.get(value, vmap.get("_default", value))
             is_float = UNITS_SCHEMA.field(col).type == pa.float64()
             row[col] = _float(value) if is_float else _text(value)
+        for col, spec in self.src.get("lookup_details", {}).items():
+            key = _get(rec, spec["via"])
+            row[col] = _float(self.lookups.get(spec["lookup"], {}).get(key))
         return row
 
 
@@ -342,13 +361,21 @@ def extract(
         log.info("Catalogue: %d values", len(catalog))
         operators = read_operators(zf, cfg, catalog)
         log.info("Operators: %d", len(operators))
+        needed = {
+            spec["lookup"]
+            for src in sources
+            for spec in cfg["sources"][src].get("lookup_details", {}).values()
+        }
+        lookups = {name: read_lookup(zf, cfg["lookups"][name]) for name in sorted(needed)}
         # The export date travels inside the file, for station 3 (manifest as_of).
         file_schema = UNITS_SCHEMA.with_metadata({"export_date": export_date.isoformat()})
         writer = pq.ParquetWriter(tmp, file_schema, compression="zstd")
         try:
             for source in sources:
                 src_cfg = cfg["sources"][source]
-                transform = Transformer(cfg, src_cfg, catalog, operators, export_date, report)
+                transform = Transformer(
+                    cfg, src_cfg, catalog, operators, export_date, report, lookups
+                )
                 batch: list[dict] = []
                 for rec in iter_records(zf, src_cfg["files"], src_cfg["record"]):
                     row = transform(rec)

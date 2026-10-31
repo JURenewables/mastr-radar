@@ -60,7 +60,15 @@ common:
   lon: Laengengrad
   operator_id: AnlagenbetreiberMastrNummer
 
-# One entry per unit file type. Phase 2 extracts wind only; WP10 adds the rest.
+# Lookup tables read before the units, joined by a key field of the unit.
+lookups:
+  storage_capacity:
+    files: AnlagenStromSpeicher_*.xml
+    record: AnlageStromSpeicher
+    key: [MaStRNummer, MastrNummer]
+    value: NutzbareSpeicherkapazitaet
+
+# One entry per unit file type.
 sources:
   wind:
     files: EinheitenWind*.xml
@@ -81,3 +89,49 @@ sources:
       hub_height_m: Nabenhoehe
       rotor_diameter_m: Rotordurchmesser
       wind_park: NameWindpark
+
+  solar:
+    files: EinheitenSolar_*.xml
+    record: EinheitSolar
+    min_rows: 6000000
+    technology: solar
+    details:
+      solar_type: ArtDerSolaranlage
+    detail_values:
+      solar_type:
+        Freiflächensolaranlage: ground_mounted
+        Gebäudesolaranlage: rooftop
+        Steckerfertige Solaranlage (sog. Balkonkraftwerk): balcony
+        Sonstige Solaranlage: other
+
+  storage:
+    files: EinheitenStromSpeicher_*.xml
+    record: EinheitStromSpeicher
+    min_rows: 2500000
+    technology: storage
+    details:
+      storage_technology: Technologie
+      battery_technology: Batterietechnologie
+    detail_values:
+      storage_technology:
+        Batterie: battery
+        Pumpspeicher: pumped_hydro
+        _default: other   # hydrogen, compressed air, flywheel, unknown
+    lookup_details:
+      storage_capacity_kwh: {lookup: storage_capacity, via: SpeMastrNummer}
+
+  biomass:
+    files: EinheitenBiomasse*.xml
+    record: EinheitBiomasse
+    min_rows: 20000
+    technology: biomass
+    details:
+      fuel: Hauptbrennstoff
+
+  hydro:
+    files: EinheitenWasser*.xml
+    record: EinheitWasser
+    min_rows: 8000
+    technology: hydro
+    details:
+      hydro_type: ArtDerWasserkraftanlage

@@ -184,3 +184,109 @@ def test_row_count_jump_is_a_warning(extracted):
         table, export_date=EXPORT_DATE, min_rows={}, previous_rows={"wind_onshore": 100}
     )
     assert any("wind_onshore" in w for w in warnings)
+
+
+# --- WP10: the other technologies ---
+
+CATALOG_MORE = {
+    "2495": "Solare Strahlungsenergie", "853": "Freiflächensolaranlage",
+    "852": "Gebäudesolaranlage", "3058": "Steckerfertige Solaranlage (sog. Balkonkraftwerk)",
+    "524": "Batterie", "525": "Pumpspeicher", "3002": "Wasserstoffspeicher",
+    "727": "Lithium-Batterie", "735": "Biogas", "1065": "Laufwasseranlage",
+}  # fmt: skip
+
+
+def make_full_export(path):
+    cat = [
+        {"Id": k, "Wert": v, "KatalogKategorieId": "1"}
+        for k, v in {**CATALOG, **CATALOG_MORE}.items()
+    ]
+    common = {k: v for k, v in BASE.items() if k not in ("WindAnLandOderAufSee", "Hersteller")}
+    solar = [
+        {"EinheitMastrNummer": "SEE_S1", **common, "ArtDerSolaranlage": "853"},
+        {"EinheitMastrNummer": "SEE_S2", **common, "ArtDerSolaranlage": "3058",
+         "Bruttoleistung": "0.8", "AnlagenbetreiberMastrNummer": "ABR2"},
+    ]  # fmt: skip
+    storage = [
+        {"EinheitMastrNummer": "SEE_B1", **common, "Technologie": "524",
+         "Batterietechnologie": "727", "SpeMastrNummer": "SSE1"},
+        {"EinheitMastrNummer": "SEE_B2", **common, "Technologie": "525", "SpeMastrNummer": "SSE2"},
+        {"EinheitMastrNummer": "SEE_B3", **common, "Technologie": "3002"},
+    ]  # fmt: skip
+    plants = [
+        {"MaStRNummer": "SSE1", "NutzbareSpeicherkapazitaet": "2500.000"},
+        {"MaStRNummer": "SSE2", "NutzbareSpeicherkapazitaet": "8000000.000"},
+    ]
+    biomass = [{"EinheitMastrNummer": "SEE_M1", **common, "Hauptbrennstoff": "735"}]
+    hydro = [{"EinheitMastrNummer": "SEE_H1", **common, "ArtDerWasserkraftanlage": "1065"}]
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("Katalogwerte.xml", _xml("Katalogwerte", "Katalogwert", cat))
+        zf.writestr("Marktakteure_1.xml", _xml("Marktakteure", "Marktakteur", OPERATORS))
+        zf.writestr("EinheitenSolar_1.xml", _xml("EinheitenSolar", "EinheitSolar", solar))
+        zf.writestr(
+            "EinheitenStromSpeicher_1.xml",
+            _xml("EinheitenStromSpeicher", "EinheitStromSpeicher", storage),
+        )
+        zf.writestr(
+            "AnlagenStromSpeicher_1.xml",
+            _xml("AnlagenStromSpeicher", "AnlageStromSpeicher", plants),
+        )
+        zf.writestr("EinheitenBiomasse.xml", _xml("EinheitenBiomasse", "EinheitBiomasse", biomass))
+        zf.writestr("EinheitenWasser.xml", _xml("EinheitenWasser", "EinheitWasser", hydro))
+    return path
+
+
+@pytest.fixture
+def full(tmp_path):
+    zp = make_full_export(tmp_path / "Gesamtdatenexport_20261030.zip")
+    out = tmp_path / "units.parquet"
+    report = ex.extract(
+        zp, out, export_date=EXPORT_DATE, sources=("solar", "storage", "biomass", "hydro")
+    )
+    table = pq.read_table(out)
+    return table, {r["unit_id"]: r for r in table.to_pylist()}, report
+
+
+def test_all_technologies(full):
+    table, rows, report = full
+    assert report.rows == {"solar": 2, "storage": 3, "biomass": 1, "hydro": 1}
+    ex.check_units(table, export_date=EXPORT_DATE, min_rows={})
+
+
+def test_solar_types(full):
+    rows = full[1]
+    assert rows["SEE_S1"]["solar_type"] == "ground_mounted"
+    assert rows["SEE_S2"]["solar_type"] == "balcony"
+    assert rows["SEE_S2"]["size_class"] == "<10 kW"
+    assert rows["SEE_S2"]["lat"] is None  # private owner
+
+
+def test_storage_types_and_capacity(full):
+    rows = full[1]
+    assert rows["SEE_B1"]["storage_technology"] == "battery"
+    assert rows["SEE_B1"]["battery_technology"] == "Lithium-Batterie"
+    assert rows["SEE_B1"]["storage_capacity_kwh"] == 2500.0  # linked via SpeMastrNummer
+    assert rows["SEE_B2"]["storage_technology"] == "pumped_hydro"
+    assert rows["SEE_B2"]["storage_capacity_kwh"] == 8_000_000.0
+    assert rows["SEE_B3"]["storage_technology"] == "other"  # hydrogen
+    assert rows["SEE_B3"]["storage_capacity_kwh"] is None
+
+
+def test_biomass_and_hydro_details(full):
+    rows = full[1]
+    assert rows["SEE_M1"]["fuel"] == "Biogas"
+    assert rows["SEE_H1"]["hydro_type"] == "Laufwasseranlage"
+    assert rows["SEE_M1"]["solar_type"] is None
+
+
+def test_unknown_solar_type_fails_check(tmp_path):
+    zp = tmp_path / "Gesamtdatenexport_20261030.zip"
+    cat = [{"Id": k, "Wert": v, "KatalogKategorieId": "1"} for k, v in CATALOG.items()]
+    rec = {"EinheitMastrNummer": "SEE_X", **BASE, "ArtDerSolaranlage": "77777"}
+    with zipfile.ZipFile(zp, "w") as zf:
+        zf.writestr("Katalogwerte.xml", _xml("Katalogwerte", "Katalogwert", cat))
+        zf.writestr("Marktakteure_1.xml", _xml("Marktakteure", "Marktakteur", OPERATORS))
+        zf.writestr("EinheitenSolar_1.xml", _xml("EinheitenSolar", "EinheitSolar", [rec]))
+    ex.extract(zp, tmp_path / "u.parquet", export_date=EXPORT_DATE, sources=("solar",))
+    with pytest.raises(ex.UnitsCheckError, match="solar_type: invalid values"):
+        ex.check_units(pq.read_table(tmp_path / "u.parquet"), export_date=EXPORT_DATE, min_rows={})
