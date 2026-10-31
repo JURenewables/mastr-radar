@@ -88,22 +88,29 @@ Rules that keep it locked:
 - Use MaStR IDs (`EinheitMastrNummer`, operator `MastrNummer`) as keys.
   Never match on names alone.
 
-## Design: premium data journalism
+## Design: "Product" style (chosen in WP26, 31 Oct 2026)
 
-Reference points: FT, The Economist, Bloomberg Green, Datawrapper. Calm,
-editorial, information-dense, never cluttered.
+Clean, bright, state of the art, like a Google or Anthropic product page;
+storytelling flow inspired by Zeit Online's energy monitor (one scrolling
+page). Reference mock-up: https://claude.ai/artifact/Eoju75aXD7jXJAvgMh7Evq (tab C).
 
-- **Typography:** serif headlines (e.g. Source Serif / Newsreader), neutral
-  sans for UI and body (e.g. Inter), tabular numerals for all figures.
-- **Colour:** off-white paper, near-black ink, warm greys, one accent colour.
-  Fixed, muted technology colours everywhere (solar, wind onshore, wind
-  offshore, storage, biomass, hydro). Full dark mode. Colour is never the
+- **Typography:** one modern sans (Manrope) for headings and body. Big, bold,
+  tight headings and numbers (weight 800, negative letter spacing). Tabular
+  numerals for all figures.
+- **Colour:** white background, light grey-blue panels, near-black ink, one
+  vivid blue accent. Fixed technology colours everywhere: solar amber, onshore
+  wind blue, offshore navy, storage violet, biomass green, hydro teal.
+  Automatic dark version when the device is in dark mode. Colour is never the
   only carrier of meaning.
-- **Charts:** a headline that states the finding, direct labels instead of
-  legends where possible, light gridlines, no chart junk. A source line under
-  every chart: "Source: Marktstammdatenregister, as of DD Mon YYYY".
-- **Maps:** quiet greyscale basemap so the data stands out, points sized by
-  capacity, regional shading for totals, clear legend and scale.
+- **Shapes:** soft rounded panels (about 20 px radius), rounded pill controls,
+  thin light borders, no heavy shadows.
+- **Maps:** light, quiet basemap; districts shaded by capacity per km²; plants
+  as dots in a darker tone of the technology colour; the year large top left
+  and the running total top right; play button and year slider for animations.
+- **Charts:** a headline that states the finding (e.g. "Solar added 17.4 GW in
+  2025; the 2030 target needs 19.9 GW a year"), direct labels, light gridlines,
+  no chart junk. A source line under every chart: "Source:
+  Marktstammdatenregister, as of DD Mon YYYY".
 - **Numbers:** MW/GW with sensible rounding, explicit units, deltas with sign
   and period.
 - **Layout:** mobile first, generous whitespace, the as-of date always

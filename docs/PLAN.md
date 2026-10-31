@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP26 of 43 · Phase 6 · Design directions published, waiting for your choice**
+**You are here: WP27 of 43 · Phase 6 · Next: animation data for "Germany lights up"**
 
-Progress: Part 1 done (25 / 25) · Part 2: 0 / 18
+Progress: Part 1 done (25 / 25) · Part 2: 1 / 18
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -131,10 +131,12 @@ look).
 
 ## Phase 6: Monitor and maps
 
-- [ ] **WP26. Design session.** Three visual directions (Paper, Night,
+- [x] **WP26. Design session.** Three visual directions (Paper, Night,
   Product) as a clickable page with real data: animated "Germany lights up"
   map, key figures, build-out vs 2030 target. You choose or mix.
-  *Status:* published, waiting for your choice.
+  *Result:* you chose **C · Product** (map reads best). The running total
+  stays top right on the map. Light by default, automatic dark version when
+  the phone is in dark mode. Mock-up: https://claude.ai/artifact/Eoju75aXD7jXJAvgMh7Evq
 - [ ] **WP27. Animation data.** Build-out per year by district/municipality,
   plus plant points; contract update (v1.3).
 - [ ] **WP28. "Germany lights up": solar.** Play button, year slider.
