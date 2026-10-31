@@ -1,7 +1,7 @@
 {
   "contract_version": "1.4",
   "as_of": "2026-10-30",
-  "generated_at": "2026-10-31T17:25:06+00:00",
+  "generated_at": "2026-10-31T18:28:58+00:00",
   "pipeline_version": "0.1.0",
   "incomplete_after": {
     "biomass": "2026-06-07",
@@ -49,8 +49,8 @@
     },
     {
       "name": "monitor/stats.json",
-      "rows": 11,
-      "bytes": 12846
+      "rows": 13,
+      "bytes": 21408
     }
   ]
 }

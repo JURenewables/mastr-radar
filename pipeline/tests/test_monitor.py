@@ -104,3 +104,78 @@ def test_check_passes(built):
     units, out, *_ = built
     ag.check_explorer_files(out, units)
     monitor.check(out, json.loads((out / "kpis.json").read_text()), AS_OF)
+
+
+# --- Wind industry (contract v1.5 draft) ---
+
+BRANDS = monitor.yaml.safe_load(monitor.BRANDS_CONFIG.read_text())
+
+
+@pytest.mark.parametrize(
+    ("manufacturer", "brand"),
+    [
+        ("ENERCON GmbH", "Enercon"),
+        ("Vestas Deutschland GmbH", "Vestas"),
+        ("Nordex Energy SE & Co. KG", "Nordex"),
+        ("REpower Systems AG", "Senvion (REpower)"),
+        ("Siemens Gamesa Renewable Energy GmbH & Co. KG", "Siemens Gamesa"),
+        ("Unbekannter Hersteller", "Other"),
+        (None, "Other"),
+        (float("nan"), "Other"),
+    ],
+)
+def test_brand_of(manufacturer, brand):
+    assert monitor.brand_of(manufacturer, BRANDS) == brand
+
+
+@pytest.mark.parametrize(
+    ("brand", "model", "family"),
+    [
+        ("Enercon", "E-160 EP5 E3 R1", "E-160"),
+        ("Enercon", "E138 EP3", "E-138"),
+        ("Vestas", "V162-6.2 MW", "V162"),
+        ("Nordex", "N163/6.X", "N163"),
+        ("Vestas", None, None),
+        ("Other", "XY-100", None),
+    ],
+)
+def test_model_family(brand, model, family):
+    assert monitor.model_family(brand, model, BRANDS) == family
+
+
+def test_wind_industry(tmp_path):
+    rows = [
+        wind("A", 2000, date(2001, 5, 1), manufacturer="ENERCON GmbH", turbine_model="E-70"),
+        wind(
+            "B",
+            6000,
+            date(2025, 3, 1),
+            manufacturer="Vestas",
+            turbine_model="V162-6.2",
+            hub_height_m=160.0,
+            rotor_diameter_m=162.0,
+        ),
+        wind(
+            "C",
+            6000,
+            date(2026, 3, 1),
+            manufacturer="Vestas",
+            turbine_model="V162-6.2",
+            hub_height_m=150.0,
+            rotor_diameter_m=162.0,
+        ),
+        wind("D", 3000, date(2026, 4, 1), manufacturer="Mystery Wind"),
+        wind("E", 3000, None, status="planned", manufacturer="Nordex"),  # not in series
+    ]
+    units = write_units(tmp_path / "units.parquet", rows)
+    out = tmp_path / "data"
+    ag.build(units, out, monitor_settings=SETTINGS)
+    wi = json.loads((out / "monitor" / "stats.json").read_text())["wind_industry"]
+    assert wi["brands"] == ["Vestas", "Enercon", "Other"]
+    i25, i26 = wi["years"].index(2025), wi["years"].index(2026)
+    assert wi["added_mw"]["Vestas"][i25] == 6
+    assert wi["installed_mw"]["Vestas"][i26] == 12
+    assert wi["installed_mw"]["Other"][i26] == 3
+    v162 = next(m for m in wi["recent_models"] if m["model"] == "V162")
+    assert (v162["units"], v162["mw"], v162["avg_hub_height_m"]) == (2, 12, 155)
+    assert wi["unattributed_share"] == pytest.approx(3 / 17, abs=1e-3)

@@ -1,0 +1,35 @@
+# Wind turbine manufacturers: MaStR spellings → brand (WP49).
+# Legal-entity variants are merged (e.g. Nordex Energy / Nordex Germany / Nordex SE).
+# Historical brands stay separate (NEG Micon, Tacke, Enron Wind, Bonus, …), so the
+# ranking shows who actually built the turbines at the time. First match wins.
+brands:
+  - {brand: Enercon, match: "enercon"}
+  - {brand: Vestas, match: "vestas"}
+  - {brand: Nordex, match: "nordex"}
+  - {brand: GE, match: "^ge |general electric|ge wind|ge renewable"}
+  - {brand: Senvion (REpower), match: "senvion|repower"}
+  - {brand: Siemens Gamesa, match: "siemens|gamesa"}
+  - {brand: NEG Micon, match: "neg micon|micon"}
+  - {brand: Nordtank, match: "nordtank"}
+  - {brand: Tacke, match: "tacke"}
+  - {brand: Enron Wind, match: "enron"}
+  - {brand: Fuhrländer, match: "fuhrl"}
+  - {brand: eno energy, match: "eno energy"}
+  - {brand: AN Windenergie, match: "^an[ -]|an windenergie|an windanlagen|an-maschinenbau"}
+  - {brand: Vensys, match: "vensys"}
+  - {brand: DeWind, match: "dewind"}
+  - {brand: Südwind, match: "südwind|suedwind"}
+  - {brand: Bonus, match: "bonus"}
+  - {brand: Kenersys, match: "kenersys"}
+  - {brand: SkyWind, match: "skywind"}
+  - {brand: Lagerwey, match: "lagerwey"}
+other: Other
+
+# Model family from the free-text model name, per brand (regex, first group).
+models:
+  Enercon: {pattern: "E[- ]?(\\d{2,3})", format: "E-{}"}
+  Vestas: {pattern: "V ?(\\d{2,3})", format: "V{}"}
+  Nordex: {pattern: "N ?(\\d{2,3})", format: "N{}"}
+  GE: {pattern: "\\d\\.\\d+[- ]?(\\d{2,3})", format: "GE {}"}
+  Senvion (REpower): {pattern: "M ?M? ?(\\d{2,3})", format: "MM/M{}"}
+  Siemens Gamesa: {pattern: "(?:SG|SWT|G)[- ]?\\d?\\.?\\d*[- ]?(\\d{2,3})", format: "SG {}"}

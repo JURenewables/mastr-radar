@@ -15,12 +15,14 @@ All values in MW (rounded) unless the name says otherwise.
 from __future__ import annotations
 
 import json
+import re
 from datetime import date
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
+import yaml
 
 from mastr_radar.config import MonitorSettings
 
@@ -41,6 +43,8 @@ COLUMNS = [
     "storage_capacity_kwh",
     "hub_height_m",
     "rotor_diameter_m",
+    "manufacturer",
+    "turbine_model",
 ]
 SOLAR_TYPES = ["ground_mounted", "rooftop", "balcony", "other"]
 STORAGE_BUCKETS = [("home", 0, 30), ("commercial", 30, 1000), ("large", 1000, float("inf"))]
@@ -132,6 +136,97 @@ def build_points(df: pd.DataFrame, first_year: int, min_kw: float) -> dict:
         "operating": flat.ravel().tolist(),
         "planned_onshore_fields": ["lon_x100", "lat_x100", "mw"],
         "planned_onshore": planned.ravel().tolist(),
+    }
+
+
+BRANDS_CONFIG = Path(__file__).resolve().parents[2] / "config" / "wind_brands.yaml"
+TOP_BRANDS = 12
+
+
+def brand_of(manufacturer: str | None, cfg: dict) -> str:
+    name = manufacturer.lower() if isinstance(manufacturer, str) else ""
+    for b in cfg["brands"]:
+        if re.search(b["match"], name):
+            return b["brand"]
+    return cfg["other"]
+
+
+def model_family(brand: str, model: str | None, cfg: dict) -> str | None:
+    """'Enercon E-160 EP5 E3 R1' → 'E-160'; None if the name gives no family."""
+    rule = cfg["models"].get(brand)
+    if not isinstance(model, str) or not model:
+        return None
+    if rule:
+        m = re.search(rule["pattern"], model, flags=re.IGNORECASE)
+        if m:
+            return rule["format"].format(m.group(1))
+    return None
+
+
+def build_wind_industry(live: pd.DataFrame, years: list[int]) -> dict:
+    """Manufacturers of onshore turbines: additions and fleet per year, models, sizes."""
+    cfg = yaml.safe_load(BRANDS_CONFIG.read_text())
+    w = live[(live["technology"] == "wind_onshore") & live["y"].notna()].copy()
+    w["brand"] = [brand_of(m, cfg) for m in w["manufacturer"]]
+    totals = w.groupby("brand")["capacity_kw"].sum().sort_values(ascending=False)
+    top = [b for b in totals.index if b != cfg["other"]][:TOP_BRANDS]
+    w.loc[~w["brand"].isin(top), "brand"] = cfg["other"]
+    brands = top + [cfg["other"]]
+    added, installed = {}, {}
+    for b in brands:
+        series = _yearly(w[w["brand"] == b], years)
+        added[b], installed[b] = series["added"], series["installed"]
+
+    # Most-built model families of the last three years (incl. the running one).
+    first_recent = years[-1] - 2
+    recent = w[w["y"] >= first_recent].copy()
+    recent["model"] = [
+        model_family(b, m, cfg)
+        for b, m in zip(recent["brand"], recent["turbine_model"], strict=True)
+    ]
+    recent = recent[recent["model"].notna()]
+    models = []
+    for (b, m), g in recent.groupby(["brand", "model"]):
+        models.append(
+            {
+                "brand": b,
+                "model": m,
+                "units": int(len(g)),
+                "mw": _mw(g["capacity_kw"].sum()),
+                "avg_mw": round(float(g["capacity_kw"].mean()) / 1000, 2),
+                "avg_hub_height_m": None
+                if g["hub_height_m"].isna().all()
+                else round(float(g["hub_height_m"].mean())),
+                "avg_rotor_diameter_m": None
+                if g["rotor_diameter_m"].isna().all()
+                else round(float(g["rotor_diameter_m"].mean())),
+            }
+        )
+    models.sort(key=lambda r: -r["mw"])
+
+    # Sizes per brand and year (top 5 brands, since 2005).
+    specs = {}
+    for b in top[:5]:
+        g = w[(w["brand"] == b) & (w["y"] >= 2005)].groupby("y")
+
+        def series(col, g=g):
+            return [None if pd.isna(v) else round(float(v), 1) for v in g[col].mean().values]
+
+        specs[b] = {
+            "years": [int(y) for y in g.size().index],
+            "avg_mw": [round(float(v) / 1000, 2) for v in g["capacity_kw"].mean().values],
+            "avg_hub_height_m": series("hub_height_m"),
+            "avg_rotor_diameter_m": series("rotor_diameter_m"),
+        }
+    return {
+        "years": years,
+        "brands": brands,
+        "added_mw": added,
+        "installed_mw": installed,
+        "recent_models_since": first_recent,
+        "recent_models": models[:15],
+        "brand_specs": specs,
+        "unattributed_share": round(float(totals.get(cfg["other"], 0) / totals.sum()), 4),
     }
 
 
@@ -274,6 +369,8 @@ def build_stats(
         "planned_mw": {
             t: _mw(planned[planned["technology"] == t]["capacity_kw"].sum()) for t in TECHS
         },
+        "population_reference": population["reference"],
+        "wind_industry": build_wind_industry(live, list(range(settings.first_year, year + 1))),
     }
 
 
