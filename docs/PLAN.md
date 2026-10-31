@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: v1 is live at https://mastr-radar.vercel.app and updates daily. All 25 WPs done. Next: pick a parked option (see "Later options").**
+**You are here: WP26 of 43 · Phase 6 · Design directions published, waiting for your choice**
 
-Progress: █████████████████████████ 25 / 25
+Progress: Part 1 done (25 / 25) · Part 2: 0 / 18
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -118,6 +118,50 @@ building anything wide. That way every problem in the chain shows up early.
   *Status:* banner and README done; free domain kept (decision 8).
 
 🏁 **Milestone: public MaStR exploration suite.**
+
+---
+
+# Part 2: Monitor, data hub, auctions
+
+Order agreed on 31 Oct 2026: monitor and maps first, then the data hub, then
+auctions. English. The scrolling monitor becomes the start page (can change).
+Style goal: state of the art, futuristic; inspiration from Zeit Online's
+energy monitor and Fraunhofer Energy-Charts (flow and storytelling, not their
+look).
+
+## Phase 6: Monitor and maps
+
+- [ ] **WP26. Design session.** Three visual directions (Paper, Night,
+  Product) as a clickable page with real data: animated "Germany lights up"
+  map, key figures, build-out vs 2030 target. You choose or mix.
+  *Status:* published, waiting for your choice.
+- [ ] **WP27. Animation data.** Build-out per year by district/municipality,
+  plus plant points; contract update (v1.3).
+- [ ] **WP28. "Germany lights up": solar.** Play button, year slider.
+- [ ] **WP29. Same for onshore wind, offshore wind, storage.**
+- [ ] **WP30. Monitor page.** One scrolling page, section navigation; becomes
+  the start page.
+- [ ] **WP31. Section: build-out per year vs 2030 targets.**
+- [ ] **WP32. Section: states compared** (per km² and per resident).
+- [ ] **WP33. Section: the storage boom.**
+
+## Phase 7: Data hub
+
+- [ ] **WP34. Sources and licences.** MaStR, SMARD, Energy-Charts, Eurostat,
+  ENTSO-E (free account), IEA (check: much is paid). Your input: which ones.
+- [ ] **WP35. Catalogue format and hub contract.**
+- [ ] **WP36. First outside source: SMARD** (generation, prices).
+- [ ] **WP37. Access for agents:** catalogue page, `llms.txt`, stable links.
+- [ ] **WP38. ENTSO-E** (after you register for a key).
+
+## Phase 8: Auctions
+
+- [ ] **WP39. Import award lists** (onshore since 2017), link to MaStR via the
+  EEG number.
+- [ ] **WP40. Rounds overview:** volumes, competition, published prices.
+- [ ] **WP41. Winners map and time to going online.**
+- [ ] **WP42. Run-up before bid dates.**
+- [ ] **WP43. Optional: energy yield estimate.**
 
 ---
 
