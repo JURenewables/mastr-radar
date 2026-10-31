@@ -245,7 +245,16 @@ export function MapPanel({ version, filters }: { version: string; filters: Filte
                 )} districts`}
         </p>
       </div>
-      <div ref={container} className="h-[60vh] min-h-[360px] w-full overflow-hidden rounded border border-rule" />
+      <div
+        ref={container}
+        role="img"
+        aria-label={
+          mode === "units"
+            ? "Map of the selected units of 100 kW and more, sized by capacity"
+            : "Map of districts shaded by total capacity of the selected units"
+        }
+        className="h-[60vh] min-h-[360px] w-full overflow-hidden rounded border border-rule"
+      />
       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-muted">
         {mode === "units" ? (
           <>

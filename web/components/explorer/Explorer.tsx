@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { filtersToParams, parseFilters, summaryWhere, type Filters } from "@/lib/filters";
 import { formatCount, formatPower, TECHNOLOGY_LABELS } from "@/lib/format";
@@ -53,6 +53,23 @@ function SelectionTotals({ version, filters }: { version: string; filters: Filte
   );
 }
 
+function ShareButton() {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        await navigator.clipboard.writeText(window.location.href);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }}
+      className="rounded-full border border-rule px-3 py-1 text-sm text-ink-muted hover:border-ink hover:text-ink"
+    >
+      {copied ? "Link copied" : "Copy link to this view"}
+    </button>
+  );
+}
+
 export function Explorer({
   asOf,
   incompleteAfter,
@@ -83,12 +100,16 @@ export function Explorer({
   const version = asOf;
   return (
     <div className="space-y-12">
+      {/* Phones: totals, map, then filters. Wide screens: filters left, map right. */}
       <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        <div className="space-y-6">
+        <div className="space-y-4">
           <SelectionTotals version={version} filters={filters} />
-          <FilterBar filters={filters} onChange={setFilters} asOf={asOf} />
+          <ShareButton />
         </div>
-        <MapPanel version={version} filters={filters} />
+        <div className="lg:row-span-2">
+          <MapPanel version={version} filters={filters} />
+        </div>
+        <FilterBar filters={filters} onChange={setFilters} asOf={asOf} />
       </section>
       <BuildoutChart version={version} filters={filters} asOf={asOf} incompleteAfter={incomplete} />
       <div className="grid gap-12 lg:grid-cols-2">
