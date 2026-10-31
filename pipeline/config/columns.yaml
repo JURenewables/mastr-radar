@@ -67,6 +67,9 @@ lookups:
     record: AnlageStromSpeicher
     key: [MaStRNummer, MastrNummer]
     value: NutzbareSpeicherkapazitaet
+    # Capacity belongs to the storage plant; split it evenly over its linked units
+    # (otherwise multi-unit pumped hydro plants are counted once per unit).
+    split_by_list: VerknuepfteEinheitenMaStRNummern
 
 # One entry per unit file type.
 sources:
@@ -103,6 +106,8 @@ sources:
         Gebäudesolaranlage: rooftop
         Steckerfertige Solaranlage (sog. Balkonkraftwerk): balcony
         Sonstige Solaranlage: other
+    # Data quality (WP12): commissioning dates before this are impossible → emptied.
+    min_commissioning_date: {_all: 1983-01-01}
 
   storage:
     files: EinheitenStromSpeicher_*.xml
@@ -119,6 +124,10 @@ sources:
         _default: other   # hydrogen, compressed air, flywheel, unknown
     lookup_details:
       storage_capacity_kwh: {lookup: storage_capacity, via: SpeMastrNummer}
+    # Data quality (WP12): usable kWh per kW of power above these limits are
+    # registration errors → emptied and counted.
+    storage_capacity_max_hours: {battery: 24, other: 24, pumped_hydro: 100}
+    min_commissioning_date: {battery: 2000-01-01}
 
   biomass:
     files: EinheitenBiomasse*.xml

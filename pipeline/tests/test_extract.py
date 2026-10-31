@@ -204,6 +204,8 @@ def make_full_export(path):
     common = {k: v for k, v in BASE.items() if k not in ("WindAnLandOderAufSee", "Hersteller")}
     solar = [
         {"EinheitMastrNummer": "SEE_S1", **common, "ArtDerSolaranlage": "853"},
+        {"EinheitMastrNummer": "SEE_S3", **common, "ArtDerSolaranlage": "852",
+         "Inbetriebnahmedatum": "1975-01-01"},
         {"EinheitMastrNummer": "SEE_S2", **common, "ArtDerSolaranlage": "3058",
          "Bruttoleistung": "0.8", "AnlagenbetreiberMastrNummer": "ABR2"},
     ]  # fmt: skip
@@ -212,10 +214,19 @@ def make_full_export(path):
          "Batterietechnologie": "727", "SpeMastrNummer": "SSE1"},
         {"EinheitMastrNummer": "SEE_B2", **common, "Technologie": "525", "SpeMastrNummer": "SSE2"},
         {"EinheitMastrNummer": "SEE_B3", **common, "Technologie": "3002"},
+        {"EinheitMastrNummer": "SEE_B4", **common, "Technologie": "524", "SpeMastrNummer": "SSE3",
+         "Inbetriebnahmedatum": "1990-05-01"},
     ]  # fmt: skip
     plants = [
         {"MaStRNummer": "SSE1", "NutzbareSpeicherkapazitaet": "2500.000"},
-        {"MaStRNummer": "SSE2", "NutzbareSpeicherkapazitaet": "8000000.000"},
+        # Plant with two units: 48 000 kWh → 24 000 kWh each (8 h on 3 MW).
+        {
+            "MaStRNummer": "SSE2",
+            "NutzbareSpeicherkapazitaet": "48000.000",
+            "VerknuepfteEinheitenMaStRNummern": "SEE_B2, SEE_B9",
+        },
+        # 3 MW battery with 1 000 000 kWh = 333 h: a registration error.
+        {"MaStRNummer": "SSE3", "NutzbareSpeicherkapazitaet": "1000000.000"},
     ]
     biomass = [{"EinheitMastrNummer": "SEE_M1", **common, "Hauptbrennstoff": "735"}]
     hydro = [{"EinheitMastrNummer": "SEE_H1", **common, "ArtDerWasserkraftanlage": "1065"}]
@@ -249,7 +260,7 @@ def full(tmp_path):
 
 def test_all_technologies(full):
     table, rows, report = full
-    assert report.rows == {"solar": 2, "storage": 3, "biomass": 1, "hydro": 1}
+    assert report.rows == {"solar": 3, "storage": 4, "biomass": 1, "hydro": 1}
     ex.check_units(table, export_date=EXPORT_DATE, min_rows={})
 
 
@@ -267,7 +278,7 @@ def test_storage_types_and_capacity(full):
     assert rows["SEE_B1"]["battery_technology"] == "Lithium-Batterie"
     assert rows["SEE_B1"]["storage_capacity_kwh"] == 2500.0  # linked via SpeMastrNummer
     assert rows["SEE_B2"]["storage_technology"] == "pumped_hydro"
-    assert rows["SEE_B2"]["storage_capacity_kwh"] == 8_000_000.0
+    assert rows["SEE_B2"]["storage_capacity_kwh"] == 24_000.0  # plant split over 2 units
     assert rows["SEE_B3"]["storage_technology"] == "other"  # hydrogen
     assert rows["SEE_B3"]["storage_capacity_kwh"] is None
 
@@ -290,3 +301,13 @@ def test_unknown_solar_type_fails_check(tmp_path):
     ex.extract(zp, tmp_path / "u.parquet", export_date=EXPORT_DATE, sources=("solar",))
     with pytest.raises(ex.UnitsCheckError, match="solar_type: invalid values"):
         ex.check_units(pq.read_table(tmp_path / "u.parquet"), export_date=EXPORT_DATE, min_rows={})
+
+
+def test_quality_rules(full):
+    _, rows, report = full
+    assert rows["SEE_B4"]["storage_capacity_kwh"] is None  # 333 h per kW: implausible
+    assert report.nulled_storage_capacity == 1
+    assert rows["SEE_B4"]["commissioning_date"] is None  # battery before 2000
+    assert rows["SEE_S3"]["commissioning_date"] is None  # solar before 1983
+    assert rows["SEE_S1"]["commissioning_date"] == date(2017, 9, 1)
+    assert report.implausible_commissioning == 2

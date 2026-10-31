@@ -123,6 +123,8 @@ class Report:
     missing_sea_region: int = 0
     privacy_blanked: int = 0
     unknown_operator: int = 0
+    nulled_storage_capacity: int = 0
+    implausible_commissioning: int = 0
     warnings: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
@@ -156,12 +158,20 @@ def read_catalog(zf: zipfile.ZipFile) -> dict[str, str]:
     return {r["Id"]: r["Wert"] for r in iter_records(zf, "Katalogwerte.xml", "Katalogwert")}
 
 
-def read_lookup(zf: zipfile.ZipFile, spec: dict) -> dict[str, str]:
-    """Read a key → value table, e.g. storage plant number → usable capacity (kWh)."""
-    return {
-        _get(r, spec["key"]): r.get(spec["value"])
-        for r in iter_records(zf, spec["files"], spec["record"])
-    }
+def read_lookup(zf: zipfile.ZipFile, spec: dict) -> dict[str, float | None]:
+    """Read a key → value table, e.g. storage plant number → usable capacity (kWh).
+
+    With `split_by_list`, the value is divided by the number of entries in that
+    comma-separated field (the plant's linked units).
+    """
+    out: dict[str, float | None] = {}
+    for r in iter_records(zf, spec["files"], spec["record"]):
+        value = _float(r.get(spec["value"]))
+        if value is not None and spec.get("split_by_list"):
+            linked = [x for x in (r.get(spec["split_by_list"]) or "").split(",") if x.strip()]
+            value /= max(len(linked), 1)
+        out[_get(r, spec["key"])] = value
+    return out
 
 
 def read_operators(
@@ -335,8 +345,28 @@ class Transformer:
             row[col] = _float(value) if is_float else _text(value)
         for col, spec in self.src.get("lookup_details", {}).items():
             key = _get(rec, spec["via"])
-            row[col] = _float(self.lookups.get(spec["lookup"], {}).get(key))
+            row[col] = self.lookups.get(spec["lookup"], {}).get(key)
+
+        self._apply_quality_rules(row)
         return row
+
+    def _apply_quality_rules(self, row: dict) -> None:
+        """Data quality rules from the mapping (WP12): empty impossible values, count them."""
+        limits = self.src.get("storage_capacity_max_hours")
+        kwh, kw = row.get("storage_capacity_kwh"), row.get("capacity_kw")
+        if limits and kwh is not None and kw:
+            limit = limits.get(row.get("storage_technology"), limits.get("_all"))
+            if limit is not None and kwh / kw > limit:
+                row["storage_capacity_kwh"] = None
+                self.report.nulled_storage_capacity += 1
+        min_dates = self.src.get("min_commissioning_date")
+        cod = row.get("commissioning_date")
+        if min_dates and cod is not None:
+            key = row.get("storage_technology")
+            earliest = min_dates.get(key, min_dates.get("_all")) if key else min_dates.get("_all")
+            if earliest is not None and cod < earliest:
+                row["commissioning_date"] = None
+                self.report.implausible_commissioning += 1
 
 
 # --- Running station 2 -------------------------------------------------------
