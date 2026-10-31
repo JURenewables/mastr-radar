@@ -103,6 +103,13 @@ building anything wide. That way every problem in the chain shows up early.
 
 ---
 
+## Follow-ups noted
+
+- Automatic cross-check: compare installed capacity per technology with the
+  Energy-Charts API on each run, as a warning (not a failure). Fits WP12.
+- Explorer: show both gross additions and net additions (after
+  decommissioning), since public sources such as Energy-Charts quote net.
+
 ## Later options (parked, not scheduled)
 
 Each becomes its own phase once the explorer is live.

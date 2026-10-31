@@ -178,3 +178,35 @@ should be set **per technology** (measured fully, including solar, in WP11).
 - Provisional "possibly incomplete" dates (90% of units registered within
   this time; refined in WP12): onshore after 5 Oct 2026 (25 days),
   offshore after 14 Oct 2026 (16 days).
+
+## 11. Cross-check with Fraunhofer ISE Energy-Charts (31 Oct 2026)
+
+Source: `api.energy-charts.info/installed_power` (country=de), last updated
+30 Oct 2026 08:36 UTC, the same day as our export. Energy-Charts also builds
+on MaStR.
+
+**Installed capacity (GW)**
+
+| | MaStR Radar (gross, operating) | Energy-Charts (Oct 2026) | Difference |
+|---|---|---|---|
+| Onshore wind | 71.544 | 71.618 | −0.074 (−0.1%) |
+| Offshore wind | 11.644 | 11.644 | 0 |
+
+Including temporarily shut-down turbines, our onshore figure is 71.589 GW,
+which halves the gap. For wind, gross and net capacity are identical in MaStR.
+
+**Net additions per year (GW, commissioned minus decommissioned)**
+
+| Year | Onshore: ours | Onshore: Energy-Charts | Offshore: ours | Offshore: Energy-Charts |
+|---|---|---|---|---|
+| 2023 | 2.982 | 2.999 | 0.257 | 0.257 |
+| 2024 | 2.552 | 2.576 | 0.742 | 0.742 |
+| 2025 | 4.585 | 4.590 | 0.518 | 0.518 |
+| 2026 YTD | 3.491 | 3.439 | 1.910 | 1.910 |
+
+Energy-Charts' yearly figures are **net** additions. Our gross additions are
+higher: 4.25 GW onshore commissioned in 2026, minus 0.75 GW decommissioned.
+Offshore matches exactly; onshore is within about 1–2%. The remaining gaps
+are consistent with small differences in status handling and update timing.
+
+**Verdict:** station 2 and 3 numbers agree with Energy-Charts.
