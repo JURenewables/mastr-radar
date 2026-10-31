@@ -226,7 +226,8 @@ Each becomes its own phase once the explorer is live.
 7. **Contract v1.2** (31 Oct 2026, approved): data quality rules (storage
    capacity split per plant, plausibility limits, impossible dates);
    operator names on the website only from 1 MW.
-9. **Contract v1.3** (31 Oct 2026, approved): monitor files and region areas.
 8. **Domain:** keep the free https://mastr-radar.vercel.app for now. To change
    later: add the domain in Vercel (Settings → Domains) and update
    `web/lib/site.ts`.
+
+9. **Contract v1.3** (31 Oct 2026, approved): monitor files and region areas.
