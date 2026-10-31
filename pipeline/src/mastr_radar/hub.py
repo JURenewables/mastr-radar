@@ -1,4 +1,4 @@
-"""Data hub (contract v1.4 draft): H1 fetch SMARD, H2 build day files.
+"""Data hub (contract v1.4): H1 fetch SMARD, H2 build day files.
 
 SMARD publishes quarter-hourly series in weekly files (Monday 00:00 German
 time). Values are energy per quarter hour (MWh); average power is MWh × 4.
@@ -33,7 +33,7 @@ CONTRACT_VERSION = "1.4"
 
 
 class HubCheckError(RuntimeError):
-    """The day files do not meet contract v1.4 (draft)."""
+    """The day files do not meet contract v1.4."""
 
 
 def _series(settings: HubSettings) -> dict[str, int]:
@@ -397,7 +397,7 @@ def build_days(settings: HubSettings, cache_dir: Path, out_dir: Path, today: dat
 
 
 def check_days(out_dir: Path, settings: HubSettings) -> None:
-    """Contract v1.4 (draft) check for day files. Raises HubCheckError."""
+    """Contract v1.4 check for day files. Raises HubCheckError."""
     problems: list[str] = []
     days_dir = out_dir / "days"
     index = json.loads((days_dir / "index.json").read_text())

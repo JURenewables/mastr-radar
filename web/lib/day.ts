@@ -1,6 +1,6 @@
 "use client";
 
-// Hub day files (contract v1.4 draft): SMARD 15-minute series and DWD weather.
+// Hub day files (contract v1.4): SMARD 15-minute series and DWD weather.
 import { useEffect, useState } from "react";
 
 export const REGIONS = ["DE", "50Hertz", "Amprion", "TenneT", "TransnetBW"] as const;

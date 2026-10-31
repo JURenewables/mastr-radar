@@ -1,4 +1,4 @@
-# Station contracts — v1.3 (locked) + v1.4 draft (awaiting approval)
+# Station contracts — v1.4 (locked)
 
 These contracts define exactly what each station of the data chain outputs.
 They are **locked**: changing one is its own work package,
@@ -269,7 +269,7 @@ to ~2 % above the headline "in operation" figure (biomass).
 
 ---
 
-## v1.4 draft: data hub, "Germany in 24 hours" (awaiting approval)
+## v1.4: data hub, "Germany in 24 hours" (approved 31 Oct 2026)
 
 Additive only. A second, independent chain feeds the hub. It never touches
 the MaStR chain above, and a failure in it never blocks the MaStR update.
@@ -354,4 +354,4 @@ reference date 31 Dec of the latest available year).
 | 1.1 | 2026-10-30 | After WP4 data check: own reader instead of open-mastr (D11); station 1 writes the export zip; offshore regions from `Seelage`, all offshore units included (D8); storage includes pumped hydro, new `storage_technology` column (D9); `incomplete_after` per technology (D10); confirmed source names and plausible row counts |
 | 1.2 | 2026-10-31 | Data quality rules D12 (storage capacity split per plant, plausibility limits, impossible dates); operator names on the website only from 1 MW (D13). Approved by the user. |
 | 1.3 | 2026-10-31 | Monitor files `monitor/buildout.json`, `points.json`, `stats.json`; boundaries `area_km2`; series definition D14. Approved by the user. |
-| 1.4 (draft) | 2026-10-31 | Data hub chain H1/H2, day files `days/` with SMARD and DWD weather, `stations.json`, population in `states[]`, size budget 50 MB. Awaiting approval. |
+| 1.4 | 2026-10-31 | Data hub chain H1/H2, day files `days/` with SMARD and DWD weather, `stations.json`, population in `states[]`, size budget 50 MB. Approved by the user. |

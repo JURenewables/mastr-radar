@@ -57,7 +57,7 @@ monitor:
   point_min_kw: 1000        # plants on the animated map
   repowering_age_years: 20  # onshore turbines older than this count as repowering candidates
 
-# Data hub (contract v1.4 draft): SMARD market data, CC BY 4.0,
+# Data hub (contract v1.4): SMARD market data, CC BY 4.0,
 # attribution "Bundesnetzagentur | SMARD.de". Values are MWh per quarter hour.
 hub:
   keep_days: 365

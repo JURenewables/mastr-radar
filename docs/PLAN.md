@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: Phase 7 · WP41 grid map waits for your decisions (OSM licence, ENTSO-E key); contract v1.4 awaits approval; preview ready**
+**You are here: Phase 7 live except WP41 (grid map: waits for OSM licence OK and your ENTSO-E / netztransparenz accounts)**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -175,8 +175,7 @@ real stress signals (line loading itself is not published).
   prices excluded (HEDWIG); population via BKG VG1000-EW; ENTSO-E and
   netztransparenz need your free accounts; OSM share-alike needs your OK.
 - [x] **WP35. Hub contract v1.4 (draft).** Day files, catalogue, size budget.
-  *Result:* separate chain H1 fetch → H2 day files; budget 40 MB; awaiting
-  your approval together with the 24-hour section.
+  *Result:* separate chain H1 fetch → H2 day files; budget 50 MB; approved.
 - [x] **WP36. SMARD import.** 15-minute generation per technology and demand
   per grid area; back-filled for the last 12 months.
   *Result:* 364 days, 10 MB; nuclear left out (no values since Apr 2023); 6
@@ -265,3 +264,5 @@ Each becomes its own phase once the explorer is live.
    `web/lib/site.ts`.
 
 9. **Contract v1.3** (31 Oct 2026, approved): monitor files and region areas.
+10. **Contract v1.4** (31 Oct 2026, approved): data hub day files (SMARD,
+    DWD), population, budget 50 MB.

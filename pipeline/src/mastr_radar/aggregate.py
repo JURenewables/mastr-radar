@@ -20,8 +20,8 @@ from mastr_radar import __version__
 from mastr_radar.config import PIPELINE_ROOT
 from mastr_radar.extract import ENUMS, UNITS_SCHEMA, export_date_of
 
-CONTRACT_VERSION = "1.3"
-MAX_TOTAL_BYTES = 50 * 1024 * 1024  # contract v1.4 (draft)
+CONTRACT_VERSION = "1.4"
+MAX_TOTAL_BYTES = 50 * 1024 * 1024  # contract v1.4
 MAP_POINT_MIN_KW = 100.0  # D5: units from 100 kW are individual points
 DEFAULT_OPERATOR_NAME_MIN_KW = 1000.0  # operator names only from 1 MW (settings)
 BOUNDARIES_DIR = PIPELINE_ROOT / "assets" / "boundaries"
