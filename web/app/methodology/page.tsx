@@ -182,6 +182,28 @@ export default async function Methodology() {
           <p>Every rule is counted in a daily report, so changes in the data stay visible.</p>
         </Section>
 
+        <Section title="Turbine makers and auctions">
+          <p>
+            Turbine makers come from the manufacturer name each operator registers in MaStR. Spellings
+            and company histories are grouped into brands (for example REpower and Senvion, or Siemens,
+            Gamesa and Siemens Gamesa); the rules are public in the pipeline configuration. Models are
+            grouped by rotor size (all V162 variants count as V162).
+          </p>
+          <p>
+            Auction results come from the Bundesnetzagentur: the published figures of each onshore wind
+            round (volume, ceiling, lowest, average and highest award value) and its award list. Each
+            award lists its turbines by MaStR register number, which links it to the register (maker,
+            model, status). Prices of single bids are not published, so prices per company cannot be
+            shown.
+          </p>
+          <p>
+            Bidders are sorted into company groups and types (developers and IPPs, utilities and
+            Stadtwerke, citizen and local) by keywords in their company name. Many bidders are project
+            companies whose name does not reveal their owner; they stay “not attributed”. Names of
+            bidders that are not companies are never shown.
+          </p>
+        </Section>
+
         <Section title="Known limitations">
           <ul className="list-disc space-y-2 pl-6">
             <li>

@@ -372,6 +372,35 @@ without a matching name count as "Other".
 **Check:** key present; series complete for every brand; `unattributed_share`
 at most 5 % (else the brand list needs updating).
 
+### Auctions (`auctions/onshore.json`, `auctions/awards.json`)
+
+New input chain: **A1 fetch** (`mastr-radar auctions-fetch`) downloads the
+BNetzA page and award list (.xlsx) of every finished onshore round listed in
+`settings.yaml → auctions.onshore_rounds` into `data/auctions/` (cached).
+**A2 build** runs inside station 3 (`aggregate`), because it links award
+turbines to station 2's `units.parquet` via the register numbers (`SEE…` =
+`unit_id`, `EEG…` = `eeg_id`). Bidders are grouped with the rules in
+`pipeline/config/auction_groups.yaml`.
+
+**`auctions/onshore.json`**
+
+| Key | Content |
+|---|---|
+| `source`, `categories` | source line; category keys → labels (`developer`, `utility`, `citizen`, `unattributed`) |
+| `rounds[]` | `id`, `bid_date`, `published`, `ceiling_ct`, `volume_kw`, `min_ct`, `avg_ct` (volume-weighted), `max_ct`, `awards`, `awarded_kw` (all from the round page); `list_kw`, `list_awards` (from the award list, may include late awards); `kw_by_category`, `kw_by_maker` (kW of linked turbines per brand); `turbines`, `turbines_in_mastr`, `turbines_operating` |
+| `winners_by_year[year][]` | top 15 company groups by awarded kW (bucket groups such as "Citizen wind farms" excluded): `group`, `category`, `kw`, `share` (of the year's awarded kW), `awards`, `rounds` |
+| `unattributed_share` | share of awarded kW without a group |
+
+**`auctions/awards.json`** → `awards[]`, one per award: `round`, `bid_date`,
+`award_no`, `bidder` (null unless the name carries a company legal form, D4),
+`group`, `category`, `kw`, `state`, `turbines`, `turbines_in_mastr`,
+`turbines_operating`, `maker`, `model` (most common among its turbines).
+
+**Check:** rounds match the settings; every round has dates, ceiling and the
+three prices with min ≤ avg ≤ max ≤ ceiling; award list within ±10 % of the
+published awarded kW; ≥ 90 % of listed turbines found in MaStR; categories
+add up; award rows match the rounds. Licence: see `docs/sources.md`.
+
 ---
 
 ## Version history

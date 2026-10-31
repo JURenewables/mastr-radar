@@ -16,6 +16,7 @@ import {
   YearRace,
 } from "./Sections";
 import { Loading, Section } from "./ui";
+import { AuctionPrices, AuctionWinners, roundLabel } from "./Auctions";
 import { BrandRace, BrandShares, TurbineModels } from "./WindIndustry";
 
 export const SECTIONS = [
@@ -27,6 +28,8 @@ export const SECTIONS = [
   ["turbines", "Turbines"],
   ["makers", "Makers"],
   ["models", "Models"],
+  ["auctions", "Auctions"],
+  ["winners", "Winners"],
   ["where", "Where"],
   ["storage", "Storage"],
   ["pipeline", "Next wave"],
@@ -75,6 +78,21 @@ export function Monitor({ asOf }: { asOf: string }) {
     ? wi.brands.filter((x) => x !== "Other").sort((a, c) => wi.added_mw[c][wiLast] - wi.added_mw[a][wiLast])[0]
     : undefined;
   const topModel = wi?.recent_models[0];
+  const au = data?.auctions;
+  const auFirst = au?.rounds[0];
+  const auLast = au?.rounds.at(-1);
+  const auYear = au ? Object.keys(au.winners_by_year).sort().at(-1)! : "";
+  const auYearRounds = au?.rounds.filter((r) => r.bid_date.startsWith(auYear)) ?? [];
+  const auShare = (c: "developer" | "utility") => {
+    const tot = auYearRounds.reduce((t, r) => t + r.list_kw, 0) || 1;
+    return Math.round((auYearRounds.reduce((t, r) => t + r.kw_by_category[c], 0) / tot) * 100);
+  };
+  const auSource = au ? (
+    <>
+      Source: Bundesnetzagentur, onshore wind auctions (award lists and round results), linked to the
+      Marktstammdatenregister as of {date}. Data processed.
+    </>
+  ) : undefined;
   const large = s?.battery_storage.buckets.large.mw ?? [];
   const topState = s?.states
     .filter((x) => x.area_km2)
@@ -192,6 +210,31 @@ export function Monitor({ asOf }: { asOf: string }) {
       >
         {data ? <TurbineModels data={data} /> : <Loading />}
       </Section>
+
+      {au && auFirst && auLast && (
+        <>
+          <Section
+            id="auctions"
+            eyebrow="Onshore wind auctions"
+            title={`Award prices fell from ${auFirst.avg_ct.toFixed(2)} to ${auLast.avg_ct.toFixed(2)} ct/kWh between ${roundLabel(auFirst.bid_date)} and ${roundLabel(auLast.bid_date)}`}
+            subtitle="Every onshore wind auction round since 2025: lowest, average and highest successful bid, against the legal ceiling."
+            asOf={date}
+            source={auSource}
+          >
+            <AuctionPrices a={au} />
+          </Section>
+          <Section
+            id="winners"
+            eyebrow={`Auction winners ${auYear}`}
+            title={`Developers and IPPs won at least ${auShare("developer")}% of the ${auYear} capacity; utilities and Stadtwerke ${auShare("utility")}%`}
+            subtitle="Which company groups won the most capacity, which types of bidder win, and whose turbines they plan to build."
+            asOf={date}
+            source={auSource}
+          >
+            <AuctionWinners a={au} brands={s?.wind_industry.brands ?? []} />
+          </Section>
+        </>
+      )}
 
       <Section
         id="where"

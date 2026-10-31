@@ -88,7 +88,35 @@ export interface WindIndustry {
   >;
   unattributed_share: number;
 }
+export type AuctionCategory = "developer" | "utility" | "citizen" | "unattributed";
+export interface AuctionRound {
+  id: string;
+  bid_date: string;
+  published: string;
+  ceiling_ct: number;
+  volume_kw: number | null;
+  min_ct: number;
+  max_ct: number;
+  avg_ct: number;
+  awards: number;
+  awarded_kw: number;
+  list_kw: number;
+  list_awards: number;
+  kw_by_category: Record<AuctionCategory, number>;
+  kw_by_maker: Record<string, number>;
+  turbines: number;
+  turbines_in_mastr: number;
+  turbines_operating: number;
+}
+export interface Auctions {
+  source: string;
+  categories: Record<AuctionCategory, string>;
+  rounds: AuctionRound[];
+  winners_by_year: Record<string, { group: string; category: AuctionCategory; kw: number; share: number; awards: number; rounds: number }[]>;
+  unattributed_share: number;
+}
 export interface MonitorData {
+  auctions: Auctions | null;
   buildout: Buildout;
   stats: Stats;
   points: Points;
@@ -104,7 +132,8 @@ function load(version: string): Promise<MonitorData> {
     get("monitor/stats.json"),
     get("monitor/points.json"),
     get("boundaries/districts.geojson"),
-  ]).then(([buildout, stats, points, districts]) => ({ buildout, stats, points, districts }));
+    get("auctions/onshore.json").catch(() => null),
+  ]).then(([buildout, stats, points, districts, auctions]) => ({ buildout, stats, points, districts, auctions }));
 }
 
 /** All monitor data, or null while loading. `version` is the manifest's as_of. */
