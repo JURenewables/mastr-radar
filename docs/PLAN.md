@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: Phase 7 live except WP41 (grid map: waits for OSM licence OK and your ENTSO-E / netztransparenz accounts)**
+**You are here: Phase 8 live (turbine makers WP49–51, auctions WP44–45, contract v1.5). Next: WP45b better auction attribution; WP41 grid map waits for OSM licence OK and your ENTSO-E / netztransparenz keys**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -204,11 +204,28 @@ real stress signals (line loading itself is not published).
   *Result:* `/llms.txt`, `/catalog.json` (built from the manifest), `/open-data`
   page with quick-start code; CORS open on `/data/*`.
 
-## Phase 8: Auctions
+## Phase 8: Turbine makers and auctions
 
-- [ ] **WP44. Import award lists** (onshore since 2017), link to MaStR via the
-  EEG number.
-- [ ] **WP45. Rounds overview:** volumes, competition, published prices.
+- [x] **WP49. Turbine makers data:** brands from registered manufacturer
+  names, additions and fleet per brand and year, most-built models, sizes.
+  *Result:* `wind_industry` in `stats.json` (contract v1.5 draft); 1.4 % of
+  capacity has no clear maker.
+- [x] **WP50. Makers race:** bar chart race (fleet or yearly additions, play
+  button), market share of new capacity since 2000.
+- [x] **WP51. Turbine models:** most-built models since 2024 with hub height
+  and rotor; rotor, hub height and rating per maker since 2005.
+
+- [x] **WP44. Import award lists** (onshore 2025–2026 so far), link to MaStR via
+  the register numbers.
+  *Result:* `auctions-fetch` + build in station 3; 7 rounds, 2,541 awards,
+  ~100 % of turbines found in MaStR; bidders grouped by name (42 % of capacity
+  not attributable from the name alone).
+- [x] **WP45. Rounds overview:** published prices per round (lowest, average,
+  highest vs ceiling), top winning groups per year, bidder types, turbine
+  makers in the awards.
+- [ ] **WP45b. Better attribution:** map project companies to their parent
+  groups (e.g. from MaStR operator data or a reviewed list) to shrink the
+  "not attributed" share. Older rounds (2017–2024).
 - [ ] **WP46. Winners map and time to going online.**
 - [ ] **WP47. Run-up before bid dates.**
 - [ ] **WP48. Optional: energy yield estimate.**

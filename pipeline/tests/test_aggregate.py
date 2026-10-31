@@ -25,6 +25,7 @@ def unit(uid, tech="wind_onshore", status="operating", kw=3000.0, cod=date(2020,
         registration_date=(cod + timedelta(days=lag)) if cod else date(2025, 1, 1),
         last_updated=date(2026, 1, 1),
         operator_is_person=False,
+        manufacturer="ENERCON GmbH" if tech == "wind_onshore" else None,
     )
     return row
 
@@ -72,7 +73,7 @@ def test_kpis(built):
 
 def test_manifest(built):
     _, out, manifest = built
-    assert manifest["contract_version"] == "1.4"
+    assert manifest["contract_version"] == "1.5"
     assert manifest["as_of"] == "2026-10-30"
     files = {f["name"]: f for f in manifest["files"]}
     assert set(files) == {

@@ -1,4 +1,4 @@
-# Station contracts — v1.4 (locked)
+# Station contracts — v1.5 (locked)
 
 These contracts define exactly what each station of the data chain outputs.
 They are **locked**: changing one is its own work package,
@@ -346,6 +346,63 @@ reference date 31 Dec of the latest available year).
 
 ---
 
+## v1.5: turbine makers and auctions (approved 31 Oct 2026)
+
+Additive only: nothing above changes. `contract_version` becomes `"1.5"`
+(manifest and day-file index); the website still accepts 1.4 files.
+
+### Turbine makers (`monitor/stats.json` → `wind_industry`)
+
+Onshore wind units of the series (D14). Registered manufacturer names are
+grouped into brands with the regular expressions in
+`pipeline/config/wind_brands.yaml` (e.g. REpower and Senvion → "Senvion
+(REpower)"; Siemens, Gamesa and Siemens Gamesa → "Siemens Gamesa"). Units
+without a matching name count as "Other".
+
+| Key | Content |
+|---|---|
+| `years` | first_year … as-of year |
+| `brands` | the 12 brands with the most capacity ever built, then `"Other"` |
+| `added_mw[brand]`, `installed_mw[brand]` | MW per year, same definition as `buildout.json` |
+| `recent_models_since` | as-of year − 2 |
+| `recent_models[]` | top 15 model families since then by MW: `brand`, `model` (rotor-size family, e.g. `V162`), `units`, `mw`, `avg_mw`, `avg_hub_height_m`, `avg_rotor_diameter_m` |
+| `brand_specs[brand]` | the 5 brands with most MW since 2015: `years` (since 2005, ≥ 10 turbines), `avg_mw`, `avg_hub_height_m`, `avg_rotor_diameter_m` |
+| `unattributed_share` | share of onshore capacity counted as "Other" |
+
+**Check:** key present; series complete for every brand; `unattributed_share`
+at most 5 % (else the brand list needs updating).
+
+### Auctions (`auctions/onshore.json`, `auctions/awards.json`)
+
+New input chain: **A1 fetch** (`mastr-radar auctions-fetch`) downloads the
+BNetzA page and award list (.xlsx) of every finished onshore round listed in
+`settings.yaml → auctions.onshore_rounds` into `data/auctions/` (cached).
+**A2 build** runs inside station 3 (`aggregate`), because it links award
+turbines to station 2's `units.parquet` via the register numbers (`SEE…` =
+`unit_id`, `EEG…` = `eeg_id`). Bidders are grouped with the rules in
+`pipeline/config/auction_groups.yaml`.
+
+**`auctions/onshore.json`**
+
+| Key | Content |
+|---|---|
+| `source`, `categories` | source line; category keys → labels (`developer`, `utility`, `citizen`, `unattributed`) |
+| `rounds[]` | `id`, `bid_date`, `published`, `ceiling_ct`, `volume_kw`, `min_ct`, `avg_ct` (volume-weighted), `max_ct`, `awards`, `awarded_kw` (all from the round page); `list_kw`, `list_awards` (from the award list, may include late awards); `kw_by_category`, `kw_by_maker` (kW of linked turbines per brand); `turbines`, `turbines_in_mastr`, `turbines_operating` |
+| `winners_by_year[year][]` | top 15 company groups by awarded kW (bucket groups such as "Citizen wind farms" excluded): `group`, `category`, `kw`, `share` (of the year's awarded kW), `awards`, `rounds` |
+| `unattributed_share` | share of awarded kW without a group |
+
+**`auctions/awards.json`** → `awards[]`, one per award: `round`, `bid_date`,
+`award_no`, `bidder` (null unless the name carries a company legal form, D4),
+`group`, `category`, `kw`, `state`, `turbines`, `turbines_in_mastr`,
+`turbines_operating`, `maker`, `model` (most common among its turbines).
+
+**Check:** rounds match the settings; every round has dates, ceiling and the
+three prices with min ≤ avg ≤ max ≤ ceiling; award list within ±10 % of the
+published awarded kW; ≥ 90 % of listed turbines found in MaStR; categories
+add up; award rows match the rounds. Licence: see `docs/sources.md`.
+
+---
+
 ## Version history
 
 | Version | Date | Change |
@@ -355,3 +412,4 @@ reference date 31 Dec of the latest available year).
 | 1.2 | 2026-10-31 | Data quality rules D12 (storage capacity split per plant, plausibility limits, impossible dates); operator names on the website only from 1 MW (D13). Approved by the user. |
 | 1.3 | 2026-10-31 | Monitor files `monitor/buildout.json`, `points.json`, `stats.json`; boundaries `area_km2`; series definition D14. Approved by the user. |
 | 1.4 | 2026-10-31 | Data hub chain H1/H2, day files `days/` with SMARD and DWD weather, `stations.json`, population in `states[]`, size budget 50 MB. Approved by the user. |
+| 1.5 | 2026-10-31 | Turbine makers (`wind_industry` in `stats.json`), auctions chain A1/A2 with `auctions/onshore.json` and `auctions/awards.json`. Approved by the user. |

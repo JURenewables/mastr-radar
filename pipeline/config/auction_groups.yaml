@@ -1,0 +1,132 @@
+# Auction bidders → company groups (contract v1.5 draft).
+#
+# Award lists name the bidding company, often a project company ("wpd Windpark
+# Nr. 440 GmbH & Co. KG"). A bidder belongs to a group when its name matches the
+# group's regular expression (lower case, first match wins, so specific groups
+# come first). Project companies without a group name stay "not attributed":
+# their parent cannot be told from the name alone.
+#
+# Groups marked `bucket` collect many independent companies (e.g. all
+# citizen wind farms): they count in the category totals but are not ranked
+# as winners.
+#
+# Categories:
+#   developer: independent developers and power producers (IPPs)
+#   utility:   energy utilities, municipal utilities (Stadtwerke) and their joint ventures
+#   citizen:   citizen wind farms, cooperatives, farmers' and local companies
+categories:
+  developer: Developers & IPPs
+  utility: Utilities & Stadtwerke
+  citizen: Citizen & local
+  unattributed: Not attributed
+
+groups:
+  # --- Developers & IPPs ---
+  - {group: wpd, category: developer, match: "\\bwpd\\b"}
+  - {group: UKA, category: developer, match: "\\buka\\b|umweltgerechte kraftanlagen"}
+  - {group: ABO Energy, category: developer, match: "\\babo (energy|wind)\\b"}
+  - {group: JUWI, category: developer, match: "\\bjuwi\\b"}
+  - {group: Prowind, category: developer, match: "\\bprowind\\b"}
+  - {group: BOREAS, category: developer, match: "\\bboreas\\b"}
+  - {group: Energiekontor, category: developer, match: "energiekontor"}
+  - {group: Energiequelle, category: developer, match: "energiequelle"}
+  - {group: PNE, category: developer, match: "\\bpne\\b|\\bwkn\\b"}
+  - {group: ENERTRAG, category: developer, match: "enertrag"}
+  - {group: NOTUS energy, category: developer, match: "\\bnotus\\b"}
+  - {group: UGE, category: developer, match: "\\buge\\b|umweltgerechte energie"}
+  - {group: Qualitas Energy, category: developer, match: "\\bqe (windpark|niemegk|holding)|qualitas"}
+  - {group: NeXtWind, category: developer, match: "nextwind"}
+  - {group: ENOVA, category: developer, match: "\\benova\\b"}
+  - {group: PROKON, category: developer, match: "\\bprokon\\b"}
+  - {group: Max Bögl, category: developer, match: "max bögl"}
+  - {group: Denker & Wulf, category: developer, match: "denker (&|und) wulf"}
+  - {group: Eurowind, category: developer, match: "eurowind"}
+  - {group: ERG, category: developer, match: "\\berg (development|wind)"}
+  - {group: Sabowind, category: developer, match: "sabowind"}
+  - {group: eno energy, category: developer, match: "\\beno energy\\b"}
+  - {group: Agrowea, category: developer, match: "agrowea"}
+  - {group: Westwind, category: developer, match: "^westwind\\b"}
+  - {group: MLK, category: developer, match: "\\bmlk\\b"}
+  - {group: Landwind, category: developer, match: "^landwind\\b"}
+  - {group: wiwi consult, category: developer, match: "wiwi consult"}
+  - {group: Energieplan Ost West, category: developer, match: "energieplan ost west"}
+  - {group: BayWa r.e., category: developer, match: "baywa"}
+  - {group: Statkraft, category: developer, match: "statkraft"}
+  - {group: Ørsted, category: developer, match: "\\børsted\\b|\\borsted\\b"}
+  - {group: GP JOULE, category: developer, match: "gp joule"}
+  - {group: Ostwind, category: developer, match: "\\bostwind\\b"}
+  - {group: Volkswind, category: developer, match: "volkswind"}
+  - {group: Windwärts, category: developer, match: "windwärts"}
+  - {group: Teut, category: developer, match: "\\bteut\\b"}
+  - {group: VSB, category: developer, match: "\\bvsb\\b"}
+  - {group: SL NaturEnergie, category: developer, match: "^sl (windenergie|naturenergie)"}
+  - {group: CPC Germania, category: developer, match: "cpc germania"}
+  - {group: Uhl Windkraft, category: developer, match: "^uhl windkraft"}
+  - {group: SelzEnergie, category: developer, match: "selzenergie"}
+  - {group: REA, category: developer, match: "^rea gmbh"}
+  - {group: mdp, category: developer, match: "^mdp\\b"}
+  - {group: meridian, category: developer, match: "^meridian\\b"}
+  - {group: WindStrom, category: developer, match: "^windstrom\\b"}
+  - {group: Windxperts, category: developer, match: "windxperts"}
+  - {group: Windtaler, category: developer, match: "windtaler"}
+  - {group: WIND-projekt, category: developer, match: "wind-projekt"}
+  - {group: Schierloh, category: developer, match: "schierloh"}
+  - {group: AEZ Planungs, category: developer, match: "^aez planungs"}
+  - {group: Green Wind, category: developer, match: "^green wind"}
+  - {group: unlimited energy, category: developer, match: "^unlimited energy"}
+  - {group: ecoJoule, category: developer, match: "ecojoule"}
+  - {group: Nordex, category: developer, match: "^nordex"}
+  - {group: Enercon, category: developer, match: "^enercon"}
+  - {group: EnviTec, category: developer, match: "envitec"}
+  - {group: Luxcara, category: developer, match: "luxcara"}
+  - {group: Encavis, category: developer, match: "encavis"}
+  - {group: Iberdrola, category: developer, match: "iberdrola"}
+  - {group: TotalEnergies, category: developer, match: "totalenergies|quadra energy"}
+  - {group: Windkraft Simonsfeld, category: developer, match: "simonsfeld"}
+
+  # --- Utilities & Stadtwerke ---
+  - {group: EnBW, category: utility, match: "\\benbw\\b"}
+  - {group: RWE, category: utility, match: "\\brwe\\b"}
+  - {group: Vattenfall, category: utility, match: "vattenfall"}
+  - {group: Alterric (EWE), category: utility, match: "alterric"}
+  - {group: EWE, category: utility, match: "\\bewe\\b"}
+  - {group: enercity, category: utility, match: "enercity"}
+  - {group: Trianel, category: utility, match: "trianel"}
+  - {group: evm, category: utility, match: "^evm\\b"}
+  - {group: e-regio, category: utility, match: "^e-regio\\b"}
+  - {group: STAWAG, category: utility, match: "stawag"}
+  - {group: Gelsenwasser, category: utility, match: "gelsenwasser"}
+  - {group: HochsauerlandEnergie, category: utility, match: "hochsauerlandenergie"}
+  - {group: Thüga, category: utility, match: "thüga"}
+  - {group: Mainova, category: utility, match: "mainova"}
+  - {group: N-ERGIE, category: utility, match: "n-ergie"}
+  - {group: MVV, category: utility, match: "\\bmvv\\b"}
+  - {group: LEAG, category: utility, match: "\\bleag\\b"}
+  - {group: Uniper, category: utility, match: "uniper"}
+  - {group: Iqony (STEAG), category: utility, match: "iqony|\\bsteag\\b"}
+  - {group: ENGIE, category: utility, match: "\\bengie\\b"}
+  - {group: E.ON, category: utility, match: "\\be\\.on\\b"}
+  - {group: enviaM, category: utility, match: "enviam"}
+  - {group: badenova, category: utility, match: "badenova"}
+  - {group: Süwag, category: utility, match: "süwag"}
+  - {group: ENTEGA, category: utility, match: "entega"}
+  - {group: WEMAG, category: utility, match: "wemag"}
+  - {group: SachsenEnergie, category: utility, match: "sachsenenergie"}
+  - {group: Pfalzwerke, category: utility, match: "pfalzwerke"}
+  - {group: Lechwerke, category: utility, match: "lechwerke"}
+  - {group: Naturstrom, category: utility, match: "naturstrom"}
+  - {group: Green Planet Energy, category: utility, match: "green planet energy|greenpeace energy"}
+  - {group: SWM (Stadtwerke München), category: utility, match: "stadtwerke münchen|\\bswm\\b"}
+  - {group: Stadtwerke (other), category: utility, bucket: true, match: "stadtwerk|gemeindewerk|stadtwerke|energieversorgung|\\bswb\\b|kommunal|versorgungsbetriebe"}
+
+  # --- Citizen & local ---
+  - {group: Citizen wind farms, category: citizen, bucket: true, match: "bürger|buerger"}
+  - {group: Cooperatives, category: citizen, bucket: true, match: "genossenschaft|\\beg$|\\beg\\b(?!br)"}
+  - {group: Raiffeisen & farmers, category: citizen, bucket: true, match: "raiffeisen|landvolk|landwirt"}
+  - {group: Partnerships (GbR), category: citizen, bucket: true, match: "\\bgbr\\b|\\begbr\\b"}
+
+other: Not attributed
+
+# Names that do not end in a legal form of a company are treated as possible
+# natural persons (privacy rule D4): counted, never shown by name.
+legal_entity: "\\b(gmbh|kg|ag|se|mbh|ug|eg|kgaa|b\\.v\\.|a/s|s\\.a\\.|ltd|limited|e\\.v\\.|aps|sarl|s\\.à r\\.l\\.)\\b"

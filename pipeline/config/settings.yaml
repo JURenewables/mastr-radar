@@ -57,6 +57,19 @@ monitor:
   point_min_kw: 1000        # plants on the animated map
   repowering_age_years: 20  # onshore turbines older than this count as repowering candidates
 
+# Onshore wind auctions (contract v1.5 draft): finished BNetzA rounds, in
+# order. Add each new round once its awards are published (4 a year). The id
+# is the last part of the round page URL.
+auctions:
+  onshore_rounds:
+    - {id: GT1022025, year: 2025}
+    - {id: GT1052025, year: 2025}
+    - {id: GT1082025, year: 2025}
+    - {id: GT1112025, year: 2025}
+    - {id: GT01022026, year: 2026}
+    - {id: GT01052026, year: 2026}
+    - {id: GT03082026, year: 2026}
+
 # Data hub (contract v1.4): SMARD market data, CC BY 4.0,
 # attribution "Bundesnetzagentur | SMARD.de". Values are MWh per quarter hour.
 hub:

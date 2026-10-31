@@ -150,14 +150,26 @@ def aggregate() -> None:
     if not units.exists():
         typer.echo("No units.parquet. Run `mastr-radar extract` first.", err=True)
         raise typer.Exit(code=1)
+    missing = [
+        r["id"]
+        for r in s.auction_rounds
+        if not (s.data_dir / "auctions" / f"{r['id']}.xlsx").exists()
+    ]
+    if missing:
+        typer.echo(
+            f"Auction rounds not fetched: {missing}. Run `mastr-radar auctions-fetch`.", err=True
+        )
+        raise typer.Exit(code=1)
     manifest = ag.build(
         units,
         s.output_dir,
         operator_name_min_kw=s.min_capacity_mw * 1000,
         monitor_settings=s.monitor,
+        auction_rounds=s.auction_rounds,
+        auctions_dir=s.data_dir / "auctions",
     )
     try:
-        ag.check_explorer_files(s.output_dir, units)
+        ag.check_explorer_files(s.output_dir, units, s.auction_rounds)
     except ag.ExplorerCheckError as exc:
         typer.echo(f"CHECK FAILED: {exc}", err=True)
         raise typer.Exit(code=1) from exc
@@ -181,6 +193,18 @@ def aggregate() -> None:
         )
     for w in result["warnings"]:
         typer.echo(f"WARNING: {w}")
+
+
+@app.command("auctions-fetch")
+def auctions_fetch() -> None:
+    """Auctions A1: download BNetzA onshore round pages and award lists (cached)."""
+    from mastr_radar import auctions
+
+    s = load_settings()
+    n = auctions.fetch(list(s.auction_rounds), s.data_dir / "auctions")
+    typer.echo(
+        f"{len(s.auction_rounds)} rounds ready in {s.data_dir / 'auctions'} ({n} new files)."
+    )
 
 
 @app.command("hub-fetch")

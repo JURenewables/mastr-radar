@@ -12,6 +12,7 @@ const DATA = path.join(process.cwd(), "public", "data");
 const LICENCES = {
   mastr: { name: "Datenlizenz Deutschland – Namensnennung – Version 2.0", id: "DL-DE-BY-2.0", url: "https://www.govdata.de/dl-de/by-2-0" },
   bkg: { name: "Datenlizenz Deutschland – Namensnennung – Version 2.0", id: "DL-DE-BY-2.0", url: "https://www.govdata.de/dl-de/by-2-0" },
+  bnetza: { name: "Datenlizenz Deutschland – Namensnennung", id: "DL-DE-BY", url: "https://www.govdata.de/dl-de/by-2-0" },
   ccby: { name: "Creative Commons Attribution 4.0", id: "CC-BY-4.0", url: "https://creativecommons.org/licenses/by/4.0/" },
 } as const;
 
@@ -51,6 +52,8 @@ async function json<T>(file: string): Promise<T | null> {
 
 const MASTR_ATTR = "© Bundesnetzagentur, DL-DE-BY-2.0, Marktstammdatenregister; processed by MaStR Radar";
 
+const BNETZA_ATTR = "Bundesnetzagentur, Ausschreibungen Wind an Land; MaStR © Bundesnetzagentur, DL-DE-BY-2.0; processed by MaStR Radar";
+
 const DESCRIPTIONS: Record<string, Omit<Dataset, "id" | "url" | "rows" | "bytes" | "update">> = {
   "kpis.json": { title: "Headline numbers per technology", description: "Installed, planned and added-this-year capacity (kW) and unit counts per technology.", format: "json", licence: LICENCES.mastr, attribution: MASTR_ATTR },
   "units.parquet": { title: "Units of 100 kW and more", description: "Every solar, wind, storage, biomass and hydro unit of 100 kW or more: technology, status, capacity, dates, location (where public), operator (companies, from 1 MW).", format: "parquet", licence: LICENCES.mastr, attribution: MASTR_ATTR },
@@ -60,6 +63,8 @@ const DESCRIPTIONS: Record<string, Omit<Dataset, "id" | "url" | "rows" | "bytes"
   "monitor/buildout.json": { title: "Build-out per year", description: "Installed, added and retired capacity (MW) per year since 1990, nationally and per district, for every technology.", format: "json", licence: LICENCES.mastr, attribution: MASTR_ATTR },
   "monitor/points.json": { title: "Plants of 1 MW and more", description: "Coordinates, commissioning year, technology and capacity of plants in operation (public locations only), plus planned onshore wind turbines.", format: "json", licence: LICENCES.mastr, attribution: MASTR_ATTR },
   "monitor/stats.json": { title: "Monitor analyses", description: "2030 targets, year-to-date curves, solar by type, turbine sizes, battery storage, states (with area and population), top districts, repowering.", format: "json", licence: LICENCES.mastr, attribution: `${MASTR_ATTR}; population © GeoBasis-DE / BKG (2026)` },
+  "auctions/onshore.json": { title: "Onshore wind auctions: rounds and winners", description: "Every onshore wind auction round since 2025: volume, ceiling, lowest, average and highest award value (ct/kWh), awarded capacity by bidder type and by turbine maker, top winning company groups per year.", format: "json", licence: LICENCES.bnetza, attribution: BNETZA_ATTR },
+  "auctions/awards.json": { title: "Onshore wind awards", description: "One row per award: round, bidder (companies only), company group and type, kW, state, turbines and how many are already in MaStR or operating, turbine maker and model.", format: "json", licence: LICENCES.bnetza, attribution: BNETZA_ATTR },
 };
 
 export async function buildCatalog(): Promise<Catalog> {

@@ -58,6 +58,7 @@ class Settings:
     crosscheck: CrosscheckSettings
     monitor: MonitorSettings
     hub: HubSettings
+    auction_rounds: tuple[dict, ...] = ()
 
     @property
     def raw_dir(self) -> Path:
@@ -105,4 +106,5 @@ def load_settings(path: Path = DEFAULT_CONFIG) -> Settings:
             smard_residual_load=int(hub["smard"]["residual_load"]),
             dwd=dict(hub["dwd"]),
         ),
+        auction_rounds=tuple(dict(r) for r in raw.get("auctions", {}).get("onshore_rounds", [])),
     )

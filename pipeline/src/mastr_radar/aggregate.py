@@ -20,7 +20,7 @@ from mastr_radar import __version__
 from mastr_radar.config import PIPELINE_ROOT
 from mastr_radar.extract import ENUMS, UNITS_SCHEMA, export_date_of
 
-CONTRACT_VERSION = "1.4"
+CONTRACT_VERSION = "1.5"
 MAX_TOTAL_BYTES = 50 * 1024 * 1024  # contract v1.4
 MAP_POINT_MIN_KW = 100.0  # D5: units from 100 kW are individual points
 DEFAULT_OPERATOR_NAME_MIN_KW = 1000.0  # operator names only from 1 MW (settings)
@@ -158,6 +158,8 @@ def build(
     boundaries_dir: Path = BOUNDARIES_DIR,
     operator_name_min_kw: float = DEFAULT_OPERATOR_NAME_MIN_KW,
     monitor_settings=None,
+    auction_rounds: tuple[dict, ...] = (),
+    auctions_dir: Path | None = None,
 ) -> dict:
     """Write all explorer files and manifest.json; return the manifest."""
     units = pq.read_table(units_path)
@@ -188,6 +190,11 @@ def build(
 
         files += monitor.build(units_path, out_dir, as_of, monitor_settings, boundaries_dir)
 
+    if auction_rounds and auctions_dir is not None:
+        from mastr_radar import auctions
+
+        files += auctions.build(list(auction_rounds), auctions_dir, units_path, out_dir)
+
     manifest = {
         "contract_version": CONTRACT_VERSION,
         "as_of": as_of.isoformat(),
@@ -217,7 +224,9 @@ def _check_fields(obj: dict, fields: dict, where: str, problems: list[str]) -> N
             problems.append(f"{where}.{key}: expected {typ.__name__}.")
 
 
-def check_explorer_files(out_dir: Path, units_path: Path) -> None:
+def check_explorer_files(
+    out_dir: Path, units_path: Path, auction_rounds: tuple[dict, ...] = ()
+) -> None:
     """Run the station 3 check. Raises ExplorerCheckError listing every problem."""
     problems: list[str] = []
     manifest = json.loads((out_dir / "manifest.json").read_text())
@@ -256,6 +265,14 @@ def check_explorer_files(out_dir: Path, units_path: Path) -> None:
         try:
             monitor.check(out_dir, kpis, as_of)
         except monitor.MonitorCheckError as exc:
+            problems.append(str(exc))
+    if auction_rounds:
+        from mastr_radar import auctions
+
+        expected_files |= {"auctions/onshore.json", "auctions/awards.json"}
+        try:
+            auctions.check(out_dir, list(auction_rounds))
+        except auctions.AuctionCheckError as exc:
             problems.append(str(exc))
     if missing := expected_files - set(listed):
         problems.append(f"manifest: missing files {sorted(missing)}.")

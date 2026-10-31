@@ -10,6 +10,7 @@ export function Section({
   subtitle,
   note,
   asOf,
+  source,
   children,
 }: {
   id: string;
@@ -18,6 +19,8 @@ export function Section({
   subtitle?: ReactNode;
   note?: ReactNode;
   asOf: string;
+  /** Replaces the default MaStR source line. */
+  source?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -27,7 +30,8 @@ export function Section({
       {subtitle && <p className="mt-3 max-w-2xl text-ink-muted">{subtitle}</p>}
       <div className="mt-7">{children}</div>
       <p className="mt-5 text-xs text-ink-muted">
-        {note && <>{note} </>}Source: Marktstammdatenregister, as of {asOf}.
+        {note && <>{note} </>}
+        {source ?? <>Source: Marktstammdatenregister, as of {asOf}.</>}
       </p>
     </section>
   );
