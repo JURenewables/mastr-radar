@@ -152,4 +152,6 @@ data/                local working dir for downloads (git-ignored)
   checked), `uv run mastr-radar check-download <zip>` (check only)
 - Station 2: `uv run mastr-radar extract` (newest zip → `data/extract/units.parquet`,
   then checked; report in `extract_report.json`)
+- Station 3: `uv run mastr-radar aggregate` (`units.parquet` → `web/public/data/`,
+  then checked)
 - Web: (added in WP7)

@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP7 of 25 · Phase 2 · Next: station 3, first explorer files (manifest + headline numbers)**
+**You are here: WP8 of 25 · Phase 2 · Next: station 4, website shell on Vercel**
 
-Progress: ██████░░░░░░░░░░░░░░░░░░░ 6 / 25
+Progress: ███████░░░░░░░░░░░░░░░░░░ 7 / 25
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -45,9 +45,11 @@ building anything wide. That way every problem in the chain shows up early.
   *Done when:* runs on the real data and a fixture test passes.
   *Result:* 44 344 turbines in 84 s; check passed; totals match WP4
   (71.54 GW onshore, 11.64 GW offshore operating).
-- [ ] **WP7. Station 3: First explorer file.** `manifest.json` (as-of date)
+- [x] **WP7. Station 3: First explorer file.** `manifest.json` (as-of date)
   and `kpis.json` (total installed onshore wind), validated.
   *Done when:* files are generated and checked.
+  *Result:* as of 30 Oct 2026: onshore 71.5 GW installed, +4.2 GW in 2026,
+  54 GW planned; offshore 11.6 GW, +1.9 GW. Check passed.
 - [ ] **WP8. Station 4: Website shell.** Next.js + Tailwind on Vercel showing
   that number, the as-of date and the licence footer.
   *Done when:* a public Vercel URL shows the correct number.

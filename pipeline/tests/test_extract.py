@@ -90,6 +90,12 @@ def test_schema_and_row_count(extracted):
     assert report.rows == {"wind_onshore": 7, "wind_offshore": 2}
 
 
+def test_export_date_stored_in_file(tmp_path):
+    zp = make_export(tmp_path / "Gesamtdatenexport_20261030.zip")
+    ex.extract(zp, tmp_path / "u.parquet", export_date=EXPORT_DATE)
+    assert ex.export_date_of(tmp_path / "u.parquet") == EXPORT_DATE
+
+
 def test_company_turbine_is_complete(extracted):
     r = extracted[1]["SEE01"]
     assert r["technology"] == "wind_onshore"

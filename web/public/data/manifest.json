@@ -1,0 +1,17 @@
+{
+  "contract_version": "1.1",
+  "as_of": "2026-10-30",
+  "generated_at": "2026-10-31T09:28:46+00:00",
+  "pipeline_version": "0.1.0",
+  "incomplete_after": {
+    "wind_offshore": "2026-10-14",
+    "wind_onshore": "2026-10-05"
+  },
+  "files": [
+    {
+      "name": "kpis.json",
+      "rows": 2,
+      "bytes": 390
+    }
+  ]
+}

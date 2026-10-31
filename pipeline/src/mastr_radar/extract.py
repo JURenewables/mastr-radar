@@ -342,7 +342,9 @@ def extract(
         log.info("Catalogue: %d values", len(catalog))
         operators = read_operators(zf, cfg, catalog)
         log.info("Operators: %d", len(operators))
-        writer = pq.ParquetWriter(tmp, UNITS_SCHEMA, compression="zstd")
+        # The export date travels inside the file, for station 3 (manifest as_of).
+        file_schema = UNITS_SCHEMA.with_metadata({"export_date": export_date.isoformat()})
+        writer = pq.ParquetWriter(tmp, file_schema, compression="zstd")
         try:
             for source in sources:
                 src_cfg = cfg["sources"][source]
@@ -441,6 +443,14 @@ def check_units(
     if report is not None:
         report.warnings.extend(warnings)
     return warnings
+
+
+def export_date_of(units_path: Path) -> date:
+    """Read the export date that station 2 stored in units.parquet."""
+    meta = pq.read_schema(units_path).metadata or {}
+    if b"export_date" not in meta:
+        raise UnitsCheckError(f"{units_path} has no export_date metadata.")
+    return date.fromisoformat(meta[b"export_date"].decode())
 
 
 def write_report(path: Path, report: Report) -> None:

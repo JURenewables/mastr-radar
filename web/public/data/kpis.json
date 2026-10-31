@@ -1,0 +1,16 @@
+[
+  {
+    "technology": "wind_offshore",
+    "installed_capacity_kw": 11643743.0,
+    "installed_units": 1818,
+    "planned_capacity_kw": 1365000.0,
+    "added_capacity_kw_ytd": 1910250.0
+  },
+  {
+    "technology": "wind_onshore",
+    "installed_capacity_kw": 71544162.907,
+    "installed_units": 30435,
+    "planned_capacity_kw": 53976152.81,
+    "added_capacity_kw_ytd": 4244583.97
+  }
+]

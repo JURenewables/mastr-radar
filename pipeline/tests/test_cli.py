@@ -18,9 +18,3 @@ def test_settings_load():
     assert s.min_capacity_mw == 1.0
     assert "wind_onshore" in s.technologies
     assert s.output_dir.parts[-3:] == ("web", "public", "data")
-
-
-def test_unimplemented_steps_fail_clearly():
-    result = runner.invoke(app, ["aggregate"])
-    assert result.exit_code == 1
-    assert "WP7" in result.stdout

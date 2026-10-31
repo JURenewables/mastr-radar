@@ -17,11 +17,6 @@ def _setup() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
-def _not_yet(step: str, wp: int) -> None:
-    typer.echo(f"'{step}' is not implemented yet (planned for WP{wp}).")
-    raise typer.Exit(code=1)
-
-
 @app.command()
 def version() -> None:
     """Print the pipeline version."""
@@ -146,8 +141,21 @@ def extract(
 
 @app.command()
 def aggregate() -> None:
-    """Station 3: write the files the website reads."""
-    _not_yet("aggregate", 7)
+    """Station 3: build the files the website reads, then check them."""
+    from mastr_radar import aggregate as ag
+
+    s = load_settings()
+    units = s.data_dir / "extract" / "units.parquet"
+    if not units.exists():
+        typer.echo("No units.parquet. Run `mastr-radar extract` first.", err=True)
+        raise typer.Exit(code=1)
+    manifest = ag.build(units, s.output_dir)
+    try:
+        ag.check_explorer_files(s.output_dir, units)
+    except ag.ExplorerCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"Check passed: as of {manifest['as_of']} → {s.output_dir}")
 
 
 if __name__ == "__main__":

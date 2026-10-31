@@ -162,3 +162,19 @@ should be set **per technology** (measured fully, including solar, in WP11).
   blanked.
 - Names are Unicode-normalised: some operator names use a full-width
   ampersand (`＆`), which becomes `&`.
+
+## 10. Station 3 run (WP7)
+
+- Station 2 stores the export date inside `units.parquet` (file metadata
+  `export_date`). Station 3 reads it from there, so it never has to look
+  outside station 2's output.
+- First explorer files, as of 30 Oct 2026:
+
+| Technology | Installed | Units | Added 2026 | Planned |
+|---|---|---|---|---|
+| Onshore wind | 71.5 GW | 30 435 | 4.2 GW | 54.0 GW |
+| Offshore wind | 11.6 GW | 1 818 | 1.9 GW | 1.4 GW |
+
+- Provisional "possibly incomplete" dates (90% of units registered within
+  this time; refined in WP12): onshore after 5 Oct 2026 (25 days),
+  offshore after 14 Oct 2026 (16 days).
