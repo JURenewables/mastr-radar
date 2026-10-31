@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP5 of 25 · Phase 2 · Next: station 1, the downloader**
+**You are here: WP6 of 25 · Phase 2 · Next: station 2, extract wind into units.parquet**
 
-Progress: ████░░░░░░░░░░░░░░░░░░░░░ 4 / 25
+Progress: █████░░░░░░░░░░░░░░░░░░░░ 5 / 25
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -32,12 +32,14 @@ building anything wide. That way every problem in the chain shows up early.
   *Result:* runner is fine (86 GB disk); download needs resume/retry;
   open-mastr 1.0.0 fails on all solar files. Details in
   `docs/data-dictionary.md`.
-- [ ] **WP5. Station 1: Download.** Own downloader for the BNetzA export:
+- [x] **WP5. Station 1: Download.** Own downloader for the BNetzA export:
   resumes after a broken connection, retries with increasing waits, then
   checks the zip (integrity, required files, date, size) and writes
   `download_meta.json`.
   *Done when:* the real export downloads and passes the check, and tests on
   a tiny fixture zip pass (incl. a simulated broken download).
+  *Result:* full export 3.26 GB in 50 min; the connection broke at 3.12 GB
+  and the download resumed and finished; check passed (189 files, CRC).
 - [ ] **WP6. Station 2: Extract (wind).** Export zip → `units.parquet` for wind,
   validated against the contract.
   *Done when:* runs on the real data and a fixture test passes.

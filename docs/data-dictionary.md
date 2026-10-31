@@ -7,7 +7,7 @@ Findings from the real MaStR bulk export of **30 Oct 2026**
 
 | Measure | Result |
 |---|---|
-| Export size (zip) | 2.55 GB |
+| Export size (zip) | 3.26 GB full export (open-mastr only fetched the 2.55 GB it needed) |
 | Download time | 48 min locally, at roughly 1 MB/s; the BNetzA server is the bottleneck |
 | GitHub runner download | **Failed after 35 min**: BNetzA dropped the connection mid-file |
 | open-mastr processing into SQLite | 36 min, SQLite file 5.6 GB |
@@ -15,6 +15,10 @@ Findings from the real MaStR bulk export of **30 Oct 2026**
 | Peak disk | 7.9 GB (zip + SQLite) |
 | Peak memory | 2.1 GB |
 | Free disk on GitHub runner | 86 GB |
+
+**WP5 update:** our own downloader fetched the full 3.26 GB in 50 min. The
+connection broke once at 3.12 GB; it resumed and finished, and the check
+(189 files, CRC) took about 3.5 min.
 
 **Verdict:** the GitHub runner has plenty of disk and memory. The weak point is
 the download, which is slow and can break. It needs resume and retry.
