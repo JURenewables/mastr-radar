@@ -1,0 +1,80 @@
+# Daily data hub update (contract v1.4): SMARD day files for
+# "Germany in 24 hours". Independent of the MaStR update: if one fails, the
+# other still runs.
+name: Daily hub update
+
+on:
+  schedule:
+    - cron: "23 6 * * *"  # 06:23 UTC; SMARD has filled yesterday by then
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/hub-daily.yml
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: daily-hub-update-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install pipeline
+        working-directory: pipeline
+        run: uv sync --python 3.12
+
+      # Keep downloaded SMARD weeks between runs; only the newest weeks are refetched.
+      - uses: actions/cache@v4
+        with:
+          path: data/hub
+          key: hub-cache-${{ github.run_id }}
+          restore-keys: hub-cache-
+
+      - name: "H1: fetch SMARD"
+        working-directory: pipeline
+        run: uv run mastr-radar hub-fetch
+
+      - name: "H2: build and check day files"
+        working-directory: pipeline
+        run: uv run mastr-radar hub-build
+
+      - name: Commit new day files (only if changed)
+        run: |
+          if [ -z "$(git status --porcelain web/public/data/days)" ]; then
+            echo "Day files unchanged."
+            exit 0
+          fi
+          LAST=$(python3 -c "import json;print(json.load(open('web/public/data/days/index.json'))['last'])")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/public/data/days
+          git commit -m "Update hub day files (through $LAST)"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Open or update an issue on failure
+        if: failure() && github.event_name != 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          TITLE="Daily hub update failed"
+          NUM=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number --jq '.[0].number')
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body "Failed again: $RUN_URL"
+          else
+            gh issue create --title "$TITLE" --body "The daily hub update (SMARD day files) failed. The site keeps the last good days.
+
+          Run: $RUN_URL"
+          fi

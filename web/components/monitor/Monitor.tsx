@@ -3,6 +3,7 @@
 import { useMonitorData, mw } from "@/lib/monitor";
 import { formatDate } from "@/lib/format";
 
+import { Day24 } from "./Day24";
 import { LightUpMap } from "./LightUpMap";
 import {
   PipelineMap,
@@ -18,6 +19,7 @@ import { Loading, Section } from "./ui";
 
 export const SECTIONS = [
   ["light-up", "Germany lights up"],
+  ["day", "24 hours"],
   ["targets", "Race to 2030"],
   ["this-year", "This year"],
   ["balcony", "Balcony boom"],
@@ -81,6 +83,17 @@ export function Monitor({ asOf }: { asOf: string }) {
       </Section>
 
       <Section
+        id="day"
+        eyebrow="Any day of the last 12 months"
+        title="Germany in 24 hours"
+        subtitle="Pick a day and press play: how solar, wind and every other source met demand, quarter hour by quarter hour, and where the sun and wind were working."
+        note="Generation and demand: Bundesnetzagentur | SMARD.de. Weather: Deutscher Wetterdienst. District maps are estimates."
+        asOf={date}
+      >
+        {data ? <Day24 data={data} asOf={asOf} /> : <Loading height={520} />}
+      </Section>
+
+      <Section
         id="targets"
         eyebrow="Targets"
         title={
@@ -137,7 +150,8 @@ export function Monitor({ asOf }: { asOf: string }) {
         id="where"
         eyebrow="Regions"
         title={topState ? `${topState.name} has the most solar per km² of any state` : "Where it is built"}
-        subtitle="Capacity in operation per km² of land, or in total, by state. Offshore wind is not part of any state."
+        subtitle="Capacity in operation per km² of land, per resident (watts), or in total, by state. Offshore wind is not part of any state."
+        note="Population and areas: © GeoBasis-DE / BKG (2026), Statistische Ämter des Bundes und der Länder."
         asOf={date}
       >
         {data ? <StatesRank data={data} /> : <Loading />}

@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: Phase 6 done on the branch (preview). Waiting for: your look at the preview, approval of contract v1.3, merge. Next: WP34 data hub**
+**You are here: Phase 7 live except WP41 (grid map: waits for OSM licence OK and your ENTSO-E / netztransparenz accounts)**
 
-Progress: Part 1 done (25 / 25) · Part 2: 8 / 18
+Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -154,31 +154,64 @@ look).
   *Result:* progress to target, annual additions and 2030 pace line; plus
   "this year vs previous years" race chart.
 - [x] **WP32. Section: states compared** (per km² and per resident).
-  *Result:* states per km² or total, densest districts. Per resident needs
-  population data: moves to the data hub (WP34+).
+  *Result:* states per km², per resident (BKG VG250-EW population, added in
+  Phase 7) or total; densest districts.
 - [x] **WP33. Section: the storage boom.**
   *Result:* batteries per year: home, commercial, large; GW or GWh.
 - [x] **Extra sections (your request for more analyses):** balcony-solar boom,
   turbines keep growing (drawn to scale), the next wave (planned onshore wind
   map), the ageing fleet (repowering candidates).
 
-## Phase 7: Data hub
+## Phase 7: Data hub and "Germany in 24 hours"
 
-- [ ] **WP34. Sources and licences.** MaStR, SMARD, Energy-Charts, Eurostat,
-  ENTSO-E (free account), IEA (check: much is paid). Your input: which ones.
-- [ ] **WP35. Catalogue format and hub contract.**
-- [ ] **WP36. First outside source: SMARD** (generation, prices).
-- [ ] **WP37. Access for agents:** catalogue page, `llms.txt`, stable links.
-- [ ] **WP38. ENTSO-E** (after you register for a key).
+Decided 31 Oct 2026: any day of the last 12 months selectable; clearly
+labelled estimates are fine for district maps; the grid map shows lines and
+real stress signals (line loading itself is not published).
+
+- [x] **WP34. Sources and licences.** SMARD, Energy-Charts, DWD,
+  netztransparenz (redispatch), ENTSO-E (free key), OpenStreetMap grid
+  (ODbL), Destatis (population), IEA. Write `docs/sources.md`.
+  *Result:* `docs/sources.md`. SMARD and DWD are CC BY 4.0 and ready; SMARD
+  prices excluded (HEDWIG); population via BKG VG1000-EW; ENTSO-E and
+  netztransparenz need your free accounts; OSM share-alike needs your OK.
+- [x] **WP35. Hub contract v1.4 (draft).** Day files, catalogue, size budget.
+  *Result:* separate chain H1 fetch → H2 day files; budget 50 MB; approved.
+- [x] **WP36. SMARD import.** 15-minute generation per technology and demand
+  per grid area; back-filled for the last 12 months.
+  *Result:* 364 days, 10 MB; nuclear left out (no values since Apr 2023); 6
+  night-time solar spikes cleaned; own daily workflow `hub-daily.yml`.
+- [x] **WP37. DWD import.** Hourly sunshine and wind per weather station;
+  back-filled.
+  *Result:* every day file has hourly radiation (≈65 stations) and wind
+  (≈285 stations); `days/stations.json`; 20 MB for the year.
+- [x] **WP38. Section "Germany in 24 hours".** Date picker, generation stacked
+  against demand with a play head, map of the 4 grid areas.
+  *Result:* date picker (last 12 months), play through the day, generation
+  stacked against demand for Germany or each grid area, key figures.
+- [x] **WP39. Estimated solar map per district** (MaStR capacity × DWD
+  sunshine, scaled to measured output per grid area).
+  *Result:* district solar estimate (MaStR capacity × DWD radiation, scaled
+  to each grid area's measured output).
+- [x] **WP40. Estimated wind map per district.**
+  *Result:* district wind estimate (MaStR capacity × DWD wind, rough power
+  curve, scaled to measured output); renewable-share map of the grid areas.
+- [ ] **WP41. Grid map.** High-voltage lines (OpenStreetMap), cross-border
+  flows, redispatch hotspots for the chosen day. Needs your ENTSO-E key for
+  flows.
+- [ ] **WP42. Optional: estimated line loading** with a power-flow model
+  (several WPs).
+- [x] **WP43. Access for agents:** catalogue page, `llms.txt`, stable links.
+  *Result:* `/llms.txt`, `/catalog.json` (built from the manifest), `/open-data`
+  page with quick-start code; CORS open on `/data/*`.
 
 ## Phase 8: Auctions
 
-- [ ] **WP39. Import award lists** (onshore since 2017), link to MaStR via the
+- [ ] **WP44. Import award lists** (onshore since 2017), link to MaStR via the
   EEG number.
-- [ ] **WP40. Rounds overview:** volumes, competition, published prices.
-- [ ] **WP41. Winners map and time to going online.**
-- [ ] **WP42. Run-up before bid dates.**
-- [ ] **WP43. Optional: energy yield estimate.**
+- [ ] **WP45. Rounds overview:** volumes, competition, published prices.
+- [ ] **WP46. Winners map and time to going online.**
+- [ ] **WP47. Run-up before bid dates.**
+- [ ] **WP48. Optional: energy yield estimate.**
 
 ---
 
@@ -231,3 +264,5 @@ Each becomes its own phase once the explorer is live.
    `web/lib/site.ts`.
 
 9. **Contract v1.3** (31 Oct 2026, approved): monitor files and region areas.
+10. **Contract v1.4** (31 Oct 2026, approved): data hub day files (SMARD,
+    DWD), population, budget 50 MB.

@@ -56,3 +56,34 @@ monitor:
     wind_offshore: 30000
   point_min_kw: 1000        # plants on the animated map
   repowering_age_years: 20  # onshore turbines older than this count as repowering candidates
+
+# Data hub (contract v1.4): SMARD market data, CC BY 4.0,
+# attribution "Bundesnetzagentur | SMARD.de". Values are MWh per quarter hour.
+hub:
+  keep_days: 365
+  smard:
+    base_url: https://www.smard.de/app/chart_data
+    regions: [DE, 50Hertz, Amprion, TenneT, TransnetBW]
+    # Nuclear (1224) left out: no German plant has run since 15 Apr 2023 and
+    # SMARD sends no values.
+    generation:            # our name: SMARD filter id
+      solar: 4068
+      wind_onshore: 4067
+      wind_offshore: 1225
+      biomass: 4066
+      hydro: 1226
+      other_renewable: 1228
+      lignite: 1223
+      hard_coal: 4069
+      gas: 4071
+      pumped_storage: 4070
+      other_conventional: 1227
+    demand: 410            # Netzlast
+    residual_load: 4359
+  # DWD Open Data (CC BY 4.0, attribution "Deutscher Wetterdienst").
+  dwd:
+    base_url: https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate
+    solar_dir: 10_minutes/solar/recent      # global radiation GS_10, J/cm² per 10 min
+    solar_stations: zehn_min_sd_Beschreibung_Stationen.txt
+    wind_dir: hourly/wind/recent            # hourly mean wind speed F, m/s
+    wind_stations: FF_Stundenwerte_Beschreibung_Stationen.txt

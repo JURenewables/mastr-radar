@@ -38,6 +38,17 @@ class MonitorSettings:
 
 
 @dataclass(frozen=True)
+class HubSettings:
+    keep_days: int
+    smard_base_url: str
+    smard_regions: tuple[str, ...]
+    smard_generation: dict[str, int]
+    smard_demand: int
+    smard_residual_load: int
+    dwd: dict[str, str]
+
+
+@dataclass(frozen=True)
 class Settings:
     min_capacity_mw: float
     technologies: tuple[str, ...]
@@ -46,6 +57,7 @@ class Settings:
     download: DownloadSettings
     crosscheck: CrosscheckSettings
     monitor: MonitorSettings
+    hub: HubSettings
 
     @property
     def raw_dir(self) -> Path:
@@ -57,6 +69,7 @@ def load_settings(path: Path = DEFAULT_CONFIG) -> Settings:
     dl = raw["download"]
     cc = raw["crosscheck"]
     mo = raw["monitor"]
+    hub = raw["hub"]
     return Settings(
         min_capacity_mw=float(raw["min_capacity_mw"]),
         technologies=tuple(raw["technologies"]),
@@ -82,5 +95,14 @@ def load_settings(path: Path = DEFAULT_CONFIG) -> Settings:
             targets_2030_mw={k: float(v) for k, v in mo["targets_2030_mw"].items()},
             point_min_kw=float(mo["point_min_kw"]),
             repowering_age_years=int(mo["repowering_age_years"]),
+        ),
+        hub=HubSettings(
+            keep_days=int(hub["keep_days"]),
+            smard_base_url=hub["smard"]["base_url"],
+            smard_regions=tuple(hub["smard"]["regions"]),
+            smard_generation={k: int(v) for k, v in hub["smard"]["generation"].items()},
+            smard_demand=int(hub["smard"]["demand"]),
+            smard_residual_load=int(hub["smard"]["residual_load"]),
+            dwd=dict(hub["dwd"]),
         ),
     )
