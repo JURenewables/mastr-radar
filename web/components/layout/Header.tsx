@@ -17,6 +17,9 @@ export function Header({ asOf, wide = false }: { asOf?: string; wide?: boolean }
             <Link href="/explore" className="hover:text-ink">
               Explore
             </Link>
+            <Link href="/open-data" className="hover:text-ink">
+              Data
+            </Link>
             <Link href="/methodology" className="hover:text-ink">
               Methodology
             </Link>

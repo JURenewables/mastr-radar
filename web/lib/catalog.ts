@@ -1,0 +1,123 @@
+// Data catalogue (WP43): one description of every published dataset, used by
+// /catalog.json (machines), /llms.txt (AI agents) and the /data page (people).
+// Server only: reads the manifest and the hub index at build time.
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
+import type { Manifest } from "./types";
+import { SITE_URL } from "./site";
+
+const DATA = path.join(process.cwd(), "public", "data");
+
+const LICENCES = {
+  mastr: { name: "Datenlizenz Deutschland – Namensnennung – Version 2.0", id: "DL-DE-BY-2.0", url: "https://www.govdata.de/dl-de/by-2-0" },
+  bkg: { name: "Datenlizenz Deutschland – Namensnennung – Version 2.0", id: "DL-DE-BY-2.0", url: "https://www.govdata.de/dl-de/by-2-0" },
+  ccby: { name: "Creative Commons Attribution 4.0", id: "CC-BY-4.0", url: "https://creativecommons.org/licenses/by/4.0/" },
+} as const;
+
+export interface Dataset {
+  id: string;
+  title: string;
+  description: string;
+  format: "parquet" | "json" | "geojson";
+  url: string;
+  rows?: number;
+  bytes?: number;
+  update: string;
+  licence: { name: string; id: string; url: string };
+  attribution: string;
+}
+
+export interface Catalog {
+  name: string;
+  description: string;
+  site: string;
+  contract: string;
+  contract_url: string;
+  as_of: string;
+  generated_at: string;
+  datasets: Dataset[];
+  day_files: { first: string | null; last: string | null; count: number; url_template: string };
+  how_to: Record<string, string>;
+}
+
+async function json<T>(file: string): Promise<T | null> {
+  try {
+    return JSON.parse(await readFile(path.join(DATA, file), "utf8")) as T;
+  } catch {
+    return null;
+  }
+}
+
+const MASTR_ATTR = "© Bundesnetzagentur, DL-DE-BY-2.0, Marktstammdatenregister; processed by MaStR Radar";
+
+const DESCRIPTIONS: Record<string, Omit<Dataset, "id" | "url" | "rows" | "bytes" | "update">> = {
+  "kpis.json": { title: "Headline numbers per technology", description: "Installed, planned and added-this-year capacity (kW) and unit counts per technology.", format: "json", licence: LICENCES.mastr, attribution: MASTR_ATTR },
+  "units.parquet": { title: "Units of 100 kW and more", description: "Every solar, wind, storage, biomass and hydro unit of 100 kW or more: technology, status, capacity, dates, location (where public), operator (companies, from 1 MW).", format: "parquet", licence: LICENCES.mastr, attribution: MASTR_ATTR },
+  "summary.parquet": { title: "Totals for all units", description: "Unit counts and capacity (kW) for all 9.6 million units by technology, status, size class, state, district and commissioning month.", format: "parquet", licence: LICENCES.mastr, attribution: MASTR_ATTR },
+  "boundaries/states.geojson": { title: "State boundaries", description: "Generalised state outlines with key, name and area (km²).", format: "geojson", licence: LICENCES.bkg, attribution: "© GeoBasis-DE / BKG (2026)" },
+  "boundaries/districts.geojson": { title: "District boundaries", description: "Generalised district outlines with key, name and area (km²).", format: "geojson", licence: LICENCES.bkg, attribution: "© GeoBasis-DE / BKG (2026)" },
+  "monitor/buildout.json": { title: "Build-out per year", description: "Installed, added and retired capacity (MW) per year since 1990, nationally and per district, for every technology.", format: "json", licence: LICENCES.mastr, attribution: MASTR_ATTR },
+  "monitor/points.json": { title: "Plants of 1 MW and more", description: "Coordinates, commissioning year, technology and capacity of plants in operation (public locations only), plus planned onshore wind turbines.", format: "json", licence: LICENCES.mastr, attribution: MASTR_ATTR },
+  "monitor/stats.json": { title: "Monitor analyses", description: "2030 targets, year-to-date curves, solar by type, turbine sizes, battery storage, states (with area and population), top districts, repowering.", format: "json", licence: LICENCES.mastr, attribution: `${MASTR_ATTR}; population © GeoBasis-DE / BKG (2026)` },
+};
+
+export async function buildCatalog(): Promise<Catalog> {
+  const manifest = await json<Manifest>("manifest.json");
+  const days = await json<{ first: string | null; last: string | null; dates: string[] }>("days/index.json");
+  const files = manifest?.files ?? [];
+  const datasets: Dataset[] = files
+    .filter((f) => DESCRIPTIONS[f.name])
+    .map((f) => ({
+      id: f.name.replace(/[/.]/g, "-"),
+      url: `${SITE_URL}/data/${f.name}`,
+      rows: f.rows,
+      bytes: f.bytes,
+      update: "daily",
+      ...DESCRIPTIONS[f.name],
+    }));
+  datasets.push(
+    {
+      id: "days-index",
+      title: "Day files: index",
+      description: "List of available day files (last 12 months).",
+      format: "json",
+      url: `${SITE_URL}/data/days/index.json`,
+      update: "daily",
+      licence: LICENCES.ccby,
+      attribution: "Bundesnetzagentur | SMARD.de; Deutscher Wetterdienst",
+    },
+    {
+      id: "days-stations",
+      title: "Weather stations",
+      description: "DWD station ids, coordinates and names used in the day files.",
+      format: "json",
+      url: `${SITE_URL}/data/days/stations.json`,
+      update: "daily",
+      licence: LICENCES.ccby,
+      attribution: "Deutscher Wetterdienst",
+    },
+  );
+  return {
+    name: "MaStR Radar data",
+    description:
+      "Open data on Germany's renewable energy units (Marktstammdatenregister), with quarter-hourly generation and demand (SMARD) and weather (DWD), cleaned, checked and updated daily.",
+    site: SITE_URL,
+    contract: manifest?.contract_version ?? "unknown",
+    contract_url: "https://github.com/JURenewables/mastr-radar/blob/main/docs/contracts.md",
+    as_of: manifest?.as_of ?? "unknown",
+    generated_at: manifest?.generated_at ?? "unknown",
+    datasets,
+    day_files: {
+      first: days?.first ?? null,
+      last: days?.last ?? null,
+      count: days?.dates.length ?? 0,
+      url_template: `${SITE_URL}/data/days/{YYYY-MM-DD}.json`,
+    },
+    how_to: {
+      python: `import pandas as pd\nunits = pd.read_parquet("${SITE_URL}/data/units.parquet")`,
+      duckdb: `SELECT technology, sum(capacity_kw)/1e6 AS gw FROM '${SITE_URL}/data/summary.parquet' WHERE status = 'operating' GROUP BY 1;`,
+      curl: `curl ${SITE_URL}/data/days/${days?.last ?? "2026-10-30"}.json`,
+    },
+  };
+}

@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP41 of 48 · Phase 7 · Waiting for decisions (grid map); doing WP43 meanwhile**
+**You are here: Phase 7 · WP41 grid map waits for your decisions (OSM licence, ENTSO-E key); contract v1.4 awaits approval; preview ready**
 
-Progress: Part 1 done (25 / 25) · Part 2: 15 / 23
+Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -201,7 +201,9 @@ real stress signals (line loading itself is not published).
   flows.
 - [ ] **WP42. Optional: estimated line loading** with a power-flow model
   (several WPs).
-- [ ] **WP43. Access for agents:** catalogue page, `llms.txt`, stable links.
+- [x] **WP43. Access for agents:** catalogue page, `llms.txt`, stable links.
+  *Result:* `/llms.txt`, `/catalog.json` (built from the manifest), `/open-data`
+  page with quick-start code; CORS open on `/data/*`.
 
 ## Phase 8: Auctions
 

@@ -165,6 +165,8 @@ data/                local working dir for downloads (git-ignored)
 - Hub (contract v1.4 draft): `uv run mastr-radar hub-fetch` (SMARD, cached in
   `data/hub/`), `uv run mastr-radar hub-build` (day files in
   `web/public/data/days/`, then checked). Sources and licences: `docs/sources.md`.
+- Open data: `/open-data` (people), `/catalog.json` and `/llms.txt` (machines,
+  built from the manifest in `web/lib/catalog.ts`); CORS open on `/data/*`.
 - Web: `cd web && npm run dev` (local), `npm run lint`, `npm run build`.
   Next.js 16: read `web/node_modules/next/dist/docs/` before using unfamiliar APIs.
   Live: https://mastr-radar.vercel.app (from `main`); branches get preview links.
