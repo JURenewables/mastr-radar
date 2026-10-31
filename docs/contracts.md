@@ -1,4 +1,4 @@
-# Station contracts — v1.2 (locked) + v1.3 draft (awaiting approval)
+# Station contracts — v1.3 (locked)
 
 These contracts define exactly what each station of the data chain outputs.
 They are **locked**: changing one is its own work package,
@@ -240,7 +240,7 @@ The website must always:
 
 ---
 
-## v1.3 draft: monitor files (awaiting approval)
+## v1.3: monitor files (approved 31 Oct 2026)
 
 Additive only: nothing above changes. Station 3 also writes three compact JSON
 files for the scrolling monitor page, so phones don't need the in-browser
@@ -276,4 +276,4 @@ to ~2 % above the headline "in operation" figure (biomass).
 | 1 | 2026-10-30 | First version, approved and locked |
 | 1.1 | 2026-10-30 | After WP4 data check: own reader instead of open-mastr (D11); station 1 writes the export zip; offshore regions from `Seelage`, all offshore units included (D8); storage includes pumped hydro, new `storage_technology` column (D9); `incomplete_after` per technology (D10); confirmed source names and plausible row counts |
 | 1.2 | 2026-10-31 | Data quality rules D12 (storage capacity split per plant, plausibility limits, impossible dates); operator names on the website only from 1 MW (D13). Approved by the user. |
-| 1.3 (draft) | 2026-10-31 | Monitor files `monitor/buildout.json`, `points.json`, `stats.json`; boundaries `area_km2`; series definition D14. Awaiting approval. |
+| 1.3 | 2026-10-31 | Monitor files `monitor/buildout.json`, `points.json`, `stats.json`; boundaries `area_km2`; series definition D14. Approved by the user. |

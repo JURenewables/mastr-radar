@@ -1,4 +1,4 @@
-"""Station 3, monitor files (contract v1.3 draft).
+"""Station 3, monitor files (contract v1.3).
 
 Three compact JSON files for the scrolling monitor page, so phones never need
 the in-browser database:
@@ -47,7 +47,7 @@ STORAGE_BUCKETS = [("home", 0, 30), ("commercial", 30, 1000), ("large", 1000, fl
 
 
 class MonitorCheckError(RuntimeError):
-    """The monitor files do not meet the station 3 contract (v1.3 draft)."""
+    """The monitor files do not meet the station 3 contract (v1.3)."""
 
 
 def _mw(kw) -> int:

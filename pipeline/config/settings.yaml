@@ -46,7 +46,7 @@ crosscheck:
     solar: Solar DC
     biomass: Biomass
 
-# Station 3 monitor files (contract v1.3 draft).
+# Station 3 monitor files (contract v1.3).
 monitor:
   first_year: 1990
   # Legal 2030 targets in MW: EEG 2023 §4 (solar, onshore wind) and WindSeeG §1 (offshore).

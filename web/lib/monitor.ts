@@ -1,6 +1,6 @@
 "use client";
 
-// Monitor files (contract v1.3 draft, station 3). Fetched once per page.
+// Monitor files (contract v1.3, station 3). Fetched once per page.
 import { useEffect, useState } from "react";
 
 import type { Technology } from "./types";
