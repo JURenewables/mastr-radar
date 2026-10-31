@@ -45,6 +45,11 @@ def built(tmp_path):
         unit("E", tech="wind_offshore", kw=8000, cod=date(2026, 8, 1)),
     ]
     # 60 onshore units commissioned a year ago, 90% registered within 20 days.
+    named = unit("N", kw=500)  # company-owned but below 1 MW
+    named["operator_name"] = "Small Solar GmbH"
+    big_named = unit("M", kw=1500)
+    big_named["operator_name"] = "Big Wind GmbH"
+    rows += [named, big_named]
     rows += [
         unit(f"L{i}", kw=1, cod=date(2025, 10, 1), lag=(20 if i < 54 else 100)) for i in range(60)
     ]
@@ -58,8 +63,8 @@ def test_kpis(built):
     _, out, _ = built
     kpis = {k["technology"]: k for k in json.loads((out / "kpis.json").read_text())}
     on = kpis["wind_onshore"]
-    assert on["installed_capacity_kw"] == 3000 + 2000 + 60
-    assert on["installed_units"] == 62
+    assert on["installed_capacity_kw"] == 3000 + 2000 + 500 + 1500 + 60
+    assert on["installed_units"] == 64
     assert on["planned_capacity_kw"] == 5000
     assert on["added_capacity_kw_ytd"] == 2000
     assert kpis["wind_offshore"]["added_capacity_kw_ytd"] == 8000
@@ -69,9 +74,16 @@ def test_manifest(built):
     _, out, manifest = built
     assert manifest["contract_version"] == "1.1"
     assert manifest["as_of"] == "2026-10-30"
-    assert manifest["files"] == [
-        {"name": "kpis.json", "rows": 2, "bytes": (out / "kpis.json").stat().st_size}
-    ]
+    files = {f["name"]: f for f in manifest["files"]}
+    assert set(files) == {
+        "kpis.json",
+        "units.parquet",
+        "summary.parquet",
+        "boundaries/states.geojson",
+        "boundaries/districts.geojson",
+    }
+    assert files["kpis.json"]["rows"] == 2
+    assert files["boundaries/states.geojson"]["rows"] == 16
 
 
 def test_incomplete_after_per_technology(built):
@@ -109,3 +121,34 @@ def test_check_catches_wrong_contract_version(built):
         ag.check_explorer_files(out, units)
     assert "contract_version" in str(err.value)
     assert "missing ['pipeline_version']" in str(err.value)
+
+
+def test_web_units(built):
+    _, out, _ = built
+    web = {r["unit_id"]: r for r in pq.read_table(out / "units.parquet").to_pylist()}
+    assert "L0" not in web  # 1 kW: only in the summary
+    assert set(web) == {"A", "B", "C", "D", "E", "N", "M"}
+    assert web["N"]["operator_name"] is None  # below 1 MW: no operator name
+    assert web["M"]["operator_name"] == "Big Wind GmbH"
+    assert "eeg_id" not in web["A"] and "postcode" not in web["A"]
+
+
+def test_summary_covers_all_units(built):
+    _, out, _ = built
+    s = pq.read_table(out / "summary.parquet").to_pylist()
+    onshore = [r for r in s if r["technology"] == "wind_onshore"]
+    assert sum(r["unit_count"] for r in onshore) == 66
+    assert sum(r["capacity_kw"] for r in onshore) == 3000 + 2000 + 5000 + 600 + 500 + 1500 + 60
+    planned = [r for r in onshore if r["status"] == "planned"]
+    assert planned[0]["commissioning_month"] is None
+    months = {r["commissioning_month"] for r in onshore}
+    assert "2026-03" in months and "2025-10" in months
+
+
+def test_check_catches_tampered_summary(built):
+    units, out, _ = built
+    s = pq.read_table(out / "summary.parquet")
+    pq.write_table(s.slice(1), out / "summary.parquet")
+    with pytest.raises(ag.ExplorerCheckError) as err:
+        ag.check_explorer_files(out, units)
+    assert "totals for" in str(err.value)

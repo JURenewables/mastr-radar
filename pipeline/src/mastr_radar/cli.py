@@ -99,7 +99,7 @@ def _check_and_write_meta(path: Path, source_url, result, *, verify_crc: bool) -
 @app.command()
 def extract(
     zip_path: Path = typer.Argument(None, help="Export zip. Default: newest in data/raw."),
-    source: list[str] = typer.Option(["wind"], help="Source types to extract (WP6: wind)."),
+    source: list[str] = typer.Option(None, help="Source types to extract. Default: all."),
 ) -> None:
     """Station 2: read the export zip into units.parquet and check it."""
     import pyarrow.parquet as pq
@@ -119,6 +119,7 @@ def extract(
     previous = ex.read_previous_rows(report_path)
 
     cfg = ex.load_columns_config()
+    source = source or list(cfg["sources"])
     report = ex.extract(zip_path, out, export_date=export_date, sources=tuple(source), cfg=cfg)
     min_rows = {src: cfg["sources"][src]["min_rows"] for src in source}
     try:
@@ -149,7 +150,7 @@ def aggregate() -> None:
     if not units.exists():
         typer.echo("No units.parquet. Run `mastr-radar extract` first.", err=True)
         raise typer.Exit(code=1)
-    manifest = ag.build(units, s.output_dir)
+    manifest = ag.build(units, s.output_dir, operator_name_min_kw=s.min_capacity_mw * 1000)
     try:
         ag.check_explorer_files(s.output_dir, units)
     except ag.ExplorerCheckError as exc:
