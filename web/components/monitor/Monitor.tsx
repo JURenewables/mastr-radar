@@ -3,6 +3,7 @@
 import { useMonitorData, mw } from "@/lib/monitor";
 import { formatDate } from "@/lib/format";
 
+import { Day24 } from "./Day24";
 import { LightUpMap } from "./LightUpMap";
 import {
   PipelineMap,
@@ -18,6 +19,7 @@ import { Loading, Section } from "./ui";
 
 export const SECTIONS = [
   ["light-up", "Germany lights up"],
+  ["day", "24 hours"],
   ["targets", "Race to 2030"],
   ["this-year", "This year"],
   ["balcony", "Balcony boom"],
@@ -78,6 +80,17 @@ export function Monitor({ asOf }: { asOf: string }) {
         asOf={date}
       >
         {data ? <LightUpMap data={data} /> : <Loading height={520} />}
+      </Section>
+
+      <Section
+        id="day"
+        eyebrow="Any day of the last 12 months"
+        title="Germany in 24 hours"
+        subtitle="Pick a day and press play: how solar, wind and every other source met demand, quarter hour by quarter hour, and where the sun and wind were working."
+        note="Generation and demand: Bundesnetzagentur | SMARD.de. Weather: Deutscher Wetterdienst. District maps are estimates."
+        asOf={date}
+      >
+        {data ? <Day24 data={data} asOf={asOf} /> : <Loading height={520} />}
       </Section>
 
       <Section

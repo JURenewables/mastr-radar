@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP38 of 48 · Phase 7 · Section "Germany in 24 hours"**
+**You are here: WP41 of 48 · Phase 7 · Waiting for decisions (grid map); doing WP43 meanwhile**
 
-Progress: Part 1 done (25 / 25) · Part 2: 12 / 23
+Progress: Part 1 done (25 / 25) · Part 2: 15 / 23
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -185,11 +185,17 @@ real stress signals (line loading itself is not published).
   back-filled.
   *Result:* every day file has hourly radiation (≈65 stations) and wind
   (≈285 stations); `days/stations.json`; 20 MB for the year.
-- [ ] **WP38. Section "Germany in 24 hours".** Date picker, generation stacked
+- [x] **WP38. Section "Germany in 24 hours".** Date picker, generation stacked
   against demand with a play head, map of the 4 grid areas.
-- [ ] **WP39. Estimated solar map per district** (MaStR capacity × DWD
+  *Result:* date picker (last 12 months), play through the day, generation
+  stacked against demand for Germany or each grid area, key figures.
+- [x] **WP39. Estimated solar map per district** (MaStR capacity × DWD
   sunshine, scaled to measured output per grid area).
-- [ ] **WP40. Estimated wind map per district.**
+  *Result:* district solar estimate (MaStR capacity × DWD radiation, scaled
+  to each grid area's measured output).
+- [x] **WP40. Estimated wind map per district.**
+  *Result:* district wind estimate (MaStR capacity × DWD wind, rough power
+  curve, scaled to measured output); renewable-share map of the grid areas.
 - [ ] **WP41. Grid map.** High-voltage lines (OpenStreetMap), cross-border
   flows, redispatch hotspots for the chosen day. Needs your ENTSO-E key for
   flows.

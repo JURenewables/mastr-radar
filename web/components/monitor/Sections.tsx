@@ -589,10 +589,10 @@ export function PipelineMap({ data }: { data: MonitorData }) {
     .slice(0, 8);
   return (
     <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
-      <div className="overflow-hidden rounded-[20px] border border-rule">
+      <div className="min-w-0 overflow-hidden rounded-[20px] border border-rule">
         <canvas ref={ref} role="img" aria-label="Map of planned onshore wind turbines (blue) and turbines in operation (grey)" className="block w-full" />
       </div>
-      <div>
+      <div className="min-w-0">
         <p className="text-sm text-ink-muted">
           <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-accent align-middle" /> planned turbines ·{" "}
           <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-ink-muted align-middle opacity-50" /> in operation
