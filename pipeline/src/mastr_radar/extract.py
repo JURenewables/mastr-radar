@@ -475,6 +475,18 @@ def check_units(
     if lo and lo < MIN_DATE:
         problems.append("planned_commissioning_date before 1890.")
 
+    # D12: impossible commissioning dates must be gone.
+    for tech, storage_type, earliest in [
+        ("solar", None, date(1983, 1, 1)),
+        ("storage", "battery", date(2000, 1, 1)),
+    ]:
+        mask = pc.equal(table["technology"], tech)
+        if storage_type:
+            mask = pc.and_(mask, pc.equal(table["storage_technology"], storage_type))
+        early = pc.less(table["commissioning_date"], pa.scalar(earliest, pa.date32()))
+        if pc.sum(pc.fill_null(pc.and_(mask, early), False)).as_py():
+            problems.append(f"{tech}: commissioning dates before {earliest} remain (D12).")
+
     lat, lon = table["lat"], table["lon"]
     if lat.null_count < table.num_rows:
         if pc.min(lat).as_py() < LAT_RANGE[0] or pc.max(lat).as_py() > LAT_RANGE[1]:

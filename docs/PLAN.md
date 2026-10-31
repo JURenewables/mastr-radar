@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP25 of 25 · Waiting for your decisions: custom domain, contract v1.2 wording, merge to `main`**
+**You are here: WP9 final check: first daily run on `main` after the merge. Then all 25 done.**
 
-Progress: ███████████████████████░░ 23 / 25
+Progress: ████████████████████████░ 24 / 25
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -112,9 +112,9 @@ building anything wide. That way every problem in the chain shows up early.
   readers. Follow-up: speed check on a real phone.
 - [x] **WP24. Sharing.** Link previews, shareable views.
   *Result:* link preview image with headline numbers, sitemap, robots.
-- [ ] **WP25. Launch checks.** Domain, warning banner if data is older than
+- [x] **WP25. Launch checks.** Domain, warning banner if data is older than
   48 h, contributor README.
-  *Status:* banner and README done. Open: custom domain (your decision).
+  *Status:* banner and README done; free domain kept (decision 8).
 
 🏁 **Milestone: public MaStR exploration suite.**
 
@@ -161,3 +161,9 @@ Each becomes its own phase once the explorer is live.
 6. **Contract v1.1** (after WP4): own reader instead of open-mastr; offshore
    regions from MaStR's `Seelage`; storage includes pumped hydro;
    "possibly incomplete" per technology.
+7. **Contract v1.2** (31 Oct 2026, approved): data quality rules (storage
+   capacity split per plant, plausibility limits, impossible dates);
+   operator names on the website only from 1 MW.
+8. **Domain:** keep the free https://mastr-radar.vercel.app for now. To change
+   later: add the domain in Vercel (Settings → Domains) and update
+   `web/lib/site.ts`.

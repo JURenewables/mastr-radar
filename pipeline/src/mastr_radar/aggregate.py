@@ -1,4 +1,4 @@
-"""Station 3: build the explorer files the website reads (contract v1.1).
+"""Station 3: build the explorer files the website reads (contract v1.2).
 
 manifest.json, kpis.json, units.parquet (units >= 100 kW), summary.parquet
 (totals for all units) and the state/district boundaries.
@@ -20,7 +20,7 @@ from mastr_radar import __version__
 from mastr_radar.config import PIPELINE_ROOT
 from mastr_radar.extract import ENUMS, UNITS_SCHEMA, export_date_of
 
-CONTRACT_VERSION = "1.1"
+CONTRACT_VERSION = "1.2"
 MAX_TOTAL_BYTES = 25 * 1024 * 1024
 MAP_POINT_MIN_KW = 100.0  # D5: units from 100 kW are individual points
 DEFAULT_OPERATOR_NAME_MIN_KW = 1000.0  # operator names only from 1 MW (settings)

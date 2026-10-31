@@ -311,3 +311,11 @@ def test_quality_rules(full):
     assert rows["SEE_S3"]["commissioning_date"] is None  # solar before 1983
     assert rows["SEE_S1"]["commissioning_date"] == date(2017, 9, 1)
     assert report.implausible_commissioning == 2
+
+
+def test_check_catches_impossible_dates(full):
+    table = full[0]
+    idx = table.schema.get_field_index("commissioning_date")
+    bad = table.set_column(idx, "commissioning_date", pa.array([date(1970, 1, 1)] * table.num_rows))
+    with pytest.raises(ex.UnitsCheckError, match=r"solar: commissioning dates before 1983-01-01"):
+        ex.check_units(bad, export_date=EXPORT_DATE, min_rows={})

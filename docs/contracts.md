@@ -1,4 +1,4 @@
-# Station contracts — v1.1 (locked)
+# Station contracts — v1.2 (locked)
 
 These contracts define exactly what each station of the data chain outputs.
 They are **locked**: changing one is its own work package,
@@ -30,6 +30,8 @@ Source column names (German) were confirmed against the real export of
 | D8 | Offshore wind | **All** offshore wind units go to one of two extra regions, using MaStR's own sea field (`Seelage`): **Nordsee (offshore)** (`state_key` = `OFF_N`) or **Ostsee (offshore)** (`OFF_O`). Their `district_key` is the same value. This includes the 96 coastal-water turbines MaStR lists under Niedersachsen or Mecklenburg-Vorpommern; none of them has a municipality. |
 | D9 | Technologies | Onshore wind, offshore wind, solar, storage, biomass, hydro. **Storage covers all electricity storage**: batteries, pumped hydro and other types, told apart by `storage_technology`. (Phase 2 only builds onshore wind.) |
 | D10 | "Possibly incomplete" | Set **per technology**, because registration delays differ a lot (90% of wind within 3 weeks, storage about 4.5 months). |
+| D12 | Data quality rules (v1.2) | Storage capacity is recorded per storage **plant** and split evenly over the plant's linked units. Storage capacity above 24 h per kW (pumped hydro: 100 h) is emptied. Impossible commissioning dates are emptied: solar before 1983, batteries before 2000. Every rule is counted in `extract_report.json`. |
+| D13 | Operator names on the website (v1.2) | In the website's `units.parquet`, `operator_name` is shown only for units of 1 MW or more (and never for natural persons, D4). |
 | D11 | How the export is read | **Our own reader**, not open-mastr. Station 1 downloads the export zip with resume and retry; station 2 reads the XML files from the zip directly. (open-mastr 1.0.0 failed on all solar files in WP4.) |
 
 ---
@@ -130,7 +132,7 @@ the decoded fields.
 | `wind_park` | string | wind | `NameWindpark` |
 | `solar_type` | enum: `ground_mounted`, `rooftop`, `balcony`, `other` | solar | `ArtDerSolaranlage` (Freifläche / Gebäude / Steckerfertig / Sonstige) |
 | `storage_technology` | enum: `battery`, `pumped_hydro`, `other` | storage | `Technologie` |
-| `storage_capacity_kwh` | float | storage | `AnlagenStromSpeicher.NutzbareSpeicherkapazitaet`, linked via `SpeMastrNummer` |
+| `storage_capacity_kwh` | float | storage | the unit's share of its plant's usable capacity: `AnlagenStromSpeicher.NutzbareSpeicherkapazitaet` (linked via `SpeMastrNummer`) divided by the number of units in `VerknuepfteEinheitenMaStRNummern`; emptied if implausible (D12) |
 | `battery_technology` | string | storage | `Batterietechnologie` |
 | `fuel` | string | biomass | `Hauptbrennstoff` |
 | `hydro_type` | string | hydro | `ArtDerWasserkraftanlage` |
@@ -148,6 +150,8 @@ the decoded fields.
   Anything outside is set to null and counted.
 - **Privacy:** if `operator_is_person` is true, then `name`, `operator_name`,
   `lat` and `lon` are null. No exceptions.
+- Data quality rules D12 are applied before the check; the check verifies
+  that no impossible commissioning date remains.
 - Row count per technology changes by less than 5% from the previous run
   (warning, not failure).
 
@@ -171,7 +175,7 @@ the decoded fields.
 
 | Field | Meaning |
 |---|---|
-| `contract_version` | `"1.1"` |
+| `contract_version` | `"1.2"` |
 | `as_of` | export date of the MaStR data (`YYYY-MM-DD`) |
 | `generated_at` | when the pipeline ran (UTC timestamp) |
 | `pipeline_version` | version of the pipeline code |
@@ -193,7 +197,8 @@ One entry per technology:
 ### `units.parquet` (units ≥ 100 kW)
 
 The same columns as station 2, **minus** `eeg_id`, `postcode` and
-`last_updated` (the site doesn't need them).
+`last_updated` (the site doesn't need them). `operator_name` is empty for
+units below 1 MW (D13).
 
 ### `summary.parquet` (all units)
 
@@ -241,3 +246,4 @@ The website must always:
 |---|---|---|
 | 1 | 2026-10-30 | First version, approved and locked |
 | 1.1 | 2026-10-30 | After WP4 data check: own reader instead of open-mastr (D11); station 1 writes the export zip; offshore regions from `Seelage`, all offshore units included (D8); storage includes pumped hydro, new `storage_technology` column (D9); `incomplete_after` per technology (D10); confirmed source names and plausible row counts |
+| 1.2 | 2026-10-31 | Data quality rules D12 (storage capacity split per plant, plausibility limits, impossible dates); operator names on the website only from 1 MW (D13). Approved by the user. |
