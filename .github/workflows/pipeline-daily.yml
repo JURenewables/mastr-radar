@@ -42,6 +42,10 @@ jobs:
         working-directory: pipeline
         run: uv run mastr-radar extract
 
+      - name: "Auctions: fetch BNetzA onshore round pages and award lists"
+        working-directory: pipeline
+        run: uv run mastr-radar auctions-fetch
+
       - name: "Station 3: build explorer files, check, cross-check"
         working-directory: pipeline
         run: uv run mastr-radar aggregate
