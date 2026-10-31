@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP8 of 25 · Phase 2 · Next: station 4, website shell on Vercel**
+**You are here: WP9 of 25 · Phase 2 · Next: daily automation (GitHub Action). First: merge the branch into `main` so the site goes public.**
 
-Progress: ███████░░░░░░░░░░░░░░░░░░ 7 / 25
+Progress: ████████░░░░░░░░░░░░░░░░░ 8 / 25
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -50,9 +50,12 @@ building anything wide. That way every problem in the chain shows up early.
   *Done when:* files are generated and checked.
   *Result:* as of 30 Oct 2026: onshore 71.5 GW installed, +4.2 GW in 2026,
   54 GW planned; offshore 11.6 GW, +1.9 GW. Check passed.
-- [ ] **WP8. Station 4: Website shell.** Next.js + Tailwind on Vercel showing
+- [x] **WP8. Station 4: Website shell.** Next.js + Tailwind on Vercel showing
   that number, the as-of date and the licence footer.
   *Done when:* a public Vercel URL shows the correct number.
+  *Result:* built and deployed as a Vercel preview of our branch (behind
+  Vercel login, the default for previews); shows 71.5 GW, as-of date and
+  footer. The public URL shows it once the branch is merged into `main`.
 - [ ] **WP9. Daily automation.** GitHub Action runs stations 1–3 each morning
   and commits new files; Vercel redeploys.
   *Done when:* a manual run succeeds and the site updates by itself.
