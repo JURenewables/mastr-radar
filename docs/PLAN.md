@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP9 final check: first daily run on `main` after the merge. Then all 25 done.**
+**You are here: v1 is live at https://mastr-radar.vercel.app and updates daily. All 25 WPs done. Next: pick a parked option (see "Later options").**
 
-Progress: ████████████████████████░ 24 / 25
+Progress: █████████████████████████ 25 / 25
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -56,11 +56,12 @@ building anything wide. That way every problem in the chain shows up early.
   *Result:* built and deployed as a Vercel preview of our branch (behind
   Vercel login, the default for previews); shows 71.5 GW, as-of date and
   footer. The public URL shows it once the branch is merged into `main`.
-- [ ] **WP9. Daily automation.** GitHub Action runs stations 1–3 each morning
+- [x] **WP9. Daily automation.** GitHub Action runs stations 1–3 each morning
   and commits new files; Vercel redeploys.
   *Done when:* a manual run succeeds and the site updates by itself.
-  *Result:* all three stations ran on GitHub (download 45 min); the first
-  test's commit step clashed with a parallel push, a fresh test run follows.
+  *Result:* first run on `main` (31 Oct 2026) succeeded end to end: download
+  70 min, extract 9 min, checks passed, data committed, Vercel deployed; the
+  live site showed data as of 31 Oct 2026 by itself.
 
 🏁 **Milestone: a live public site with one correct number that updates daily.**
 
