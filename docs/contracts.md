@@ -1,4 +1,4 @@
-# Station contracts — v1.2 (locked)
+# Station contracts — v1.2 (locked) + v1.3 draft (awaiting approval)
 
 These contracts define exactly what each station of the data chain outputs.
 They are **locked**: changing one is its own work package,
@@ -240,6 +240,35 @@ The website must always:
 
 ---
 
+## v1.3 draft: monitor files (awaiting approval)
+
+Additive only: nothing above changes. Station 3 also writes three compact JSON
+files for the scrolling monitor page, so phones don't need the in-browser
+database. `manifest.json` lists them and `contract_version` becomes `"1.3"`.
+Values are MW, rounded, unless named otherwise. Boundaries gain an
+`area_km2` property (equal-area projection, from the unsimplified outline).
+
+**Series units (D14):** yearly series use every unit that is not planned,
+except permanently shut-down units without a shutdown date (retirement year
+unknown). "Installed at the end of year Y" = commissioned in or before Y and
+not shut down by Y; it includes temporarily shut-down units, so it can be up
+to ~2 % above the headline "in operation" figure (biomass).
+
+| File | Content |
+|---|---|
+| `monitor/buildout.json` | `years` (first_year…as-of year), `techs`; `national[tech]` with `added`, `retired`, `installed`, `units_added` per year; `district[tech][district_key]` = installed per year (offshore under `OFF_N`/`OFF_O`) |
+| `monitor/points.json` | `operating`: flat integer array, 5 per plant: lon×100, lat×100, commissioning year − first_year, technology index (in `techs`), MW. Only plants in operation, ≥ 1 MW, with public coordinates (never natural persons, D4). `planned_onshore`: 3 per turbine: lon×100, lat×100, MW |
+| `monitor/stats.json` | `installed_mw`, `targets_2030_mw` (EEG 2023 §4, WindSeeG §1), `ytd_cumulative_mw[tech][year]` (cumulative by month, as-of year and the 3 before), `solar_by_type` (MW and units per year by type), `onshore_turbines` (count, average MW, hub height and rotor diameter per year), `battery_storage` (MW, MWh, units per year: home < 30 kW, commercial 30 kW–1 MW, large ≥ 1 MW), `states` (operating and planned MW per technology, area), `top_districts` (top 10 by MW per km² per technology), `repowering` (onshore turbines in operation older than 20 years), `planned_mw` |
+
+**Check:**
+- all three files present, listed in the manifest with correct sizes;
+- series complete for every technology and year, no negative additions;
+- installed at the end of the series within 3 % of `kpis.json` per technology;
+- point arrays well-formed, coordinates inside Germany and its seas;
+- `stats.json` has every key above and the right `as_of`.
+
+---
+
 ## Version history
 
 | Version | Date | Change |
@@ -247,3 +276,4 @@ The website must always:
 | 1 | 2026-10-30 | First version, approved and locked |
 | 1.1 | 2026-10-30 | After WP4 data check: own reader instead of open-mastr (D11); station 1 writes the export zip; offshore regions from `Seelage`, all offshore units included (D8); storage includes pumped hydro, new `storage_technology` column (D9); `incomplete_after` per technology (D10); confirmed source names and plausible row counts |
 | 1.2 | 2026-10-31 | Data quality rules D12 (storage capacity split per plant, plausibility limits, impossible dates); operator names on the website only from 1 MW (D13). Approved by the user. |
+| 1.3 (draft) | 2026-10-31 | Monitor files `monitor/buildout.json`, `points.json`, `stats.json`; boundaries `area_km2`; series definition D14. Awaiting approval. |

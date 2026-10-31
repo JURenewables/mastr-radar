@@ -30,6 +30,14 @@ class CrosscheckSettings:
 
 
 @dataclass(frozen=True)
+class MonitorSettings:
+    first_year: int
+    targets_2030_mw: dict[str, float]
+    point_min_kw: float
+    repowering_age_years: int
+
+
+@dataclass(frozen=True)
 class Settings:
     min_capacity_mw: float
     technologies: tuple[str, ...]
@@ -37,6 +45,7 @@ class Settings:
     output_dir: Path
     download: DownloadSettings
     crosscheck: CrosscheckSettings
+    monitor: MonitorSettings
 
     @property
     def raw_dir(self) -> Path:
@@ -47,6 +56,7 @@ def load_settings(path: Path = DEFAULT_CONFIG) -> Settings:
     raw = yaml.safe_load(path.read_text())
     dl = raw["download"]
     cc = raw["crosscheck"]
+    mo = raw["monitor"]
     return Settings(
         min_capacity_mw=float(raw["min_capacity_mw"]),
         technologies=tuple(raw["technologies"]),
@@ -66,5 +76,11 @@ def load_settings(path: Path = DEFAULT_CONFIG) -> Settings:
             timeout_seconds=float(cc["timeout_seconds"]),
             tolerance_pct=float(cc["tolerance_pct"]),
             series=dict(cc["series"]),
+        ),
+        monitor=MonitorSettings(
+            first_year=int(mo["first_year"]),
+            targets_2030_mw={k: float(v) for k, v in mo["targets_2030_mw"].items()},
+            point_min_kw=float(mo["point_min_kw"]),
+            repowering_age_years=int(mo["repowering_age_years"]),
         ),
     )

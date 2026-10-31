@@ -20,7 +20,7 @@ from mastr_radar import __version__
 from mastr_radar.config import PIPELINE_ROOT
 from mastr_radar.extract import ENUMS, UNITS_SCHEMA, export_date_of
 
-CONTRACT_VERSION = "1.2"
+CONTRACT_VERSION = "1.3"
 MAX_TOTAL_BYTES = 25 * 1024 * 1024
 MAP_POINT_MIN_KW = 100.0  # D5: units from 100 kW are individual points
 DEFAULT_OPERATOR_NAME_MIN_KW = 1000.0  # operator names only from 1 MW (settings)
@@ -157,6 +157,7 @@ def build(
     *,
     boundaries_dir: Path = BOUNDARIES_DIR,
     operator_name_min_kw: float = DEFAULT_OPERATOR_NAME_MIN_KW,
+    monitor_settings=None,
 ) -> dict:
     """Write all explorer files and manifest.json; return the manifest."""
     units = pq.read_table(units_path)
@@ -181,6 +182,11 @@ def build(
         shutil.copyfile(boundaries_dir / name, out_dir / "boundaries" / name)
         n = len(json.loads((out_dir / "boundaries" / name).read_text())["features"])
         files.append(_file_entry(out_dir, f"boundaries/{name}", n))
+
+    if monitor_settings is not None:
+        from mastr_radar import monitor
+
+        files += monitor.build(units_path, out_dir, as_of, monitor_settings, boundaries_dir)
 
     manifest = {
         "contract_version": CONTRACT_VERSION,
@@ -243,6 +249,14 @@ def check_explorer_files(out_dir: Path, units_path: Path) -> None:
     expected_files = {"kpis.json", "units.parquet", "summary.parquet"} | {
         f"boundaries/{n}" for n in BOUNDARY_FILES
     }
+    if (out_dir / "monitor").exists():
+        from mastr_radar import monitor
+
+        expected_files |= {f"monitor/{n}" for n in ("buildout.json", "points.json", "stats.json")}
+        try:
+            monitor.check(out_dir, kpis, as_of)
+        except monitor.MonitorCheckError as exc:
+            problems.append(str(exc))
     if missing := expected_files - set(listed):
         problems.append(f"manifest: missing files {sorted(missing)}.")
     for name in ("units.parquet", "summary.parquet"):
