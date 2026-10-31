@@ -1,7 +1,8 @@
-// Explorer file types, mirroring docs/contracts.md (v1.4), station 3.
+// Explorer file types, mirroring docs/contracts.md (v1.5), station 3.
 // If the contract changes, update these types in the same commit.
 
-export const SUPPORTED_CONTRACTS = ["1.4"] as const;
+// 1.5 only adds files, so 1.4 files still load (e.g. day files until the next hub run).
+export const SUPPORTED_CONTRACTS = ["1.4", "1.5"] as const;
 
 export type Technology =
   | "wind_onshore"

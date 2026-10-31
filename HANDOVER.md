@@ -19,7 +19,7 @@ Sources and licences: `docs/sources.md`.
   24 hours", open data (`/open-data`, `/catalog.json`, `/llms.txt`).
 - Daily hub run on `main` after the last merge: succeeded.
 
-**On the branch only (needs contract v1.5 approval to go live)**
+**Contract v1.5 (approved 31 Oct 2026, going live with this merge)**
 - WP49–51 turbine makers: `wind_industry` in `monitor/stats.json`, a bar
   chart race (fleet or yearly additions), market share since 2000, most-built
   models since 2024 with hub height and rotor, sizes per maker.
@@ -42,11 +42,10 @@ Sources and licences: `docs/sources.md`.
   replacements `assert` that the old text exists, or use the Edit tool.
 - **The style issue:** ruff flagged formatting and long lines, and a totals
   helper was simplified. `ruff check` and `ruff format --check` now pass.
-- **Not finished:** contract v1.5 is drafted, not approved, so
-  `contract_version` stays `"1.4"` on the branch.
-- **Unknown:** the result of the MaStR daily run on `main` triggered after
-  the last merge (run 41224736476). It was still running when the watcher
-  stopped.
+- **Resolved:** contract v1.5 approved and locked; `contract_version` is
+  `"1.5"`. The website accepts 1.4 and 1.5 files (1.5 only adds files).
+- **Resolved:** the MaStR daily run on `main` after the last merge
+  succeeded (data as of 31 Oct 2026).
 
 ## Key decisions and why
 
@@ -106,25 +105,19 @@ Sources and licences: `docs/sources.md`.
 
 ## Open decisions (yours)
 
-1. **Approve contract v1.5** (turbine makers and auctions), then merge and go
-   live.
-2. **OpenStreetMap ODbL** for the WP41 grid map. Recommendation: accept.
-3. **Store the API keys in GitHub Secrets:** `ENTSOE_TOKEN`,
+1. **OpenStreetMap ODbL** for the WP41 grid map. Recommendation: accept.
+2. **Store the API keys in GitHub Secrets:** `ENTSOE_TOKEN`,
    `NETZTRANSPARENZ_CLIENT_ID` and `NETZTRANSPARENZ_CLIENT_SECRET`. Rotate the
    netztransparenz secret that was pasted in chat.
-4. **Better auction attribution (WP45b):** decide whether we maintain a
+3. **Better auction attribution (WP45b):** decide whether we maintain a
    reviewed list mapping project companies to parent groups.
 
 ## Next steps
 
-1. Check the MaStR daily run on `main` (run 41224736476). If it failed, read
-   the opened issue.
-2. After v1.5 approval:
-   - bump `CONTRACT_VERSION` and `SUPPORTED_CONTRACTS` to 1.5;
-   - resolve conflicts in the data files (bug 6);
-   - open the PR, merge, then trigger the daily run.
-3. WP45b: shrink "not attributed". Map project companies to parent groups
+1. Check that the daily MaStR and hub runs after the v1.5 merge succeeded
+   (they rewrite all files with contract 1.5 and the newest data).
+2. WP45b: shrink "not attributed". Map project companies to parent groups
    via MaStR operator data or a reviewed list, and add the 2017–2024 rounds.
-4. WP41 grid map, once the OSM decision and the API keys are in place.
-5. When a new auction round is published (Nov 2026: awards expected
+3. WP41 grid map, once the OSM decision and the API keys are in place.
+4. When a new auction round is published (Nov 2026: awards expected
    Jan 2027), add its id to `settings.yaml → auctions.onshore_rounds`.

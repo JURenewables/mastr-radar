@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: Phase 8 on the branch preview (turbine makers WP49–51, auctions WP44–45), waiting for your approval of contract v1.5. Phase 7 live except WP41 (grid map: waits for OSM licence OK and your ENTSO-E / netztransparenz accounts)**
+**You are here: Phase 8 live (turbine makers WP49–51, auctions WP44–45, contract v1.5). Next: WP45b better auction attribution; WP41 grid map waits for OSM licence OK and your ENTSO-E / netztransparenz keys**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 

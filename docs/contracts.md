@@ -1,4 +1,4 @@
-# Station contracts — v1.4 (locked)
+# Station contracts — v1.5 (locked)
 
 These contracts define exactly what each station of the data chain outputs.
 They are **locked**: changing one is its own work package,
@@ -346,10 +346,10 @@ reference date 31 Dec of the latest available year).
 
 ---
 
-## v1.5 draft: turbine makers and auctions (waiting for approval)
+## v1.5: turbine makers and auctions (approved 31 Oct 2026)
 
-Additive only. Until approved, the files below exist only on the branch
-preview; `contract_version` stays `"1.4"` there.
+Additive only: nothing above changes. `contract_version` becomes `"1.5"`
+(manifest and day-file index); the website still accepts 1.4 files.
 
 ### Turbine makers (`monitor/stats.json` → `wind_industry`)
 
@@ -412,3 +412,4 @@ add up; award rows match the rounds. Licence: see `docs/sources.md`.
 | 1.2 | 2026-10-31 | Data quality rules D12 (storage capacity split per plant, plausibility limits, impossible dates); operator names on the website only from 1 MW (D13). Approved by the user. |
 | 1.3 | 2026-10-31 | Monitor files `monitor/buildout.json`, `points.json`, `stats.json`; boundaries `area_km2`; series definition D14. Approved by the user. |
 | 1.4 | 2026-10-31 | Data hub chain H1/H2, day files `days/` with SMARD and DWD weather, `stations.json`, population in `states[]`, size budget 50 MB. Approved by the user. |
+| 1.5 | 2026-10-31 | Turbine makers (`wind_industry` in `stats.json`), auctions chain A1/A2 with `auctions/onshore.json` and `auctions/awards.json`. Approved by the user. |

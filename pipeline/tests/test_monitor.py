@@ -54,7 +54,7 @@ def built(tmp_path):
 def test_manifest_lists_monitor_files(built):
     names = {f["name"] for f in built[2]["files"]}
     assert {"monitor/buildout.json", "monitor/points.json", "monitor/stats.json"} <= names
-    assert built[2]["contract_version"] == "1.4"
+    assert built[2]["contract_version"] == "1.5"
 
 
 def test_buildout_series(built):
