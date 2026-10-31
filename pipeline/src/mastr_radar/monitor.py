@@ -141,6 +141,7 @@ def build_points(df: pd.DataFrame, first_year: int, min_kw: float) -> dict:
 
 BRANDS_CONFIG = Path(__file__).resolve().parents[2] / "config" / "wind_brands.yaml"
 TOP_BRANDS = 12
+SPEC_MIN_UNITS = 10
 
 
 def brand_of(manufacturer: str | None, cfg: dict) -> str:
@@ -204,10 +205,16 @@ def build_wind_industry(live: pd.DataFrame, years: list[int]) -> dict:
         )
     models.sort(key=lambda r: -r["mw"])
 
-    # Sizes per brand and year (top 5 brands, since 2005).
+    # Sizes per brand and year: the 5 brands that built most since 2015, years
+    # since 2005 with at least SPEC_MIN_UNITS turbines (fewer give noisy averages).
+    recent_mw = w[(w["y"] >= 2015) & (w["brand"] != cfg["other"])].groupby("brand")["capacity_kw"]
     specs = {}
-    for b in top[:5]:
-        g = w[(w["brand"] == b) & (w["y"] >= 2005)].groupby("y")
+    for b in recent_mw.sum().sort_values(ascending=False).index[:5]:
+        sel = w[(w["brand"] == b) & (w["y"] >= 2005)].copy()
+        for col in ("hub_height_m", "rotor_diameter_m"):
+            sel.loc[sel[col] <= 0, col] = None
+        sizes = sel.groupby("y").size()
+        g = sel[sel["y"].isin(sizes[sizes >= SPEC_MIN_UNITS].index)].groupby("y")
 
         def series(col, g=g):
             return [None if pd.isna(v) else round(float(v), 1) for v in g[col].mean().values]
@@ -458,9 +465,20 @@ def check(out_dir: Path, kpis: list[dict], as_of: date) -> None:
         "states",
         "top_districts",
         "repowering",
+        "wind_industry",
     ):
         if key not in stats:
             problems.append(f"stats.json: missing {key}.")
+    wi = stats.get("wind_industry")
+    if wi:
+        n = len(wi["years"])
+        if any(len(wi[k][b]) != n for k in ("added_mw", "installed_mw") for b in wi["brands"]):
+            problems.append("stats.json: wind_industry series incomplete.")
+        if wi["unattributed_share"] > 0.05:
+            problems.append(
+                f"stats.json: {wi['unattributed_share']:.1%} of onshore capacity has no known "
+                "maker (limit 5%): check config/wind_brands.yaml."
+            )
     if stats.get("as_of") != as_of.isoformat():
         problems.append("stats.json: as_of does not match.")
     if problems:

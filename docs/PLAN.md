@@ -204,7 +204,16 @@ real stress signals (line loading itself is not published).
   *Result:* `/llms.txt`, `/catalog.json` (built from the manifest), `/open-data`
   page with quick-start code; CORS open on `/data/*`.
 
-## Phase 8: Auctions
+## Phase 8: Turbine makers and auctions
+
+- [x] **WP49. Turbine makers data:** brands from registered manufacturer
+  names, additions and fleet per brand and year, most-built models, sizes.
+  *Result:* `wind_industry` in `stats.json` (contract v1.5 draft); 1.4 % of
+  capacity has no clear maker.
+- [x] **WP50. Makers race:** bar chart race (fleet or yearly additions, play
+  button), market share of new capacity since 2000.
+- [x] **WP51. Turbine models:** most-built models since 2024 with hub height
+  and rotor; rotor, hub height and rating per maker since 2005.
 
 - [ ] **WP44. Import award lists** (onshore since 2017), link to MaStR via the
   EEG number.

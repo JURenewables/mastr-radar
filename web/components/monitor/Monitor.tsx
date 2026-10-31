@@ -16,6 +16,7 @@ import {
   YearRace,
 } from "./Sections";
 import { Loading, Section } from "./ui";
+import { BrandRace, BrandShares, TurbineModels } from "./WindIndustry";
 
 export const SECTIONS = [
   ["light-up", "Germany lights up"],
@@ -24,6 +25,8 @@ export const SECTIONS = [
   ["this-year", "This year"],
   ["balcony", "Balcony boom"],
   ["turbines", "Turbines"],
+  ["makers", "Makers"],
+  ["models", "Models"],
   ["where", "Where"],
   ["storage", "Storage"],
   ["pipeline", "Next wave"],
@@ -64,6 +67,14 @@ export function Monitor({ asOf }: { asOf: string }) {
   const turbines = s?.onshore_turbines;
   const t2000 = turbines ? turbines.years.indexOf(2000) : -1;
   const tLast = turbines ? turbines.years.length - 2 : -1;
+  const wi = s?.wind_industry;
+  const wiLast = wi ? wi.years.length - 2 : -1; // last full year
+  const fleet = wi ? wi.brands.reduce((t, x) => t + wi.installed_mw[x].at(-1)!, 0) : 0;
+  const fleetLeader = wi?.brands.filter((x) => x !== "Other")[0];
+  const yearLeader = wi
+    ? wi.brands.filter((x) => x !== "Other").sort((a, c) => wi.added_mw[c][wiLast] - wi.added_mw[a][wiLast])[0]
+    : undefined;
+  const topModel = wi?.recent_models[0];
   const large = s?.battery_storage.buckets.large.mw ?? [];
   const topState = s?.states
     .filter((x) => x.area_km2)
@@ -144,6 +155,42 @@ export function Monitor({ asOf }: { asOf: string }) {
         asOf={date}
       >
         {data ? <TurbineGrowth data={data} /> : <Loading />}
+      </Section>
+
+      <Section
+        id="makers"
+        eyebrow="Turbine makers"
+        title={
+          wi && fleetLeader && yearLeader
+            ? `${fleetLeader} built ${Math.round((wi.installed_mw[fleetLeader].at(-1)! / fleet) * 100)}% of Germany's onshore fleet; in ${wi.years[wiLast]} ${yearLeader} installed the most`
+            : "Who builds Germany's wind turbines"
+        }
+        subtitle="Press play: the race between turbine makers since 1995, by capacity in operation or by capacity added each year."
+        note={`The ${y} figures are still incomplete.`}
+        asOf={date}
+      >
+        {data ? (
+          <div className="space-y-10">
+            <BrandRace data={data} />
+            <BrandShares data={data} />
+          </div>
+        ) : (
+          <Loading height={420} />
+        )}
+      </Section>
+
+      <Section
+        id="models"
+        eyebrow="Turbine models"
+        title={
+          topModel && wi
+            ? `The ${topModel.brand} ${topModel.model} is the most-built turbine since ${wi.recent_models_since}: ${topModel.units} units, ${topModel.avg_hub_height_m} m hub height`
+            : "Which turbines go up"
+        }
+        subtitle="The models that went online most often in recent years, and how rotors, towers and ratings have grown at each maker."
+        asOf={date}
+      >
+        {data ? <TurbineModels data={data} /> : <Loading />}
       </Section>
 
       <Section

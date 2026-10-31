@@ -346,6 +346,34 @@ reference date 31 Dec of the latest available year).
 
 ---
 
+## v1.5 draft: turbine makers and auctions (waiting for approval)
+
+Additive only. Until approved, the files below exist only on the branch
+preview; `contract_version` stays `"1.4"` there.
+
+### Turbine makers (`monitor/stats.json` → `wind_industry`)
+
+Onshore wind units of the series (D14). Registered manufacturer names are
+grouped into brands with the regular expressions in
+`pipeline/config/wind_brands.yaml` (e.g. REpower and Senvion → "Senvion
+(REpower)"; Siemens, Gamesa and Siemens Gamesa → "Siemens Gamesa"). Units
+without a matching name count as "Other".
+
+| Key | Content |
+|---|---|
+| `years` | first_year … as-of year |
+| `brands` | the 12 brands with the most capacity ever built, then `"Other"` |
+| `added_mw[brand]`, `installed_mw[brand]` | MW per year, same definition as `buildout.json` |
+| `recent_models_since` | as-of year − 2 |
+| `recent_models[]` | top 15 model families since then by MW: `brand`, `model` (rotor-size family, e.g. `V162`), `units`, `mw`, `avg_mw`, `avg_hub_height_m`, `avg_rotor_diameter_m` |
+| `brand_specs[brand]` | the 5 brands with most MW since 2015: `years` (since 2005, ≥ 10 turbines), `avg_mw`, `avg_hub_height_m`, `avg_rotor_diameter_m` |
+| `unattributed_share` | share of onshore capacity counted as "Other" |
+
+**Check:** key present; series complete for every brand; `unattributed_share`
+at most 5 % (else the brand list needs updating).
+
+---
+
 ## Version history
 
 | Version | Date | Change |

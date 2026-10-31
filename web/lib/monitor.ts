@@ -64,6 +64,29 @@ export interface Stats {
     by_state: Record<string, { units: number; mw: number }>;
   };
   planned_mw: Record<Technology, number>;
+  wind_industry: WindIndustry;
+}
+export interface TurbineModel {
+  brand: string;
+  model: string;
+  units: number;
+  mw: number;
+  avg_mw: number;
+  avg_hub_height_m: number | null;
+  avg_rotor_diameter_m: number | null;
+}
+export interface WindIndustry {
+  years: number[];
+  brands: string[];
+  added_mw: Record<string, number[]>;
+  installed_mw: Record<string, number[]>;
+  recent_models_since: number;
+  recent_models: TurbineModel[];
+  brand_specs: Record<
+    string,
+    { years: number[]; avg_mw: number[]; avg_hub_height_m: (number | null)[]; avg_rotor_diameter_m: (number | null)[] }
+  >;
+  unattributed_share: number;
 }
 export interface MonitorData {
   buildout: Buildout;

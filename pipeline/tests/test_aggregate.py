@@ -25,6 +25,7 @@ def unit(uid, tech="wind_onshore", status="operating", kw=3000.0, cod=date(2020,
         registration_date=(cod + timedelta(days=lag)) if cod else date(2025, 1, 1),
         last_updated=date(2026, 1, 1),
         operator_is_person=False,
+        manufacturer="ENERCON GmbH" if tech == "wind_onshore" else None,
     )
     return row
 
