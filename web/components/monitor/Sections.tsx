@@ -396,21 +396,31 @@ export function TurbineGrowth({ data }: { data: MonitorData }) {
 
 export function StatesRank({ data }: { data: MonitorData }) {
   const [tech, setTech] = useState<Technology>("solar");
-  const [metric, setMetric] = useState<"density" | "total">("density");
+  const [metric, setMetric] = useState<"density" | "resident" | "total">("density");
   const rows = useMemo(
     () =>
       data.stats.states
-        .filter((s) => s.area_km2 || metric === "total")
+        .filter((s) => metric === "total" || (metric === "density" ? s.area_km2 : s.population))
         .map((s) => ({
           name: s.name,
-          value: metric === "density" ? (s.operating_mw[tech] / (s.area_km2 || 1)) * 1000 : gw(s.operating_mw[tech]),
+          value:
+            metric === "density"
+              ? (s.operating_mw[tech] / (s.area_km2 || 1)) * 1000
+              : metric === "resident"
+                ? (s.operating_mw[tech] * 1e6) / (s.population || 1)
+                : gw(s.operating_mw[tech]),
         }))
         .filter((r) => r.value > 0)
         .sort((a, b) => b.value - a.value),
     [data, tech, metric],
   );
   const top = data.stats.top_districts[tech] ?? [];
-  const fmt = (v: number) => (metric === "density" ? `${Math.round(v)} kW/km²` : `${v.toFixed(1)} GW`);
+  const fmt = (v: number) =>
+    metric === "density"
+      ? `${Math.round(v)} kW/km²`
+      : metric === "resident"
+        ? `${Math.round(v).toLocaleString("en-GB")} W`
+        : `${v.toFixed(1)} GW`;
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap gap-3">
@@ -430,6 +440,7 @@ export function StatesRank({ data }: { data: MonitorData }) {
           onChange={setMetric}
           options={[
             { value: "density", label: "Per km²" },
+            { value: "resident", label: "Per resident" },
             { value: "total", label: "Total" },
           ]}
         />

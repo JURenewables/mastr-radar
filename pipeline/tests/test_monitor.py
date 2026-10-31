@@ -87,6 +87,8 @@ def test_stats(built):
     assert len(s["ytd_cumulative_mw"]["wind_onshore"]["2026"]) == 10  # Jan-Oct
     assert s["planned_mw"]["wind_onshore"] == 4
     assert s["targets_2030_mw"]["solar"] == 215000
+    brandenburg = next(x for x in s["states"] if x["key"] == "12")
+    assert brandenburg["population"] > 2_000_000  # BKG VG250-EW
 
 
 def test_check_catches_broken_monitor_file(built):

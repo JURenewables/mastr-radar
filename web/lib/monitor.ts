@@ -27,6 +27,7 @@ export interface StateRow {
   key: string;
   name: string;
   area_km2: number | null;
+  population: number | null;
   operating_mw: Record<Technology, number>;
   planned_mw: Record<Technology, number>;
 }

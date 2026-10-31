@@ -18,7 +18,7 @@ we access it. A source is only used once it appears in this file.
 |---|---|---|---|---|---|
 | **SMARD** (Bundesnetzagentur) | Generation per technology and demand (*Netzlast*), 15 min, Germany and the 4 grid areas | CC BY 4.0 | "Bundesnetzagentur \| SMARD.de" | JSON API, no account | ✅ ready (WP36) |
 | **DWD** Open Data | Measured sunshine (global radiation) and wind speed per weather station | CC BY 4.0 | "Deutscher Wetterdienst" (source must be named) | opendata.dwd.de, no account | ✅ ready (WP37) |
-| **BKG VG1000-EW** | Population per state and district (for "per resident") | dl-de/by-2-0 | © GeoBasis-DE / BKG; population: © Statistisches Bundesamt (Destatis) | Download, no account | ✅ ready |
+| **BKG VG250-EW** | Population per state and district (for "per resident"), boundaries as of 31 Dec 2025 | dl-de/by-2-0 | © GeoBasis-DE / BKG (2026); population: Statistische Ämter des Bundes und der Länder | Download, no account; stored in `pipeline/assets/population.json` | ✅ in use |
 | **OpenStreetMap** | High-voltage power lines and substations (grid map) | ODbL 1.0 | "© OpenStreetMap contributors" | Overpass / extracts, no account | ⚠️ decision needed (share-alike, see below) |
 | **netztransparenz.de** (the 4 TSOs) | Redispatch measures (grid congestion interventions) | Terms to be checked when the account exists | – | WebAPI needs a **free account** (OAuth) | ⏳ needs your registration |
 | **ENTSO-E Transparency Platform** | Cross-border physical flows | Reuse allowed with attribution (ENTSO-E terms) | "ENTSO-E Transparency Platform" | API needs a **free security token** | ⏳ needs your registration |
@@ -28,7 +28,8 @@ we access it. A source is only used once it appears in this file.
 | Source | Why |
 |---|---|
 | **SMARD wholesale prices** | The Bundesnetzagentur asks not to reuse price data until the HEDWIG procedure is settled. |
-| **Destatis GENESIS API** | Needs an account; the same population figures come with BKG VG1000-EW. |
+| **Destatis GENESIS API** | Needs an account; the same population figures come with BKG VG250-EW. |
+| **BKG VG1000-EW** | Its population figures date from 31 Dec 2020; VG250-EW is current. |
 | **IEA** | Most datasets are paid or restrict redistribution; Germany-level figures are covered by the sources above. |
 
 ## Decisions needed

@@ -200,6 +200,9 @@ def build_stats(
     # States: operating and planned MW per technology, area, density.
     area = {f["properties"]["key"]: f["properties"]["area_km2"] for f in states_geo["features"]}
     names = {f["properties"]["key"]: f["properties"]["name"] for f in states_geo["features"]}
+    population = json.loads(
+        (Path(__file__).resolve().parents[2] / "assets" / "population.json").read_text()
+    )
     states = []
     for key in sorted(set(operating["state_key"].dropna())):
         o = operating[operating["state_key"] == key]
@@ -211,6 +214,7 @@ def build_stats(
                     key, {"OFF_N": "Nordsee (offshore)", "OFF_O": "Ostsee (offshore)"}.get(key, key)
                 ),
                 "area_km2": area.get(key),
+                "population": population["states"].get(key),
                 "operating_mw": {
                     t: _mw(o[o["technology"] == t]["capacity_kw"].sum()) for t in TECHS
                 },

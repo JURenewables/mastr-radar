@@ -150,7 +150,8 @@ export function Monitor({ asOf }: { asOf: string }) {
         id="where"
         eyebrow="Regions"
         title={topState ? `${topState.name} has the most solar per km² of any state` : "Where it is built"}
-        subtitle="Capacity in operation per km² of land, or in total, by state. Offshore wind is not part of any state."
+        subtitle="Capacity in operation per km² of land, per resident (watts), or in total, by state. Offshore wind is not part of any state."
+        note="Population and areas: © GeoBasis-DE / BKG (2026), Statistische Ämter des Bundes und der Länder."
         asOf={date}
       >
         {data ? <StatesRank data={data} /> : <Loading />}

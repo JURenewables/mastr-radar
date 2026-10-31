@@ -154,8 +154,8 @@ look).
   *Result:* progress to target, annual additions and 2030 pace line; plus
   "this year vs previous years" race chart.
 - [x] **WP32. Section: states compared** (per km² and per resident).
-  *Result:* states per km² or total, densest districts. Per resident needs
-  population data: moves to the data hub (WP34+).
+  *Result:* states per km², per resident (BKG VG250-EW population, added in
+  Phase 7) or total; densest districts.
 - [x] **WP33. Section: the storage boom.**
   *Result:* batteries per year: home, commercial, large; GW or GWh.
 - [x] **Extra sections (your request for more analyses):** balcony-solar boom,
