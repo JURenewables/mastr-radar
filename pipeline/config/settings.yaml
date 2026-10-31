@@ -32,3 +32,16 @@ download:
     - EinheitenWasser*.xml
     - Marktakteure_*.xml
     - Katalogwerte.xml
+
+# Station 3 cross-check against Fraunhofer ISE Energy-Charts (warning only).
+crosscheck:
+  url: https://api.energy-charts.info/installed_power?country=de&time_step=monthly&installation_decommission=false
+  timeout_seconds: 30
+  tolerance_pct: 2.0
+  # Our technology → Energy-Charts production type. MaStR gross solar capacity
+  # is module (DC) power. Storage is not compared yet: ours includes pumped hydro.
+  series:
+    wind_onshore: Wind onshore
+    wind_offshore: Wind offshore
+    solar: Solar DC
+    biomass: Biomass

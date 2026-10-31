@@ -22,12 +22,21 @@ class DownloadSettings:
 
 
 @dataclass(frozen=True)
+class CrosscheckSettings:
+    url: str
+    timeout_seconds: float
+    tolerance_pct: float
+    series: dict[str, str]
+
+
+@dataclass(frozen=True)
 class Settings:
     min_capacity_mw: float
     technologies: tuple[str, ...]
     data_dir: Path
     output_dir: Path
     download: DownloadSettings
+    crosscheck: CrosscheckSettings
 
     @property
     def raw_dir(self) -> Path:
@@ -37,6 +46,7 @@ class Settings:
 def load_settings(path: Path = DEFAULT_CONFIG) -> Settings:
     raw = yaml.safe_load(path.read_text())
     dl = raw["download"]
+    cc = raw["crosscheck"]
     return Settings(
         min_capacity_mw=float(raw["min_capacity_mw"]),
         technologies=tuple(raw["technologies"]),
@@ -50,5 +60,11 @@ def load_settings(path: Path = DEFAULT_CONFIG) -> Settings:
             max_age_days=int(dl["max_age_days"]),
             min_size_bytes=int(dl["min_size_bytes"]),
             required_files=tuple(dl["required_files"]),
+        ),
+        crosscheck=CrosscheckSettings(
+            url=cc["url"],
+            timeout_seconds=float(cc["timeout_seconds"]),
+            tolerance_pct=float(cc["tolerance_pct"]),
+            series=dict(cc["series"]),
         ),
     )

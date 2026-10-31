@@ -157,6 +157,25 @@ def aggregate() -> None:
         raise typer.Exit(code=1) from exc
     typer.echo(f"Check passed: as of {manifest['as_of']} → {s.output_dir}")
 
+    # Outside cross-check: warns only, never fails the run.
+    from datetime import date
+
+    from mastr_radar import crosscheck
+
+    result = crosscheck.run(
+        s.output_dir / "kpis.json",
+        date.fromisoformat(manifest["as_of"]),
+        s.crosscheck,
+        s.data_dir / "reports" / "crosscheck.json",
+    )
+    for row in result["rows"]:
+        typer.echo(
+            f"Energy-Charts {row['technology']}: ours {row['ours_gw']} GW, "
+            f"theirs {row['energy_charts_gw']} GW ({row['diff_pct']:+}%)"
+        )
+    for w in result["warnings"]:
+        typer.echo(f"WARNING: {w}")
+
 
 if __name__ == "__main__":
     app()

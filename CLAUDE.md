@@ -153,5 +153,6 @@ data/                local working dir for downloads (git-ignored)
 - Station 2: `uv run mastr-radar extract` (newest zip → `data/extract/units.parquet`,
   then checked; report in `extract_report.json`)
 - Station 3: `uv run mastr-radar aggregate` (`units.parquet` → `web/public/data/`,
-  then checked)
+  then checked, then cross-checked against Energy-Charts: warning only,
+  report in `data/reports/crosscheck.json`)
 - Web: (added in WP7)

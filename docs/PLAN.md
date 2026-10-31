@@ -105,8 +105,10 @@ building anything wide. That way every problem in the chain shows up early.
 
 ## Follow-ups noted
 
-- Automatic cross-check: compare installed capacity per technology with the
-  Energy-Charts API on each run, as a warning (not a failure). Fits WP12.
+- [x] Automatic cross-check: each `aggregate` run compares installed capacity
+  per technology with the Energy-Charts API (±2%, warning only) and writes
+  `data/reports/crosscheck.json`. WP9: show these warnings in the daily
+  GitHub run summary. Storage not compared yet (ours includes pumped hydro).
 - Explorer: show both gross additions and net additions (after
   decommissioning), since public sources such as Energy-Charts quote net.
 
