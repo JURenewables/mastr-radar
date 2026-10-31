@@ -1,0 +1,146 @@
+# Station 2 column mapping: MaStR export (German) → units.parquet (contract v1.1).
+# This file is the single place where German source names are mapped.
+# A list of source names means: take the first one present.
+
+# Fields stored as catalogue numbers; decoded with Katalogwerte.xml.
+catalog_fields:
+  - Land
+  - Bundesland
+  - EinheitBetriebsstatus
+  - EinheitSystemstatus
+  - Energietraeger
+  - WindAnLandOderAufSee
+  - Seelage
+  - Hersteller
+  - Technologie
+  - ArtDerSolaranlage
+  - Batterietechnologie
+  - Hauptbrennstoff
+  - ArtDerWasserkraftanlage
+  - Personenart
+
+# D3: only active registrations.
+active_system_status: Aktiviert
+
+status:
+  In Betrieb: operating
+  In Planung: planned
+  Vorübergehend stillgelegt: temporarily_shut_down
+  Endgültig stillgelegt: permanently_shut_down
+
+# Operators (Marktakteure): who is a natural person (D4).
+operators:
+  files: Marktakteure_*.xml
+  record: Marktakteur
+  id: MastrNummer
+  name: Firmenname
+  person_type: Personenart
+  person_value_prefix: Natürliche Person
+
+# Columns shared by all unit files.
+common:
+  unit_id: EinheitMastrNummer
+  status: EinheitBetriebsstatus
+  system_status: EinheitSystemstatus
+  name: NameStromerzeugungseinheit
+  eeg_id: [EegMaStRNummer, EegMastrNummer]
+  capacity_kw: Bruttoleistung
+  net_capacity_kw: Nettonennleistung
+  commissioning_date: Inbetriebnahmedatum
+  planned_commissioning_date: GeplantesInbetriebnahmedatum
+  registration_date: Registrierungsdatum
+  shutdown_date: DatumEndgueltigeStilllegung
+  last_updated: DatumLetzteAktualisierung
+  state: Bundesland
+  district: Landkreis
+  municipality: Gemeinde
+  municipality_key: Gemeindeschluessel
+  postcode: Postleitzahl
+  lat: Breitengrad
+  lon: Laengengrad
+  operator_id: AnlagenbetreiberMastrNummer
+
+# Lookup tables read before the units, joined by a key field of the unit.
+lookups:
+  storage_capacity:
+    files: AnlagenStromSpeicher_*.xml
+    record: AnlageStromSpeicher
+    key: [MaStRNummer, MastrNummer]
+    value: NutzbareSpeicherkapazitaet
+    # Capacity belongs to the storage plant; split it evenly over its linked units
+    # (otherwise multi-unit pumped hydro plants are counted once per unit).
+    split_by_list: VerknuepfteEinheitenMaStRNummern
+
+# One entry per unit file type.
+sources:
+  wind:
+    files: EinheitenWind*.xml
+    record: EinheitWind
+    min_rows: 40000   # check: plausible row count (contract v1.1)
+    technology_field: WindAnLandOderAufSee
+    technology_values:
+      Windenergie an Land: wind_onshore
+      Windenergie auf See: wind_offshore
+    # D8: offshore region from MaStR's own sea field.
+    sea_field: Seelage
+    sea_regions:
+      Nordsee: {key: OFF_N, name: Nordsee (offshore)}
+      Ostsee: {key: OFF_O, name: Ostsee (offshore)}
+    details:
+      manufacturer: Hersteller
+      turbine_model: Typenbezeichnung
+      hub_height_m: Nabenhoehe
+      rotor_diameter_m: Rotordurchmesser
+      wind_park: NameWindpark
+
+  solar:
+    files: EinheitenSolar_*.xml
+    record: EinheitSolar
+    min_rows: 6000000
+    technology: solar
+    details:
+      solar_type: ArtDerSolaranlage
+    detail_values:
+      solar_type:
+        Freiflächensolaranlage: ground_mounted
+        Gebäudesolaranlage: rooftop
+        Steckerfertige Solaranlage (sog. Balkonkraftwerk): balcony
+        Sonstige Solaranlage: other
+    # Data quality (WP12): commissioning dates before this are impossible → emptied.
+    min_commissioning_date: {_all: 1983-01-01}
+
+  storage:
+    files: EinheitenStromSpeicher_*.xml
+    record: EinheitStromSpeicher
+    min_rows: 2500000
+    technology: storage
+    details:
+      storage_technology: Technologie
+      battery_technology: Batterietechnologie
+    detail_values:
+      storage_technology:
+        Batterie: battery
+        Pumpspeicher: pumped_hydro
+        _default: other   # hydrogen, compressed air, flywheel, unknown
+    lookup_details:
+      storage_capacity_kwh: {lookup: storage_capacity, via: SpeMastrNummer}
+    # Data quality (WP12): usable kWh per kW of power above these limits are
+    # registration errors → emptied and counted.
+    storage_capacity_max_hours: {battery: 24, other: 24, pumped_hydro: 100}
+    min_commissioning_date: {battery: 2000-01-01}
+
+  biomass:
+    files: EinheitenBiomasse*.xml
+    record: EinheitBiomasse
+    min_rows: 20000
+    technology: biomass
+    details:
+      fuel: Hauptbrennstoff
+
+  hydro:
+    files: EinheitenWasser*.xml
+    record: EinheitWasser
+    min_rows: 8000
+    technology: hydro
+    details:
+      hydro_type: ArtDerWasserkraftanlage

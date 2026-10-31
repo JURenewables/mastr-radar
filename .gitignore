@@ -1,0 +1,22 @@
+# Local data downloads and databases (multi-GB, never commit)
+/data/
+*.db
+*.sqlite
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.vercel/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

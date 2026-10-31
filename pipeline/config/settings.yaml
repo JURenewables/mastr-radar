@@ -1,0 +1,47 @@
+# Paths are relative to the repository root.
+data_dir: data               # downloads and working files (git-ignored)
+output_dir: web/public/data  # files the website reads
+
+# Operator names are only shown for units at or above this size.
+min_capacity_mw: 1.0
+
+# Technologies in the explorer (contract D9).
+technologies:
+  - wind_onshore
+  - wind_offshore
+  - solar
+  - storage
+  - biomass
+  - hydro
+
+# Station 1: download of the BNetzA bulk export ("Gesamtdatenexport").
+download:
+  page_url: https://www.marktstammdatenregister.de/MaStR/Datendownload
+  max_attempts: 10          # resume attempts before giving up
+  backoff_seconds: 5        # first wait; doubles each attempt, capped at 300 s
+  timeout_seconds: 120      # per network read
+  max_age_days: 3           # check: export must be at most this old
+  min_size_bytes: 1500000000  # check: export must be at least 1.5 GB
+  # Check: at least one file must match each pattern (contract v1.1).
+  required_files:
+    - EinheitenWind*.xml
+    - EinheitenSolar_*.xml
+    - EinheitenStromSpeicher_*.xml
+    - AnlagenStromSpeicher_*.xml
+    - EinheitenBiomasse*.xml
+    - EinheitenWasser*.xml
+    - Marktakteure_*.xml
+    - Katalogwerte.xml
+
+# Station 3 cross-check against Fraunhofer ISE Energy-Charts (warning only).
+crosscheck:
+  url: https://api.energy-charts.info/installed_power?country=de&time_step=monthly&installation_decommission=false
+  timeout_seconds: 30
+  tolerance_pct: 2.0
+  # Our technology → Energy-Charts production type. MaStR gross solar capacity
+  # is module (DC) power. Storage is not compared yet: ours includes pumped hydro.
+  series:
+    wind_onshore: Wind onshore
+    wind_offshore: Wind offshore
+    solar: Solar DC
+    biomass: Biomass
