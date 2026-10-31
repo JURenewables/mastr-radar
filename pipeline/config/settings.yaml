@@ -80,3 +80,10 @@ hub:
       other_conventional: 1227
     demand: 410            # Netzlast
     residual_load: 4359
+  # DWD Open Data (CC BY 4.0, attribution "Deutscher Wetterdienst").
+  dwd:
+    base_url: https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate
+    solar_dir: 10_minutes/solar/recent      # global radiation GS_10, J/cm² per 10 min
+    solar_stations: zehn_min_sd_Beschreibung_Stationen.txt
+    wind_dir: hourly/wind/recent            # hourly mean wind speed F, m/s
+    wind_stations: FF_Stundenwerte_Beschreibung_Stationen.txt

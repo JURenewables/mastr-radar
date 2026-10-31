@@ -45,6 +45,7 @@ class HubSettings:
     smard_generation: dict[str, int]
     smard_demand: int
     smard_residual_load: int
+    dwd: dict[str, str]
 
 
 @dataclass(frozen=True)
@@ -102,5 +103,6 @@ def load_settings(path: Path = DEFAULT_CONFIG) -> Settings:
             smard_generation={k: int(v) for k, v in hub["smard"]["generation"].items()},
             smard_demand=int(hub["smard"]["demand"]),
             smard_residual_load=int(hub["smard"]["residual_load"]),
+            dwd=dict(hub["dwd"]),
         ),
     )

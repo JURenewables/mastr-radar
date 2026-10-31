@@ -282,7 +282,8 @@ SMARD, DWD     data/hub/ cache →      web/public/data/days/
 ### H1 Fetch
 
 Writes a local cache in `data/hub/` (git-ignored): SMARD weekly series files
-and DWD station files, as downloaded. Only sources listed as ready in
+and DWD station files (10-minute global radiation, hourly wind; the 'recent'
+files, about the last 500 days), as downloaded. Only sources listed as ready in
 `docs/sources.md` may be fetched.
 
 **Check:** HTTP success; every requested series present; at least 90 % of
@@ -304,9 +305,12 @@ One file per calendar day in German local time (Europe/Berlin), for the last
 | `generation_mw[region][tech]` | average power per quarter hour, MW (SMARD MWh × 4), rounded; `null` where missing. Techs: `solar`, `wind_onshore`, `wind_offshore`, `biomass`, `hydro`, `other_renewable`, `lignite`, `hard_coal`, `gas`, `pumped_storage`, `other_conventional` |
 | `demand_mw[region]` | grid load (*Netzlast*), MW |
 | `residual_load_mw[region]` | demand minus solar and wind, MW (SMARD) |
-| `weather` | added in WP37: `stations` (id, lat, lon) and hourly `radiation_wm2` and `wind_ms` per station |
+| `weather` | `hours` (23/24/25), `solar_stations` and `radiation_wm2` (mean global radiation per local hour, W/m², integer), `wind_stations` and `wind_dms` (mean wind speed at 10 m, in 0.1 m/s, integer). Stations with < 80 % of the day's hours are left out that day. Coordinates in `days/stations.json` |
 | `cleaned_values` | number of source values emptied by the night-solar rule |
 | `sources` | attribution strings, exactly as in `docs/sources.md` |
+
+**`days/stations.json`**: `solar` and `wind`: lists of [station id, lat, lon,
+name] (DWD).
 
 **`days/index.json`**: `contract_version`, `first`, `last`, `dates` (all
 available days, ascending), and for each day the file size.
@@ -330,7 +334,9 @@ available days, ascending), and for each day the file size.
   local time;
 - the four grid areas add up to `DE` for solar, onshore wind and demand,
   within 5 % of the national value plus 1 % of the day's demand;
-- `days/` stays below 20 MB; `web/public/data/` as a whole below 40 MB (raised
+- weather: hours match the day, at least 50 radiation and 100 wind stations,
+  radiation 0–1500 W/m², wind 0–60 m/s;
+- `days/` stays below 30 MB; `web/public/data/` as a whole below 50 MB (raised
   from 25 MB).
 
 ### Population (for "per resident")
@@ -348,4 +354,4 @@ reference date 31 Dec of the latest available year).
 | 1.1 | 2026-10-30 | After WP4 data check: own reader instead of open-mastr (D11); station 1 writes the export zip; offshore regions from `Seelage`, all offshore units included (D8); storage includes pumped hydro, new `storage_technology` column (D9); `incomplete_after` per technology (D10); confirmed source names and plausible row counts |
 | 1.2 | 2026-10-31 | Data quality rules D12 (storage capacity split per plant, plausibility limits, impossible dates); operator names on the website only from 1 MW (D13). Approved by the user. |
 | 1.3 | 2026-10-31 | Monitor files `monitor/buildout.json`, `points.json`, `stats.json`; boundaries `area_km2`; series definition D14. Approved by the user. |
-| 1.4 (draft) | 2026-10-31 | Data hub chain H1/H2, day files `days/`, population in `states[]`, size budget 40 MB. Awaiting approval. |
+| 1.4 (draft) | 2026-10-31 | Data hub chain H1/H2, day files `days/` with SMARD and DWD weather, `stations.json`, population in `states[]`, size budget 50 MB. Awaiting approval. |

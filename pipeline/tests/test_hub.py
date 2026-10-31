@@ -1,8 +1,10 @@
 """Data hub (contract v1.4 draft): day files from a fake SMARD cache, no network."""
 
 import json
+import zipfile
 from datetime import date
 
+import numpy as np
 import pytest
 
 from mastr_radar import hub
@@ -59,7 +61,7 @@ def test_build_day_converts_mwh_to_mw():
     assert day["demand_mw"]["DE"][0] == 60000  # 15 000 MWh per quarter hour × 4
     assert max(day["generation_mw"]["DE"]["solar"]) == 16000
     assert "nuclear" not in day["generation_mw"]["DE"]
-    assert day["sources"] == ["Bundesnetzagentur | SMARD.de"]
+    assert day["sources"] == ["Bundesnetzagentur | SMARD.de", "Deutscher Wetterdienst"]
 
 
 def test_absent_series_is_zero():
@@ -110,3 +112,68 @@ def test_check_catches_broken_files(tmp_path, monkeypatch):
         hub.check_days(tmp_path, settings)
     assert "95 slots" in str(err.value)
     assert "do not add up" in str(err.value)
+
+
+# --- DWD weather ---------------------------------------------------------------
+
+STATIONS_TXT = """Stations_id von_datum bis_datum Stationshoehe geoBreite geoLaenge Stationsname Bundesland Abgabe
+----------- --------- --------- ------------- --------- --------- ----------------------------------------- ---------- ------
+00044 20070402 20261030             44     52.9336    8.2370 Großenkneten                             Niedersachsen                            Frei
+00183 19911101 20261031             42     54.6791   13.4344 Kap Arkona                               Mecklenburg-Vorpommern                   Frei
+"""
+
+
+def write_dwd(tmp, kind, rows_by_station):
+    d = tmp / kind
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "stations.txt").write_text(STATIONS_TXT, encoding="latin-1")
+    for sid, rows in rows_by_station.items():
+        header = (
+            "STATIONS_ID;MESS_DATUM;  QN;DS_10;GS_10;SD_10;LS_10;eor\n"
+            if kind == "solar"
+            else "STATIONS_ID;MESS_DATUM;QN_3;   F;   D;eor\n"
+        )
+        with zipfile.ZipFile(d / f"x_{sid}_akt.zip", "w") as zf:
+            zf.writestr(f"produkt_{sid}.txt", header + "".join(rows))
+
+
+def test_dwd_parsing_and_weather_block(tmp_path):
+    from datetime import UTC, datetime, timedelta
+
+    day = date(2026, 6, 21)
+    start = datetime(2026, 6, 20, 0, tzinfo=UTC)
+    # Solar station 44: 60 J/cm² per 10 min at 10 UTC (= 1000 W/m²), only 3 values at 11 UTC.
+    solar_rows = []
+    for h in range(48):
+        t = start + timedelta(hours=h)
+        for m in range(0, 60, 10):
+            v = 60.0 if t.hour == 10 else 0.0
+            if t.hour == 11 and m >= 30:
+                v = -999
+            solar_rows.append(f"44;{t:%Y%m%d%H}{m:02d};3;-999;{v};0;-999;eor\n")
+    wind_rows = [
+        f"183;{(start + timedelta(hours=h)):%Y%m%d%H};10;{4.5 if h % 2 else -999};270;eor\n"
+        for h in range(48)
+    ]
+    write_dwd(tmp_path, "solar", {"44": solar_rows})
+    write_dwd(tmp_path, "wind", {"183": wind_rows})
+
+    stations = hub.read_stations(tmp_path / "solar" / "stations.txt")
+    assert stations["44"] == (52.9336, 8.237, "Großenkneten")
+    assert stations["183"][2] == "Kap Arkona"
+
+    start_ms = int(start.timestamp() * 1000)
+    solar = hub.read_dwd_series(tmp_path, "solar", start_ms, 48)
+    assert round(solar["44"][34]) == 1000  # 21 Jun 10:00 UTC
+    assert np.isnan(solar["44"][35])  # 11 UTC: only 3 of 6 values
+
+    weather = {
+        "start_ms": start_ms,
+        "solar": solar,
+        "wind": hub.read_dwd_series(tmp_path, "wind", start_ms, 48),
+    }
+    block = hub.weather_block(day, weather)
+    assert block["hours"] == 24
+    assert block["solar_stations"] == ["44"]
+    assert block["radiation_wm2"][0][12] == 1000  # 12:00 local = 10:00 UTC
+    assert block["wind_stations"] == []  # wind station has 50 % gaps: left out

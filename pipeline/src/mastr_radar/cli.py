@@ -185,7 +185,7 @@ def aggregate() -> None:
 
 @app.command("hub-fetch")
 def hub_fetch() -> None:
-    """Hub H1: download SMARD series for the last 12 months (cached)."""
+    """Hub H1: download SMARD series (cached) and DWD weather stations."""
     from datetime import date
 
     from mastr_radar import hub
@@ -193,6 +193,8 @@ def hub_fetch() -> None:
     s = load_settings()
     n = hub.fetch_smard(s.hub, s.data_dir / "hub" / "smard", date.today())
     typer.echo(f"SMARD: {n} files downloaded.")
+    m = hub.fetch_dwd(s.hub, s.data_dir / "hub" / "dwd")
+    typer.echo(f"DWD: {m} files downloaded.")
 
 
 @app.command("hub-build")

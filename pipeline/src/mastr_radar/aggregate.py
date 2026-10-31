@@ -21,7 +21,7 @@ from mastr_radar.config import PIPELINE_ROOT
 from mastr_radar.extract import ENUMS, UNITS_SCHEMA, export_date_of
 
 CONTRACT_VERSION = "1.3"
-MAX_TOTAL_BYTES = 25 * 1024 * 1024
+MAX_TOTAL_BYTES = 50 * 1024 * 1024  # contract v1.4 (draft)
 MAP_POINT_MIN_KW = 100.0  # D5: units from 100 kW are individual points
 DEFAULT_OPERATOR_NAME_MIN_KW = 1000.0  # operator names only from 1 MW (settings)
 BOUNDARIES_DIR = PIPELINE_ROOT / "assets" / "boundaries"
@@ -289,7 +289,7 @@ def check_explorer_files(out_dir: Path, units_path: Path) -> None:
 
     total = sum(p.stat().st_size for p in out_dir.rglob("*") if p.is_file())
     if total > MAX_TOTAL_BYTES:
-        problems.append(f"{out_dir} is {total:,} bytes, over the 25 MB budget.")
+        problems.append(f"{out_dir} is {total:,} bytes, over the 50 MB budget.")
 
     if problems:
         raise ExplorerCheckError("; ".join(problems))

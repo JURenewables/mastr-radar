@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP37 of 48 · Phase 7 · DWD weather import**
+**You are here: WP38 of 48 · Phase 7 · Section "Germany in 24 hours"**
 
-Progress: Part 1 done (25 / 25) · Part 2: 11 / 23
+Progress: Part 1 done (25 / 25) · Part 2: 12 / 23
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -181,8 +181,10 @@ real stress signals (line loading itself is not published).
   per grid area; back-filled for the last 12 months.
   *Result:* 364 days, 10 MB; nuclear left out (no values since Apr 2023); 6
   night-time solar spikes cleaned; own daily workflow `hub-daily.yml`.
-- [ ] **WP37. DWD import.** Hourly sunshine and wind per weather station;
+- [x] **WP37. DWD import.** Hourly sunshine and wind per weather station;
   back-filled.
+  *Result:* every day file has hourly radiation (≈65 stations) and wind
+  (≈285 stations); `days/stations.json`; 20 MB for the year.
 - [ ] **WP38. Section "Germany in 24 hours".** Date picker, generation stacked
   against demand with a play head, map of the 4 grid areas.
 - [ ] **WP39. Estimated solar map per district** (MaStR capacity × DWD

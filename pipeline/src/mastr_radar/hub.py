@@ -7,13 +7,17 @@ Licence CC BY 4.0, attribution "Bundesnetzagentur | SMARD.de".
 
 from __future__ import annotations
 
+import io
 import json
 import logging
+import re
+import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import numpy as np
 import requests
 
 from mastr_radar.config import HubSettings
@@ -22,8 +26,9 @@ log = logging.getLogger(__name__)
 
 BERLIN = ZoneInfo("Europe/Berlin")
 QUARTER_MS = 15 * 60 * 1000
-ATTRIBUTION = ["Bundesnetzagentur | SMARD.de"]
-MAX_DAYS_BYTES = 20 * 1024 * 1024
+ATTRIBUTION = ["Bundesnetzagentur | SMARD.de", "Deutscher Wetterdienst"]
+MAX_DAYS_BYTES = 30 * 1024 * 1024
+HOUR_MS = 3600 * 1000
 CONTRACT_VERSION = "1.4"
 
 
@@ -129,6 +134,99 @@ def load_cache(
     return out
 
 
+# --- H1 Fetch: DWD weather stations ------------------------------------------
+
+
+def fetch_dwd(settings: HubSettings, cache_dir: Path, workers: int = 8) -> int:
+    """Download DWD station lists and the 'recent' files (about the last 500 days).
+
+    The recent files are updated daily, so they are always downloaded again.
+    """
+    cfg = settings.dwd
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    jobs = []
+    for kind in ("solar", "wind"):
+        folder = f"{cfg['base_url']}/{cfg[kind + '_dir']}"
+        (cache_dir / kind).mkdir(exist_ok=True)
+        jobs.append((f"{folder}/{cfg[kind + '_stations']}", cache_dir / kind / "stations.txt"))
+        listing = requests.get(f"{folder}/", timeout=60)
+        listing.raise_for_status()
+        for name in sorted(set(re.findall(r'href="([^"]+_akt\.zip)"', listing.text))):
+            jobs.append((f"{folder}/{name}", cache_dir / kind / name))
+
+    def download(job):
+        url, path = job
+        for attempt in range(4):
+            try:
+                r = requests.get(url, timeout=60)
+                r.raise_for_status()
+                path.write_bytes(r.content)
+                return
+            except requests.RequestException:
+                if attempt == 3:
+                    raise
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        list(pool.map(download, jobs))
+    log.info("DWD: %d files downloaded", len(jobs))
+    return len(jobs)
+
+
+def read_stations(path: Path) -> dict[str, tuple[float, float, str]]:
+    """Station id → (lat, lon, name) from a DWD station description file."""
+    out = {}
+    for line in path.read_text(encoding="latin-1").splitlines()[2:]:
+        parts = line.split()
+        if len(parts) < 7 or not parts[0].isdigit():
+            continue
+        name = " ".join(parts[6:-2]) if len(parts) > 8 else parts[6]
+        out[str(int(parts[0]))] = (float(parts[4]), float(parts[5]), name)
+    return out
+
+
+def read_dwd_series(cache_dir: Path, kind: str, start_ms: int, hours: int) -> dict[str, np.ndarray]:
+    """Station id → hourly array (UTC hours from start_ms), NaN where missing.
+
+    Solar: mean global radiation in W/m² from GS_10 (J/cm² per 10 min ×
+    10 000 / 600 s); an hour needs at least 4 of its 6 values. Wind: hourly
+    mean speed F in m/s.
+    """
+    out: dict[str, np.ndarray] = {}
+    for zpath in sorted((cache_dir / kind).glob("*_akt.zip")):
+        with zipfile.ZipFile(zpath) as zf:
+            member = next((n for n in zf.namelist() if n.startswith("produkt")), None)
+            if member is None:
+                continue
+            text = io.TextIOWrapper(zf.open(member), encoding="latin-1")
+            sums = np.zeros(hours)
+            counts = np.zeros(hours)
+            station = None
+            for line in text:
+                parts = line.split(";")
+                if not parts[0].strip().isdigit():
+                    continue
+                station = str(int(parts[0]))
+                stamp = parts[1].strip()
+                t = datetime(
+                    int(stamp[0:4]), int(stamp[4:6]), int(stamp[6:8]), int(stamp[8:10]), tzinfo=UTC
+                )
+                i = int((t.timestamp() * 1000 - start_ms) // HOUR_MS)
+                if not 0 <= i < hours:
+                    continue
+                raw = float(parts[4] if kind == "solar" else parts[3])
+                if raw < 0:  # -999: missing
+                    continue
+                sums[i] += raw * 10_000 / 600 if kind == "solar" else raw
+                counts[i] += 1
+            if station is None:
+                continue
+            need = 4 if kind == "solar" else 1
+            with np.errstate(invalid="ignore", divide="ignore"):
+                series = np.where(counts >= need, sums / np.maximum(counts, 1), np.nan)
+            out[station] = series
+    return out
+
+
 # --- H2 Build day files -------------------------------------------------------
 
 
@@ -158,7 +256,37 @@ def _clean_night_solar(series: list[int | None], slots: list[int]) -> int:
     return cleaned
 
 
-def build_day(day: date, cache: dict, settings: HubSettings) -> dict:
+def day_hours(day: date) -> list[int]:
+    """UTC ms of every hour of a local (Europe/Berlin) day: 23, 24 or 25 hours."""
+    return day_slots(day)[::4]
+
+
+def weather_block(day: date, weather: dict | None) -> dict | None:
+    """Hourly radiation (W/m², integer) and wind (0.1 m/s, integer) per station.
+
+    Stations with less than 80 % of the day's hours are left out that day.
+    """
+    if not weather:
+        return None
+    hours = day_hours(day)
+    idx = [int((t - weather["start_ms"]) // HOUR_MS) for t in hours]
+    block: dict = {"hours": len(hours)}
+    for kind, key, factor in (("solar", "radiation_wm2", 1), ("wind", "wind_dms", 10)):
+        ids, values = [], []
+        for sid, series in weather[kind].items():
+            if idx[0] < 0 or idx[-1] >= len(series):
+                continue
+            row = series[idx]
+            if np.isnan(row).sum() > 0.2 * len(row):
+                continue
+            ids.append(sid)
+            values.append([None if np.isnan(v) else round(float(v) * factor) for v in row])
+        block[f"{kind}_stations"] = ids
+        block[key] = values
+    return block
+
+
+def build_day(day: date, cache: dict, settings: HubSettings, weather: dict | None = None) -> dict:
     slots = day_slots(day)
     gen, demand, residual = {}, {}, {}
     cleaned = 0
@@ -179,6 +307,7 @@ def build_day(day: date, cache: dict, settings: HubSettings) -> dict:
         "demand_mw": demand,
         "residual_load_mw": residual,
         "cleaned_values": cleaned,
+        "weather": weather_block(day, weather),
         "sources": ATTRIBUTION,
     }
 
@@ -197,16 +326,42 @@ def _day_complete(day: dict) -> bool:
     return True
 
 
+def load_weather(dwd_dir: Path, first: date, today: date, days_dir: Path) -> dict | None:
+    """Hourly DWD series for the window, and days/stations.json with coordinates."""
+    if not (dwd_dir / "solar" / "stations.txt").exists():
+        log.warning("No DWD cache: day files without weather.")
+        return None
+    start = datetime.combine(first - timedelta(days=1), datetime.min.time(), UTC)
+    start_ms = int(start.timestamp() * 1000)
+    hours = (today - first).days * 24 + 72
+    weather = {"start_ms": start_ms}
+    stations = {}
+    for kind in ("solar", "wind"):
+        weather[kind] = read_dwd_series(dwd_dir, kind, start_ms, hours)
+        coords = read_stations(dwd_dir / kind / "stations.txt")
+        stations[kind] = [
+            [sid, round(coords[sid][0], 4), round(coords[sid][1], 4), coords[sid][2]]
+            for sid in sorted(weather[kind], key=int)
+            if sid in coords
+        ]
+        weather[kind] = {sid: v for sid, v in weather[kind].items() if sid in coords}
+    (days_dir / "stations.json").write_text(
+        json.dumps({**stations, "sources": ["Deutscher Wetterdienst"]}, ensure_ascii=False)
+    )
+    return weather
+
+
 def build_days(settings: HubSettings, cache_dir: Path, out_dir: Path, today: date) -> dict:
     """Write day files for the last keep_days complete days and the index."""
     days_dir = out_dir / "days"
     days_dir.mkdir(parents=True, exist_ok=True)
     cache = load_cache(settings, cache_dir)
     first = today - timedelta(days=settings.keep_days)
+    weather = load_weather(cache_dir.parent / "dwd", first, today, days_dir)
     written, skipped = [], []
     d = first
     while d < today:  # today is never written: it is not complete yet
-        day = build_day(d, cache, settings)
+        day = build_day(d, cache, settings, weather)
         if _day_complete(day):
             path = days_dir / f"{d.isoformat()}.json"
             path.write_text(json.dumps(day, separators=(",", ":")))
@@ -262,6 +417,18 @@ def check_days(out_dir: Path, settings: HubSettings) -> None:
             if any(len(s) != expected or not _complete(s) for s in series):
                 problems.append(f"{d}: incomplete series in {region}.")
                 break
+        w = day.get("weather")
+        if w:
+            if w["hours"] != expected // 4:
+                problems.append(f"{d}: weather has {w['hours']} hours, expected {expected // 4}.")
+            if len(w["solar_stations"]) < 50 or len(w["wind_stations"]) < 100:
+                problems.append(f"{d}: too few weather stations.")
+            rad = [v for row in w["radiation_wm2"] for v in row if v is not None]
+            wind = [v for row in w["wind_dms"] for v in row if v is not None]
+            if rad and (min(rad) < 0 or max(rad) > 1500):
+                problems.append(f"{d}: radiation outside 0–1500 W/m².")
+            if wind and (min(wind) < 0 or max(wind) > 600):
+                problems.append(f"{d}: wind outside 0–60 m/s.")
         solar = [v or 0 for v in day["generation_mw"]["DE"]["solar"]]
         peak = max(solar) or 1
         night = solar[: 3 * 4] + solar[-4:]  # 00:00-03:00 and 23:00-24:00
