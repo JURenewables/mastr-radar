@@ -21,6 +21,6 @@ def test_settings_load():
 
 
 def test_unimplemented_steps_fail_clearly():
-    result = runner.invoke(app, ["extract"])
+    result = runner.invoke(app, ["aggregate"])
     assert result.exit_code == 1
-    assert "WP6" in result.stdout
+    assert "WP7" in result.stdout

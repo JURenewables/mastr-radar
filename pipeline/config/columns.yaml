@@ -1,0 +1,83 @@
+# Station 2 column mapping: MaStR export (German) → units.parquet (contract v1.1).
+# This file is the single place where German source names are mapped.
+# A list of source names means: take the first one present.
+
+# Fields stored as catalogue numbers; decoded with Katalogwerte.xml.
+catalog_fields:
+  - Land
+  - Bundesland
+  - EinheitBetriebsstatus
+  - EinheitSystemstatus
+  - Energietraeger
+  - WindAnLandOderAufSee
+  - Seelage
+  - Hersteller
+  - Technologie
+  - ArtDerSolaranlage
+  - Batterietechnologie
+  - Hauptbrennstoff
+  - ArtDerWasserkraftanlage
+  - Personenart
+
+# D3: only active registrations.
+active_system_status: Aktiviert
+
+status:
+  In Betrieb: operating
+  In Planung: planned
+  Vorübergehend stillgelegt: temporarily_shut_down
+  Endgültig stillgelegt: permanently_shut_down
+
+# Operators (Marktakteure): who is a natural person (D4).
+operators:
+  files: Marktakteure_*.xml
+  record: Marktakteur
+  id: MastrNummer
+  name: Firmenname
+  person_type: Personenart
+  person_value_prefix: Natürliche Person
+
+# Columns shared by all unit files.
+common:
+  unit_id: EinheitMastrNummer
+  status: EinheitBetriebsstatus
+  system_status: EinheitSystemstatus
+  name: NameStromerzeugungseinheit
+  eeg_id: [EegMaStRNummer, EegMastrNummer]
+  capacity_kw: Bruttoleistung
+  net_capacity_kw: Nettonennleistung
+  commissioning_date: Inbetriebnahmedatum
+  planned_commissioning_date: GeplantesInbetriebnahmedatum
+  registration_date: Registrierungsdatum
+  shutdown_date: DatumEndgueltigeStilllegung
+  last_updated: DatumLetzteAktualisierung
+  state: Bundesland
+  district: Landkreis
+  municipality: Gemeinde
+  municipality_key: Gemeindeschluessel
+  postcode: Postleitzahl
+  lat: Breitengrad
+  lon: Laengengrad
+  operator_id: AnlagenbetreiberMastrNummer
+
+# One entry per unit file type. Phase 2 extracts wind only; WP10 adds the rest.
+sources:
+  wind:
+    files: EinheitenWind*.xml
+    record: EinheitWind
+    min_rows: 40000   # check: plausible row count (contract v1.1)
+    technology_field: WindAnLandOderAufSee
+    technology_values:
+      Windenergie an Land: wind_onshore
+      Windenergie auf See: wind_offshore
+    # D8: offshore region from MaStR's own sea field.
+    sea_field: Seelage
+    sea_regions:
+      Nordsee: {key: OFF_N, name: Nordsee (offshore)}
+      Ostsee: {key: OFF_O, name: Ostsee (offshore)}
+    details:
+      manufacturer: Hersteller
+      turbine_model: Typenbezeichnung
+      hub_height_m: Nabenhoehe
+      rotor_diameter_m: Rotordurchmesser
+      wind_park: NameWindpark

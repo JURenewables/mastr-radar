@@ -147,3 +147,18 @@ should be set **per technology** (measured fully, including solar, in WP11).
 | `technology` (wind on/offshore) | `Lage` | `WindAnLandOderAufSee` |
 | `solar_type` | `Lage` / `ArtDerSolaranlage` | `ArtDerSolaranlage` |
 | `eeg_id` (solar) | `EegMastrNummer` | `EegMaStRNummer` |
+
+## 9. Station 2 run (WP6, wind)
+
+- 44 344 wind units (42 435 onshore, 1 909 offshore) in 84 s. Most of that
+  time goes into reading 5.75 M operators.
+- Totals match WP4: 71.54 GW onshore and 11.64 GW offshore operating; 4.24 GW
+  onshore commissioned in 2026. Offshore: 1 580 Nordsee, 329 Ostsee.
+- Fixes counted in `data/extract/extract_report.json`: 7 coordinates outside
+  Germany nulled, 11 broken municipality codes, 0 dates out of range.
+- **Unknown operators are treated as private (D4, safe default).** 2 652
+  permanently shut-down turbines have no operator, so they lose name and
+  coordinates. Together with 2 340 privately owned turbines, 4 992 units are
+  blanked.
+- Names are Unicode-normalised: some operator names use a full-width
+  ampersand (`＆`), which becomes `&`.

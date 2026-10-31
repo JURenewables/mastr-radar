@@ -1,8 +1,8 @@
 # MaStR Radar: roadmap
 
-**You are here: WP6 of 25 · Phase 2 · Next: station 2, extract wind into units.parquet**
+**You are here: WP7 of 25 · Phase 2 · Next: station 3, first explorer files (manifest + headline numbers)**
 
-Progress: █████░░░░░░░░░░░░░░░░░░░░ 5 / 25
+Progress: ██████░░░░░░░░░░░░░░░░░░░ 6 / 25
 
 Each work package (WP) takes about 30 minutes and ends with something
 committed and checked. "Done when" is the test for ticking it off.
@@ -40,9 +40,11 @@ building anything wide. That way every problem in the chain shows up early.
   a tiny fixture zip pass (incl. a simulated broken download).
   *Result:* full export 3.26 GB in 50 min; the connection broke at 3.12 GB
   and the download resumed and finished; check passed (189 files, CRC).
-- [ ] **WP6. Station 2: Extract (wind).** Export zip → `units.parquet` for wind,
+- [x] **WP6. Station 2: Extract (wind).** Export zip → `units.parquet` for wind,
   validated against the contract.
   *Done when:* runs on the real data and a fixture test passes.
+  *Result:* 44 344 turbines in 84 s; check passed; totals match WP4
+  (71.54 GW onshore, 11.64 GW offshore operating).
 - [ ] **WP7. Station 3: First explorer file.** `manifest.json` (as-of date)
   and `kpis.json` (total installed onshore wind), validated.
   *Done when:* files are generated and checked.

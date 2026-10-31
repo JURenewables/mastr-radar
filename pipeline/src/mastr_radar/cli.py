@@ -102,9 +102,46 @@ def _check_and_write_meta(path: Path, source_url, result, *, verify_crc: bool) -
 
 
 @app.command()
-def extract() -> None:
-    """Station 2: read the export zip into units.parquet."""
-    _not_yet("extract", 6)
+def extract(
+    zip_path: Path = typer.Argument(None, help="Export zip. Default: newest in data/raw."),
+    source: list[str] = typer.Option(["wind"], help="Source types to extract (WP6: wind)."),
+) -> None:
+    """Station 2: read the export zip into units.parquet and check it."""
+    import pyarrow.parquet as pq
+
+    from mastr_radar import extract as ex
+
+    s = load_settings()
+    if zip_path is None:
+        zips = sorted(s.raw_dir.glob("Gesamtdatenexport_*.zip"))
+        if not zips:
+            typer.echo("No export zip in data/raw. Run `mastr-radar download` first.", err=True)
+            raise typer.Exit(code=1)
+        zip_path = zips[-1]
+    export_date = dl.export_date_from_name(zip_path)
+    out = s.data_dir / "extract" / "units.parquet"
+    report_path = out.with_name("extract_report.json")
+    previous = ex.read_previous_rows(report_path)
+
+    cfg = ex.load_columns_config()
+    report = ex.extract(zip_path, out, export_date=export_date, sources=tuple(source), cfg=cfg)
+    min_rows = {src: cfg["sources"][src]["min_rows"] for src in source}
+    try:
+        warnings = ex.check_units(
+            pq.read_table(out),
+            export_date=export_date,
+            min_rows=min_rows,
+            report=report,
+            previous_rows=previous,
+        )
+    except ex.UnitsCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        out.unlink(missing_ok=True)  # a broken station must not feed the next one
+        raise typer.Exit(code=1) from exc
+    ex.write_report(report_path, report)
+    for w in warnings:
+        typer.echo(f"WARNING: {w}")
+    typer.echo(f"Check passed: {dict(report.rows)} → {out}")
 
 
 @app.command()

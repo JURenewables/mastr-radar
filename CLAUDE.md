@@ -150,4 +150,6 @@ data/                local working dir for downloads (git-ignored)
   `uv run ruff check . && uv run ruff format --check .`
 - Station 1: `uv run mastr-radar download` (newest export, resumable, then
   checked), `uv run mastr-radar check-download <zip>` (check only)
+- Station 2: `uv run mastr-radar extract` (newest zip → `data/extract/units.parquet`,
+  then checked; report in `extract_report.json`)
 - Web: (added in WP7)
