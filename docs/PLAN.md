@@ -136,7 +136,10 @@ Each becomes its own phase once the explorer is live.
 2. **Snapshot storage (for later change tracking):** GitHub Release assets.
    No setup needed.
 3. **Operator names:** legal entities only, units ≥ 1 MW.
-4. **Repo:** public. Site public on Vercel. *(Domain still open.)*
+4. **Repo:** public. Site public on Vercel: project `mastr-radar`, linked to
+   GitHub, root directory `web`, Next.js, Node 22. Live site (from `main`):
+   https://mastr-radar.vercel.app. Other branches get preview links.
+   *(Custom domain still open.)*
 5. **Scope:** exploration suite first; auctions and yield later.
 6. **Contract v1.1** (after WP4): own reader instead of open-mastr; offshore
    regions from MaStR's `Seelage`; storage includes pumped hydro;
