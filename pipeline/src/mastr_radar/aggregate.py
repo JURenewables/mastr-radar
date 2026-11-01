@@ -209,6 +209,9 @@ def build(
         from mastr_radar import market_risk
 
         files += market_risk.build(out_dir, as_of)
+        from mastr_radar import players
+
+        files += players.build(out_dir)
 
     manifest = {
         "contract_version": CONTRACT_VERSION,
@@ -315,6 +318,13 @@ def check_explorer_files(
         try:
             market_risk.check(out_dir)
         except market_risk.RiskCheckError as exc:
+            problems.append(str(exc))
+        from mastr_radar import players
+
+        expected_files.add(players.FILE)
+        try:
+            players.check(out_dir)
+        except players.PlayersCheckError as exc:
             problems.append(str(exc))
     if missing := expected_files - set(listed):
         problems.append(f"manifest: missing files {sorted(missing)}.")
