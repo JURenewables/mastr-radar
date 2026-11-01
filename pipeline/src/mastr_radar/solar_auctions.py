@@ -384,6 +384,13 @@ def build(
             for st in sorted(sol["state"].dropna().unique())
         },
         "portfolios": portfolios,
+        "dynamics": wa.dynamics(
+            sol,
+            years,
+            [r["id"] for r in rounds_out if r["programme"] == "solar" and r["award_level"]],
+            [r["bid_date"] for r in rounds_out if r["programme"] == "solar" and r["award_level"]],
+            recent=4,
+        ),
         "company_profiles": _profiles(sol, years),
         "points": _points(df, cats),
         "attribution_kw": {

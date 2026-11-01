@@ -771,6 +771,9 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
             for st in sorted(df["state"].dropna().unique())
         },
         "company_profiles": _profiles(df, years, cutoff),
+        "dynamics": dynamics(
+            df, years, [r["id"] for r in round_out], [r["bid_date"] for r in round_out]
+        ),
         "median_award_mw": round(float(df.loc[df["kw"] > 0, "kw"].median()) / 1000, 1),
         "company_reported": _reported(reviewed, round_out, df),
         "reviewed_awards": int((df["attribution"] == "reviewed").sum()),
@@ -901,6 +904,71 @@ def _reported(reviewed: dict, rounds: list[dict], df: pd.DataFrame) -> list[dict
             }
         )
     return out
+
+
+DYN_MIN_KW = 100_000
+
+
+def dynamics(
+    df: pd.DataFrame, years: list[str], round_ids: list[str], bid_dates: list[str], recent: int = 6
+) -> dict:
+    """Rise and fall of company groups: share early vs late, consistency, volatility.
+
+    Shared by wind and solar. `early`/`late` = first and last third of the years
+    (at least one year each); the running year counts as late.
+    """
+    named = df[df["group"].notna() & (df["rank_group"] == df["group"])]
+    total_by_year = df.groupby("year")["kw"].sum()
+    k = max(1, len(years) // 3)
+    early, late = years[:k], years[-k:]
+    order = {r: i for i, r in enumerate(round_ids)}
+    rows = []
+    for g, d in named.groupby("group"):
+        kw = d["kw"].sum()
+        if kw < DYN_MIN_KW:
+            continue
+        by_year = [float(d.loc[d["year"] == y, "kw"].sum()) for y in years]
+        share = [
+            v / float(total_by_year.get(y, 0) or 1) for v, y in zip(by_year, years, strict=True)
+        ]
+        won = sorted({order[r] for r in d["round"]})
+        possible = len(round_ids) - won[0]
+        active = [v for v, y in zip(by_year, years, strict=True) if y >= d["year"].min()]
+        mean = float(np.mean(active)) if active else 0
+        cv = float(np.std(active) / mean) if mean else None
+        e, l_ = float(np.mean(share[:k])), float(np.mean(share[-k:]))
+        first, last = d["bid_date"].min(), d["bid_date"].max()
+        n = len(round_ids)
+        if won[0] >= n * 2 / 3:
+            status = "new"  # first award in the last third of the rounds
+        elif won[-1] < n - recent:
+            status = "dropped"  # no award in the last `recent` rounds
+        elif l_ - e >= 0.005:
+            status = "rising"
+        elif l_ - e <= -0.005:
+            status = "fading"
+        else:
+            status = "steady"
+        rows.append(
+            {
+                "group": g,
+                "category": d["category"].iloc[0],
+                "mw": round(float(kw) / 1000),
+                "kw_by_year": by_year,
+                "share_early": round(e, 4),
+                "share_late": round(l_, 4),
+                "momentum_pp": round((l_ - e) * 100, 2),
+                "rounds_won": len(won),
+                "rounds_possible": possible,
+                "hit_rate": round(len(won) / possible, 3) if possible else None,
+                "volatility": None if cv is None else round(cv, 2),
+                "first_bid": first,
+                "last_bid": last,
+                "status": status,
+            }
+        )
+    rows.sort(key=lambda r: -r["mw"])
+    return {"years": years, "early": early, "late": late, "recent_rounds": recent, "groups": rows}
 
 
 def _mode(det: pd.DataFrame, ids) -> str | None:
