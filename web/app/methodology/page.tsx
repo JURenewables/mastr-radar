@@ -199,7 +199,11 @@ export default async function Methodology() {
           <p>
             Bidders are sorted into company groups and types (developers and IPPs, utilities and
             Stadtwerke, citizen and local) by keywords in their company name. Many bidders are project
-            companies whose name does not reveal their owner; they stay “not attributed”, unless a
+            companies whose name does not reveal their owner. For these, the office address that the
+            operator company registered in the Marktstammdatenregister is used: if the other companies
+            registered at that address belong to one group, the award counts for that group (for
+            example, many project companies sit at their developer&apos;s head office). Addresses are only
+            used for this grouping and are never published. Awards stay “not attributed” unless a
             company announcement names the project, in which case the award is assigned by hand
             (each assignment cites its source). Company-announced round totals are shown next to
             ours as a cross-check. Names of

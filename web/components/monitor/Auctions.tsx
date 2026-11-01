@@ -362,8 +362,14 @@ export function AuctionWinners({ a, brands }: { a: Auctions; brands: string[] })
         <p className="mt-3 text-xs text-ink-muted">
           Striped bars stand for many companies, not one competitor. Bidders are grouped by the company
           name in the award list (e.g. “wpd Windpark Nr. 440 GmbH & Co. KG” → wpd). Project companies
-          that carry no group name are “not attributed”; groups that bid through them are undercounted.
-          Awards that company sources tie to a group are assigned by hand.
+          that carry no group name are traced through the office address the operator company registered
+          in MaStR: if the other companies registered there belong to one group, the award counts for
+          it. Awards that company sources tie to a group are assigned by hand. Share of capacity:{" "}
+          {(() => {
+            const t = Object.values(a.attribution_kw).reduce((x, y) => x + y, 0) || 1;
+            const pct = (k: keyof typeof a.attribution_kw) => Math.round((a.attribution_kw[k] / t) * 100);
+            return `${pct("name")}% by company name, ${pct("office")}% by office address, ${pct("reviewed") || "<1"}% by hand, ${pct("none")}% still not attributed.`;
+          })()}
           Alterric (EWE / Aloys Wobben Stiftung) counts as an IPP; enercity as a Stadtwerk.
         </p>
       </div>
