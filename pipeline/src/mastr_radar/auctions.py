@@ -726,6 +726,7 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         "fleet": _fleet(units_path, cfg, buckets),
         "drivers": drivers,
         "drivers_realised_cutoff": cutoff,
+        "points": _points(df, cats),
         "company_reported": _reported(reviewed, round_out, df),
         "reviewed_awards": int((df["attribution"] == "reviewed").sum()),
         "attribution_kw": {
@@ -757,6 +758,27 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         path.write_text(json.dumps(data, separators=(",", ":"), ensure_ascii=False))
         entries.append({"name": f"auctions/{name}", "rows": n, "bytes": path.stat().st_size})
     return entries
+
+
+def _points(df: pd.DataFrame, cats: list[str]) -> dict:
+    """Award locations per round for the map: flat integer arrays, 6 per award
+    (lon×100, lat×100, kW/100, category index, group index or −1, full-load
+    hours or 0). Only awards with a public location (companies, D4)."""
+    groups = sorted(df.loc[df["lat"].notna() & df["group"].notna(), "rank_group"].unique())
+    gi = {g: i for i, g in enumerate(groups)}
+    rounds: dict[str, list[int]] = {}
+    for r in df[df["lat"].notna()].itertuples():
+        rounds.setdefault(r.round, []).extend(
+            [
+                int(round(r.lon * 100)),
+                int(round(r.lat * 100)),
+                int(round(r.kw / 100)),
+                cats.index(r.category),
+                gi.get(r.rank_group, -1) if isinstance(r.group, str) else -1,
+                0 if pd.isna(r.full_load_hours) else int(r.full_load_hours),
+            ]
+        )
+    return {"groups": groups, "rounds": rounds}
 
 
 def _reported(reviewed: dict, rounds: list[dict], df: pd.DataFrame) -> list[dict]:
