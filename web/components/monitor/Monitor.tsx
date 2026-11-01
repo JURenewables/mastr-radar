@@ -1,6 +1,6 @@
 "use client";
 
-import { useMonitorData, mw } from "@/lib/monitor";
+import { useMonitorData, mw, type AuctionCategory } from "@/lib/monitor";
 import { formatDate } from "@/lib/format";
 
 import { Day24 } from "./Day24";
@@ -16,7 +16,7 @@ import {
   YearRace,
 } from "./Sections";
 import { Loading, Section } from "./ui";
-import { AuctionPrices, AuctionWinners, roundLabel } from "./Auctions";
+import { AuctionCake, AuctionPlayers, AuctionPrices, AuctionRace, AuctionWinners, AuctionYield, roundLabel } from "./Auctions";
 import { BrandRace, BrandShares, TurbineModels } from "./WindIndustry";
 
 export const SECTIONS = [
@@ -29,7 +29,10 @@ export const SECTIONS = [
   ["makers", "Makers"],
   ["models", "Models"],
   ["auctions", "Auctions"],
+  ["site-quality", "Site quality"],
   ["winners", "Winners"],
+  ["auction-race", "Race"],
+  ["players", "Players"],
   ["where", "Where"],
   ["storage", "Storage"],
   ["pipeline", "Next wave"],
@@ -81,12 +84,21 @@ export function Monitor({ asOf }: { asOf: string }) {
   const au = data?.auctions;
   const auFirst = au?.rounds[0];
   const auLast = au?.rounds.at(-1);
-  const auYear = au ? Object.keys(au.winners_by_year).sort().at(-1)! : "";
+  const auYears = au ? Object.keys(au.winners_by_year).filter((y) => y !== "all").sort() : [];
+  const auYear = auYears.at(-1) ?? "";
   const auYearRounds = au?.rounds.filter((r) => r.bid_date.startsWith(auYear)) ?? [];
-  const auShare = (c: "developer" | "utility") => {
+  const auShare = (c: AuctionCategory) => {
     const tot = auYearRounds.reduce((t, r) => t + r.list_kw, 0) || 1;
     return Math.round((auYearRounds.reduce((t, r) => t + r.kw_by_category[c], 0) / tot) * 100);
   };
+  const auPeak = au ? au.rounds.reduce((m, r) => (r.avg_ct > m.avg_ct ? r : m), au.rounds[0]) : undefined;
+  // Developers' share among bidders whose owner is known, first vs last year.
+  const knownShare = (i: number) => {
+    if (!au) return 0;
+    const known = (["developer", "utility", "municipal", "citizen"] as const).reduce((t, c) => t + au.kw_by_category_year[c][i], 0) || 1;
+    return Math.round((au.kw_by_category_year.developer[i] / known) * 100);
+  };
+  const auAll = (c: AuctionCategory) => (au ? Math.round((au.drivers[c].awarded_mw / Object.values(au.drivers).reduce((t, d) => t + d.awarded_mw, 0)) * 100) : 0);
   const auSource = au ? (
     <>
       Source: Bundesnetzagentur, onshore wind auctions (award lists and round results), linked to the
@@ -211,27 +223,62 @@ export function Monitor({ asOf }: { asOf: string }) {
         {data ? <TurbineModels data={data} /> : <Loading />}
       </Section>
 
-      {au && auFirst && auLast && (
+      {au && auFirst && auLast && auPeak && (
         <>
           <Section
             id="auctions"
             eyebrow="Onshore wind auctions"
-            title={`Award prices fell from ${auFirst.avg_ct.toFixed(2)} to ${auLast.avg_ct.toFixed(2)} ct/kWh between ${roundLabel(auFirst.bid_date)} and ${roundLabel(auLast.bid_date)}`}
-            subtitle="Every onshore wind auction round since 2025: lowest, average and highest successful bid, against the legal ceiling."
+            title={`Award prices peaked at ${auPeak.avg_ct.toFixed(2)} ct/kWh in ${auPeak.bid_date.slice(0, 4)} and fell to ${auLast.avg_ct.toFixed(2)} ct; after the site correction projects receive about ${auLast.received_ct_est?.toFixed(2) ?? "–"} ct`}
+            subtitle="Every onshore wind round since May 2019: the award value projects bid, the legal ceiling, and the estimated value they actually receive once the EEG corrects it for the quality of their site."
             asOf={date}
             source={auSource}
           >
             <AuctionPrices a={au} />
           </Section>
           <Section
+            id="site-quality"
+            eyebrow="Merit order by wind"
+            title={`The ${roundLabel(auLast.bid_date)} awards average about ${auLast.full_load_hours_avg?.toLocaleString("en-GB") ?? "–"} full-load hours at ${auLast.quality_pct_avg ?? "–"}% site quality, so their award value is multiplied by ${auLast.correction_factor_avg?.toFixed(2) ?? "–"}`}
+            subtitle="Every awarded project, located through the register and rated with DWD wind data: which sites win, how good they are, and the correction factor they earn."
+            note="Full-load hours, site quality and correction factors are model estimates."
+            asOf={date}
+            source={<>Source: Bundesnetzagentur (awards), Marktstammdatenregister as of {date} (turbines), Deutscher Wetterdienst (wind, CC BY 4.0). Data processed.</>}
+          >
+            <AuctionYield a={au} />
+          </Section>
+          <Section
             id="winners"
             eyebrow={`Auction winners ${auYear}`}
-            title={`Developers and IPPs won at least ${auShare("developer")}% of the ${auYear} capacity; utilities and Stadtwerke ${auShare("utility")}%`}
-            subtitle="Which company groups won the most capacity, which types of bidder win, and whose turbines they plan to build."
+            title={`Developers and IPPs won at least ${auShare("developer")}% of the ${auYear} capacity; utilities ${auShare("utility")}%, Stadtwerke ${auShare("municipal")}%`}
+            subtitle={`Pick a year and bidder types. ${auShare("unattributed")}% of the ${auYear} capacity went to project companies whose owner the list does not name; they get their own bar, as do citizen wind farms.`}
             asOf={date}
             source={auSource}
           >
             <AuctionWinners a={au} brands={s?.wind_industry.brands ?? []} />
+          </Section>
+          <Section
+            id="auction-race"
+            eyebrow="Auctions since 2019"
+            title={`Among known bidders, developers and IPPs won ${knownShare(au.race.years.length - 1)}% of the capacity in ${auYear}, after ${knownShare(0)}% in ${au.race.years[0]}`}
+            subtitle="Press play: who won the most auction capacity, year by year, by company group or by type of bidder, and how the cake is shared."
+            note={`The ${auYear} figures cover the rounds awarded so far.`}
+            asOf={date}
+            source={auSource}
+          >
+            <div className="space-y-12">
+              <AuctionRace a={au} />
+              <AuctionCake a={au} />
+            </div>
+          </Section>
+          <Section
+            id="players"
+            eyebrow="Developers vs utilities"
+            title={`Utilities and Stadtwerke won ${auAll("utility") + auAll("municipal")}% of auction capacity since 2019; developers and IPPs at least ${auAll("developer")}%`}
+            subtitle="Who owns the turbines that came out of the auctions and the fleet as a whole, what the data shows about each type of bidder, and why lean developers keep winning."
+            asOf={date}
+            source={auSource}
+          >
+            <AuctionPlayers a={au} />
           </Section>
         </>
       )}

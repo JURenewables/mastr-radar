@@ -1,7 +1,9 @@
 "use client";
 
-// Onshore wind auctions (contract v1.5 draft): award prices per round, winning
-// company groups, and who wins by type of bidder.
+// Onshore wind auctions (contract v1.6 draft): award prices and the estimated
+// value projects receive after the site correction, a merit order of the
+// awarded projects by estimated full-load hours, winners by company group and
+// bidder type over time, who owns the turbines, and why developers win.
 import * as Plot from "@observablehq/plot";
 import { useMemo, useState } from "react";
 
@@ -9,63 +11,162 @@ import { PlotFigure } from "@/components/explorer/PlotFigure";
 import { mw, type AuctionCategory, type Auctions } from "@/lib/monitor";
 import { cssVar } from "@/lib/theme";
 
+import { BarRace } from "./BarRace";
 import { Segmented, Stat } from "./ui";
 import { brandColor } from "./WindIndustry";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 export const roundLabel = (bidDate: string) => `${MONTHS[Number(bidDate.slice(5, 7)) - 1]} ${bidDate.slice(2, 4)}`;
-const ct = (v: number) => v.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const ct = (v: number | null | undefined) =>
+  v == null ? "–" : v.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const int = (v: number | null | undefined) => (v == null ? "–" : Math.round(v).toLocaleString("en-GB"));
 
-export const CATEGORY_ORDER: AuctionCategory[] = ["developer", "utility", "citizen", "unattributed"];
+export const CATEGORY_ORDER: AuctionCategory[] = ["developer", "utility", "municipal", "citizen", "unattributed"];
 export const CATEGORY_COLOR: Record<AuctionCategory, string> = {
   developer: "#2563eb",
-  utility: "#f59e0b",
+  utility: "#ef4444",
+  municipal: "#f59e0b",
   citizen: "#10b981",
   unattributed: "#94a3b8",
+};
+const BUCKET_NOTE: Record<string, string> = {
+  "Not attributed": "project companies, owner unknown",
+  "Citizen & local (all)": "many citizen wind farms, co-ops, farmers",
+  "Other Stadtwerke": "many municipal utilities",
 };
 const axis = () => ({
   style: { fontFamily: "var(--font-sans)", fontSize: "12px", color: cssVar("--ink-muted") },
 });
+const date = (d: string) => new Date(`${d}T00:00:00Z`);
 
-// --- Prices per round -------------------------------------------------------
+function Legend({ a, cats = CATEGORY_ORDER }: { a: Auctions; cats?: AuctionCategory[] }) {
+  return (
+    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-muted">
+      {cats.map((c) => (
+        <span key={c} className="inline-flex items-center gap-1.5">
+          <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: CATEGORY_COLOR[c] }} />
+          {a.categories[c]}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function RoundSelect({ a, value, onChange }: { a: Auctions; value: string; onChange: (id: string) => void }) {
+  return (
+    <label className="inline-flex items-center gap-2 text-sm font-semibold">
+      Round
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-full border border-rule bg-surface px-3 py-1.5 text-sm font-semibold"
+      >
+        {[...a.rounds].reverse().map((r) => (
+          <option key={r.id} value={r.id}>
+            {roundLabel(r.bid_date)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+/** Horizontal bars with a label column; buckets (many companies) are striped. */
+function GroupBars({
+  rows,
+  max,
+  value,
+}: {
+  rows: { group: string; category: AuctionCategory; mw: number; share?: number; extra?: string; bucket?: boolean }[];
+  max: number;
+  value?: (r: { mw: number; share?: number; extra?: string }) => string;
+}) {
+  return (
+    <ol className="space-y-2.5">
+      {rows.map((w, i) => (
+        <li key={w.group} className="grid grid-cols-[1.25rem_7.5rem_1fr] items-center gap-2 sm:grid-cols-[1.5rem_12rem_1fr]">
+          <span className="figures text-xs text-ink-muted">{i + 1}</span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold">{w.group}</span>
+            {w.bucket && BUCKET_NOTE[w.group] && (
+              <span className="block truncate text-[11px] leading-tight text-ink-muted">{BUCKET_NOTE[w.group]}</span>
+            )}
+          </span>
+          <div className="flex min-w-0 items-center gap-2 overflow-hidden">
+            <div
+              className="h-5 shrink-0 rounded-full"
+              style={{
+                width: `${Math.max(1, (w.mw / max) * 55)}%`,
+                background: w.bucket
+                  ? `repeating-linear-gradient(135deg, ${CATEGORY_COLOR[w.category]} 0 6px, transparent 6px 9px)`
+                  : CATEGORY_COLOR[w.category],
+                border: w.bucket ? `1.5px solid ${CATEGORY_COLOR[w.category]}` : undefined,
+              }}
+            />
+            <span className="figures min-w-0 truncate text-xs font-semibold text-ink-muted sm:text-sm">
+              {value ? value(w) : mw(w.mw)}
+            </span>
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+// --- Prices: award value and estimated received value -----------------------
 
 export function AuctionPrices({ a }: { a: Auctions }) {
-  const rows = a.rounds.map((r) => ({ ...r, label: roundLabel(r.bid_date) }));
-  const order = rows.map((r) => r.label);
+  const rows = a.rounds.map((r) => ({ ...r, d: date(r.bid_date), label: roundLabel(r.bid_date) }));
   const last = rows.at(-1)!;
   const first = rows[0];
+  const yMin = Math.floor(Math.min(...rows.map((r) => r.min_ct ?? r.avg_ct)) - 0.3);
+  const yMax = Math.ceil(Math.max(...rows.map((r) => Math.max(r.ceiling_ct ?? 0, r.received_ct_est ?? 0))) + 0.2);
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label={`Average, ${last.label}`} value={`${ct(last.avg_ct)} ct`} sub={`${last.avg_ct - first.avg_ct > 0 ? "+" : "−"}${ct(Math.abs(last.avg_ct - first.avg_ct))} ct since ${first.label}`} />
-        <Stat label={`Lowest award, ${last.label}`} value={`${ct(last.min_ct)} ct`} />
-        <Stat label={`Highest award, ${last.label}`} value={`${ct(last.max_ct)} ct`} sub={`ceiling ${ct(last.ceiling_ct)} ct`} />
-        <Stat label={`Awarded, ${last.label}`} value={mw(last.awarded_kw / 1000)} sub={`${last.awards} awards`} />
+        <Stat
+          label={`Average award, ${last.label}`}
+          value={`${ct(last.avg_ct)} ct`}
+          sub={`${last.avg_ct - first.avg_ct > 0 ? "+" : "−"}${ct(Math.abs(last.avg_ct - first.avg_ct))} ct since ${first.label}`}
+        />
+        <Stat label="× correction factor (est.)" value={last.correction_factor_avg?.toFixed(3) ?? "–"} sub={`site quality ≈ ${last.quality_pct_avg ?? "–"}%`} />
+        <Stat label="= received value (est.)" value={`${ct(last.received_ct_est)} ct`} sub="per kWh, average of the round" />
+        <Stat label={`Awarded, ${last.label}`} value={mw((last.awarded_kw ?? last.list_kw) / 1000)} sub={`${last.awards ?? last.list_awards} awards`} />
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-muted">
+        <span className="inline-flex items-center gap-1.5"><span aria-hidden className="h-2.5 w-2.5 rounded-full bg-accent" />Average award value</span>
+        <span className="inline-flex items-center gap-1.5"><span aria-hidden className="h-0.5 w-4" style={{ background: CATEGORY_COLOR.municipal }} />Estimated value received after correction</span>
+        <span className="inline-flex items-center gap-1.5"><span aria-hidden className="h-0.5 w-4 border-t border-dashed border-ink-muted" />Ceiling</span>
       </div>
       <PlotFigure
         deps={[rows]}
         render={(width) =>
           Plot.plot({
             width,
-            height: 300,
+            height: 320,
             marginLeft: 40,
-            marginRight: width < 500 ? 10 : 40,
+            marginRight: 16,
             ...axis(),
-            x: { label: null, domain: order, padding: 0.4 },
-            y: { label: "ct/kWh", domain: [4, 7.6], grid: true },
+            x: { label: null, type: "utc" },
+            y: { label: "ct/kWh", domain: [yMin, yMax], grid: true },
             marks: [
-              Plot.lineY(rows, { x: "label", y: "ceiling_ct", stroke: cssVar("--ink-muted"), strokeDasharray: "4 4", strokeWidth: 1.5 }),
-              Plot.text(rows.slice(-1), { x: "label", y: "ceiling_ct", text: () => "ceiling", dy: -8, fill: cssVar("--ink-muted"), textAnchor: "end" }),
-              Plot.ruleX(rows, { x: "label", y1: "min_ct", y2: "max_ct", stroke: cssVar("--accent"), strokeOpacity: 0.35, strokeWidth: width < 500 ? 10 : 16, strokeLinecap: "round" }),
-              Plot.dot(rows, { x: "label", y: "avg_ct", r: 5.5, fill: cssVar("--accent"), stroke: cssVar("--paper"), strokeWidth: 2 }),
-              Plot.text(rows, { x: "label", y: "avg_ct", text: (d: { avg_ct: number }) => ct(d.avg_ct), dx: width < 500 ? 0 : 14, dy: width < 500 ? -14 : 0, textAnchor: width < 500 ? "middle" : "start", fontWeight: 700, fill: cssVar("--ink") }),
+              Plot.lineY(rows.filter((r) => r.ceiling_ct), { x: "d", y: "ceiling_ct", curve: "step-after", stroke: cssVar("--ink-muted"), strokeDasharray: "4 4", strokeWidth: 1.5 }),
+              Plot.ruleX(rows.filter((r) => r.min_ct != null && r.max_ct != null), { x: "d", y1: "min_ct", y2: "max_ct", stroke: cssVar("--accent"), strokeOpacity: 0.3, strokeWidth: width < 500 ? 4 : 7, strokeLinecap: "round" }),
+              Plot.lineY(rows.filter((r) => r.received_ct_est), { x: "d", y: "received_ct_est", stroke: CATEGORY_COLOR.municipal, strokeWidth: 2.5 }),
+              Plot.lineY(rows, { x: "d", y: "avg_ct", stroke: cssVar("--accent"), strokeWidth: 1.5, strokeOpacity: 0.6 }),
+              Plot.dot(rows, { x: "d", y: "avg_ct", r: 4, fill: cssVar("--accent"), stroke: cssVar("--paper"), strokeWidth: 1.5 }),
+              Plot.text([last], { x: "d", y: "avg_ct", text: (d: typeof last) => ct(d.avg_ct), dy: 16, textAnchor: "end", fontWeight: 700, fill: cssVar("--ink") }),
+              Plot.text([last], { x: "d", y: "received_ct_est", text: (d: typeof last) => ct(d.received_ct_est), dy: -12, textAnchor: "end", fontWeight: 700, fill: CATEGORY_COLOR.municipal }),
               Plot.tip(
                 rows,
                 Plot.pointerX({
-                  x: "label",
+                  x: "d",
                   y: "avg_ct",
                   title: (d: (typeof rows)[number]) =>
-                    `${d.label}: average ${ct(d.avg_ct)} ct/kWh\nlowest ${ct(d.min_ct)} · highest ${ct(d.max_ct)}\n${mw(d.awarded_kw / 1000)} in ${d.awards} awards`,
+                    `${d.label}: average award ${ct(d.avg_ct)} ct/kWh` +
+                    (d.min_ct != null ? `\nlowest ${ct(d.min_ct)} · highest ${ct(d.max_ct)}` : "") +
+                    (d.received_ct_est ? `\nest. received ${ct(d.received_ct_est)} (factor ${d.correction_factor_avg?.toFixed(3)})` : "") +
+                    `\n${mw(d.list_kw / 1000)} awarded`,
                 }),
               ),
             ],
@@ -73,9 +174,125 @@ export function AuctionPrices({ a }: { a: Auctions }) {
         }
       />
       <p className="text-xs text-ink-muted">
-        Dot: volume-weighted average award value; bar: lowest to highest successful bid; dashed
-        line: the legal ceiling (Höchstwert). Award values are paid as a sliding market premium
-        for 20 years, adjusted for site quality. Prices of single bids are not published.
+        The award value is what a project bid for a reference site. The EEG then multiplies it by a
+        correction factor (Korrekturfaktor) that depends on the site&apos;s quality factor (Gütefaktor):
+        weaker sites get more than they bid, stronger sites less. Single bids are not published, so the
+        received value uses each round&apos;s average award value times the estimated correction factor
+        of its projects. Rounds since May 2019.
+      </p>
+    </div>
+  );
+}
+
+// --- Merit order by full-load hours ------------------------------------------
+
+type MeritRow = { x1: number; x2: number; flh: number; quality: number; cat: AuctionCategory; mw: number };
+
+export function AuctionYield({ a }: { a: Auctions }) {
+  const [id, setId] = useState(a.rounds.at(-1)!.id);
+  const [metric, setMetric] = useState<"full_load_hours_avg" | "quality_pct_avg" | "correction_factor_avg">("full_load_hours_avg");
+  const round = a.rounds.find((r) => r.id === id)!;
+  const merit = useMemo(
+    () =>
+      a.merit_order[id].reduce<MeritRow[]>((acc, [m, flh, quality, ci]) => {
+        const x1 = acc.at(-1)?.x2 ?? 0;
+        return [...acc, { x1, x2: x1 + m, flh, quality, cat: CATEGORY_ORDER[ci], mw: m }];
+      }, []),
+    [a, id],
+  );
+  const trend = a.rounds
+    .filter((r) => r[metric] != null)
+    .map((r) => ({ d: date(r.bid_date), v: r[metric] as number, label: roundLabel(r.bid_date) }));
+  const unit = metric === "full_load_hours_avg" ? "h" : metric === "quality_pct_avg" ? "%" : "";
+  const totalMw = merit.at(-1)?.x2 ?? 0;
+  const median = merit.find((m) => m.x2 >= totalMw / 2)?.flh;
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <RoundSelect a={a} value={id} onChange={setId} />
+        <Legend a={a} />
+      </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat label="Full-load hours (est.)" value={`${int(round.full_load_hours_avg)} h`} sub={`median project ${int(median)} h`} />
+        <Stat label="Site quality (Gütefaktor)" value={`${round.quality_pct_avg ?? "–"}%`} sub="of the EEG reference site" />
+        <Stat label="Correction factor" value={round.correction_factor_avg?.toFixed(3) ?? "–"} sub="capacity-weighted average" />
+        <Stat label="Award → received" value={`${ct(round.avg_ct)} → ${ct(round.received_ct_est)}`} sub="ct/kWh (estimate)" />
+      </div>
+      <div>
+        <p className="text-sm font-semibold">
+          Merit order of the {roundLabel(round.bid_date)} awards: estimated full-load hours, best sites first
+        </p>
+        <PlotFigure
+          deps={[merit]}
+          render={(width) =>
+            Plot.plot({
+              width,
+              height: 300,
+              marginLeft: 48,
+              ...axis(),
+              x: { label: "Awarded capacity (MW), cumulative →", grid: false },
+              y: { label: "Full-load hours per year", grid: true, zero: true },
+              color: { domain: CATEGORY_ORDER, range: CATEGORY_ORDER.map((c) => CATEGORY_COLOR[c]) },
+              marks: [
+                Plot.rectY(merit, { x1: "x1", x2: "x2", y: "flh", fill: "cat", insetLeft: merit.length > 150 ? 0 : 0.3 }),
+                round.full_load_hours_avg ? Plot.ruleY([round.full_load_hours_avg], { stroke: cssVar("--ink"), strokeDasharray: "3 3" }) : null,
+                Plot.tip(
+                  merit,
+                  Plot.pointerX({
+                    x: (d: MeritRow) => (d.x1 + d.x2) / 2,
+                    y: "flh",
+                    title: (d: MeritRow) =>
+                      `${a.categories[d.cat]} · ${d.mw.toFixed(1)} MW\n${d.flh.toLocaleString("en-GB")} full-load hours\nsite quality ${d.quality}%`,
+                  }),
+                ),
+              ],
+            })
+          }
+        />
+        <p className="text-xs text-ink-muted">
+          Each block is one award, as wide as its capacity. Dashed line: capacity-weighted average.
+        </p>
+      </div>
+      <div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-semibold">Average per round since 2019</p>
+          <Segmented
+            label="Measure"
+            value={metric}
+            onChange={setMetric}
+            options={[
+              { value: "full_load_hours_avg", label: "Full-load hours" },
+              { value: "quality_pct_avg", label: "Site quality" },
+              { value: "correction_factor_avg", label: "Correction factor" },
+            ]}
+          />
+        </div>
+        <PlotFigure
+          deps={[trend, metric]}
+          render={(width) =>
+            Plot.plot({
+              width,
+              height: 220,
+              marginLeft: 48,
+              ...axis(),
+              x: { label: null, type: "utc" },
+              y: { label: unit || "factor", grid: true, zero: metric === "full_load_hours_avg" },
+              marks: [
+                Plot.lineY(trend, { x: "d", y: "v", stroke: cssVar("--accent"), strokeWidth: 2.5 }),
+                Plot.dot(trend, { x: "d", y: "v", r: 3, fill: cssVar("--accent") }),
+                Plot.tip(trend, Plot.pointerX({ x: "d", y: "v", title: (d: (typeof trend)[number]) => `${d.label}: ${d.v}${unit ? ` ${unit}` : ""}` })),
+              ],
+            })
+          }
+        />
+      </div>
+      <p className="text-xs text-ink-muted">
+        Estimate, not a yield report. Each awarded turbine is located through its MaStR record
+        (coordinates, hub height, rotor, rating). Wind: DWD 200 m grid (mean wind 1981–2000 at 80 and
+        100 m, extrapolated to hub height). A generic power curve from rating and rotor gives the gross
+        yield; full-load hours are net of {Math.round(a.model.losses * 100)}% typical losses (wake,
+        availability). Site quality compares the same turbine with the EEG reference site (6.45 m/s at
+        100 m); the correction factor follows the EEG table of the bid year. Curtailment is not included.
       </p>
     </div>
   );
@@ -84,28 +301,17 @@ export function AuctionPrices({ a }: { a: Auctions }) {
 // --- Winners ----------------------------------------------------------------
 
 export function AuctionWinners({ a, brands }: { a: Auctions; brands: string[] }) {
-  const years = Object.keys(a.winners_by_year).sort();
+  const years = Object.keys(a.winners_by_year).filter((y) => y !== "all").sort();
   const [year, setYear] = useState(years.at(-1)!);
-  const winners = a.winners_by_year[year].slice(0, 12);
-  const yearRounds = a.rounds.filter((r) => r.bid_date.startsWith(year));
-  const max = Math.max(...winners.map((w) => w.kw), 1);
+  const [hidden, setHidden] = useState<AuctionCategory[]>([]);
+  const winners = a.winners_by_year[year].filter((w) => !hidden.includes(w.category)).slice(0, 15);
+  const rounds = year === "all" ? a.rounds : a.rounds.filter((r) => r.bid_date.startsWith(year));
+  const max = Math.max(...winners.map((w) => w.kw), 1) / 1000;
 
-  const split = useMemo(
-    () =>
-      a.rounds.flatMap((r) => {
-        const total = CATEGORY_ORDER.reduce((s, c) => s + r.kw_by_category[c], 0) || 1;
-        return CATEGORY_ORDER.map((c) => ({ round: roundLabel(r.bid_date), category: a.categories[c], key: c, share: r.kw_by_category[c] / total, kw: r.kw_by_category[c] }));
-      }),
-    [a],
-  );
-  const order = a.rounds.map((r) => roundLabel(r.bid_date));
-  const catLabels = CATEGORY_ORDER.map((c) => a.categories[c]);
-
-  // Turbine makers in this year's awards (linked through MaStR).
+  // Turbine makers in the awards (linked through MaStR).
   const makers: Record<string, number> = {};
-  for (const r of yearRounds) for (const [b, kw] of Object.entries(r.kw_by_maker)) makers[b] = (makers[b] ?? 0) + kw;
+  for (const r of rounds) for (const [b, kw] of Object.entries(r.kw_by_maker)) makers[b] = (makers[b] ?? 0) + kw;
   const makerTotal = Object.values(makers).reduce((s, v) => s + v, 0) || 1;
-  // Makers under 1 % join "Other" so the labels stay readable.
   const makerRows = Object.entries(
     Object.entries(makers).reduce<Record<string, number>>((acc, [b, kw]) => {
       const key = kw / makerTotal < 0.01 ? "Other" : b;
@@ -117,94 +323,52 @@ export function AuctionWinners({ a, brands }: { a: Auctions; brands: string[] })
   return (
     <div className="space-y-10">
       <div>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-semibold">
-            Top winners {year}: {yearRounds.map((r) => roundLabel(r.bid_date)).join(", ")}
-          </p>
-          {years.length > 1 && (
-            <Segmented label="Year" value={year} onChange={setYear} options={years.map((y) => ({ value: y, label: y }))} />
-          )}
+        <div className="flex flex-wrap items-center gap-3">
+          <Segmented
+            label="Year"
+            value={year}
+            onChange={setYear}
+            options={[...years.map((y) => ({ value: y, label: y })), { value: "all", label: `All ${years[0]}–${years.at(-1)!.slice(2)}` }]}
+          />
         </div>
-        <ol className="mt-4 space-y-2.5" aria-label={`Company groups with the most awarded onshore capacity in ${year}`}>
-          {winners.map((w, i) => (
-            <li key={w.group} className="grid grid-cols-[1.25rem_7.5rem_1fr] items-center gap-2 sm:grid-cols-[1.5rem_11rem_1fr]">
-              <span className="figures text-xs text-ink-muted">{i + 1}</span>
-              <span className="truncate text-sm font-semibold">{w.group}</span>
-              <div className="flex min-w-0 items-center gap-2">
-                <div className="h-5 rounded-full" style={{ width: `${(w.kw / max) * 72}%`, background: CATEGORY_COLOR[w.category] }} />
-                <span className="figures shrink-0 text-xs font-semibold text-ink-muted sm:text-sm">
-                  {mw(w.kw / 1000)} · {(w.share * 100).toFixed(1)}%
-                  <span className="hidden sm:inline"> · {w.awards} awards</span>
-                </span>
-              </div>
-            </li>
-          ))}
-        </ol>
-        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-muted">
-          {CATEGORY_ORDER.slice(0, 2).map((c) => (
-            <span key={c} className="inline-flex items-center gap-1.5">
-              <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: CATEGORY_COLOR[c] }} />
-              {a.categories[c]}
-            </span>
-          ))}
+        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Show bidder types">
+          {CATEGORY_ORDER.map((c) => {
+            const on = !hidden.includes(c);
+            return (
+              <button
+                key={c}
+                type="button"
+                aria-pressed={on}
+                onClick={() => setHidden((h) => (on ? [...h, c] : h.filter((x) => x !== c)))}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${on ? "border-ink text-ink" : "border-rule text-ink-muted line-through"}`}
+              >
+                <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: CATEGORY_COLOR[c] }} />
+                {a.categories[c]}
+              </button>
+            );
+          })}
         </div>
-        <p className="mt-2 text-xs text-ink-muted">
-          Share of all capacity awarded in {year}. Bidders are grouped by the company name in the
-          award list (e.g. “wpd Windpark Nr. 440 GmbH & Co. KG” → wpd). Many project companies carry
-          no group name ({Math.round(a.unattributed_share * 100)}% of capacity), so groups that bid
-          through such companies are undercounted. Citizen wind farms and municipal utilities
-          without a group name are counted by type below, not ranked here.
+        <p className="mt-4 text-sm font-semibold">
+          Awarded onshore capacity {year === "all" ? `${years[0]}–${years.at(-1)}` : year}
+          {year !== "all" && `: ${rounds.map((r) => roundLabel(r.bid_date)).join(", ")}`}
+        </p>
+        <div className="mt-3" aria-label={`Company groups with the most awarded onshore capacity, ${year}`}>
+          <GroupBars
+            rows={winners.map((w) => ({ ...w, mw: w.kw / 1000 }))}
+            max={max}
+            value={(w) => `${mw(w.mw)} · ${((w.share ?? 0) * 100).toFixed(1)}%`}
+          />
+        </div>
+        <p className="mt-3 text-xs text-ink-muted">
+          Striped bars stand for many companies, not one competitor. Bidders are grouped by the company
+          name in the award list (e.g. “wpd Windpark Nr. 440 GmbH & Co. KG” → wpd). Project companies
+          that carry no group name are “not attributed”; groups that bid through them are undercounted.
+          Alterric (EWE / Aloys Wobben Stiftung) counts as an IPP; enercity as a Stadtwerk.
         </p>
       </div>
 
       <div>
-        <p className="text-sm font-semibold">Who wins: awarded capacity by type of bidder</p>
-        <div className="mt-2 mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-muted">
-          {CATEGORY_ORDER.map((c) => (
-            <span key={c} className="inline-flex items-center gap-1.5">
-              <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: CATEGORY_COLOR[c] }} />
-              {a.categories[c]}
-            </span>
-          ))}
-        </div>
-        <PlotFigure
-          deps={[split]}
-          render={(width) =>
-            Plot.plot({
-              width,
-              height: 260,
-              marginLeft: 40,
-              ...axis(),
-              x: { label: null, domain: order, padding: 0.25 },
-              y: { label: null, percent: true, tickFormat: (d: number) => `${d}%`, grid: true },
-              color: { domain: catLabels, range: CATEGORY_ORDER.map((c) => CATEGORY_COLOR[c]) },
-              marks: [
-                Plot.barY(split, { x: "round", y: "share", fill: "category", order: catLabels, rx: 3, insetTop: 1 }),
-                Plot.tip(
-                  split,
-                  Plot.pointer(
-                    Plot.stackY({
-                      x: "round",
-                      y: "share",
-                      fill: "category",
-                      order: catLabels,
-                      title: (d: (typeof split)[number]) => `${d.round} · ${d.category}: ${Math.round(d.share * 100)}% (${mw(d.kw / 1000)})`,
-                    }),
-                  ),
-                ),
-              ],
-            })
-          }
-        />
-        <p className="mt-2 text-xs text-ink-muted">
-          Utilities include their joint ventures (e.g. Alterric, EWE) and Stadtwerke; developers
-          owned by a utility (e.g. JUWI, part of MVV) count as developers. “Citizen & local”: citizen
-          wind farms, cooperatives, farmers’ companies and partnerships.
-        </p>
-      </div>
-
-      <div>
-        <p className="text-sm font-semibold">Turbines in the {year} awards, by maker</p>
+        <p className="text-sm font-semibold">Turbines in these awards, by maker</p>
         <div className="mt-3 flex h-7 overflow-hidden rounded-full" role="img" aria-label={makerRows.map(([b, kw]) => `${b} ${Math.round((kw / makerTotal) * 100)}%`).join(", ")}>
           {makerRows.map(([b, kw]) => (
             <div key={b} style={{ width: `${(kw / makerTotal) * 100}%`, background: brandColor(brands, b) }} title={`${b}: ${Math.round((kw / makerTotal) * 100)}%`} />
@@ -217,12 +381,263 @@ export function AuctionWinners({ a, brands }: { a: Auctions; brands: string[] })
             </span>
           ))}
         </div>
-        <p className="mt-2 text-xs text-ink-muted">
-          Each award lists its turbines by MaStR register number;{" "}
-          {Math.round((yearRounds.reduce((s, r) => s + r.turbines_in_mastr, 0) / Math.max(1, yearRounds.reduce((s, r) => s + r.turbines, 0))) * 100)}% of
-          them were found in the register, with the maker the developer registered.
-        </p>
       </div>
     </div>
   );
 }
+
+// --- Race of winners and the share of the cake ------------------------------
+
+export function AuctionRace({ a }: { a: Auctions }) {
+  const [view, setView] = useState<"companies" | "types">("companies");
+  const [mode, setMode] = useState<"cumulative" | "year">("cumulative");
+  const steps = a.race.years;
+  const cum = (xs: number[]) => xs.reduce<number[]>((acc, v) => [...acc, (acc.at(-1) ?? 0) + v], []);
+  const toMw = (xs: number[]) => xs.map((v) => v / 1000);
+  const companies = useMemo(() => {
+    const v: Record<string, number[]> = {};
+    for (const g of a.race.groups) v[g] = toMw(mode === "cumulative" ? cum(a.race.kw[g]) : a.race.kw[g]);
+    return v;
+  }, [a, mode]);
+  const types = useMemo(() => {
+    const v: Record<string, number[]> = {};
+    for (const c of CATEGORY_ORDER) v[a.categories[c]] = toMw(mode === "cumulative" ? cum(a.kw_by_category_year[c]) : a.kw_by_category_year[c]);
+    return v;
+  }, [a, mode]);
+  const catOfGroup = Object.fromEntries(a.race.groups.map((g, i) => [g, a.race.categories[i]]));
+  const catOfLabel = Object.fromEntries(CATEGORY_ORDER.map((c) => [a.categories[c], c]));
+  const controls = (
+    <>
+      <Segmented label="View" value={view} onChange={setView} options={[{ value: "companies", label: "Companies" }, { value: "types", label: "Bidder types" }]} />
+      <Segmented label="Measure" value={mode} onChange={setMode} options={[{ value: "cumulative", label: "Since 2019" }, { value: "year", label: "Per year" }]} />
+    </>
+  );
+  return (
+    <div className="space-y-3">
+      {view === "companies" ? (
+        <BarRace
+          key="companies"
+          steps={steps}
+          names={a.race.groups}
+          values={companies}
+          colorOf={(n) => CATEGORY_COLOR[catOfGroup[n] ?? "unattributed"]}
+          pinned={["Not attributed", "Citizen & local (all)"]}
+          rows={12}
+          totalLabel={(s) => (mode === "cumulative" ? `awarded ${steps[0]}–${s}` : `awarded in ${s}`)}
+          controls={controls}
+          ariaLabel="Auction winners by company group"
+        />
+      ) : (
+        <BarRace
+          key="types"
+          steps={steps}
+          names={Object.keys(types)}
+          values={types}
+          colorOf={(n) => CATEGORY_COLOR[catOfLabel[n]]}
+          rows={5}
+          totalLabel={(s) => (mode === "cumulative" ? `awarded ${steps[0]}–${s}` : `awarded in ${s}`)}
+          controls={controls}
+          ariaLabel="Auction winners by bidder type"
+        />
+      )}
+      <Legend a={a} />
+      <p className="text-xs text-ink-muted">
+        {steps.at(-1)} includes the rounds awarded so far. The 15 company groups with the most capacity
+        since 2019 race against the many citizen wind farms and the project companies whose owner is
+        unknown.
+      </p>
+    </div>
+  );
+}
+
+export function AuctionCake({ a }: { a: Auctions }) {
+  const [base, setBase] = useState<"known" | "all">("known");
+  const cats = base === "known" ? CATEGORY_ORDER.filter((c) => c !== "unattributed") : CATEGORY_ORDER;
+  const rows = useMemo(
+    () =>
+      a.race.years.flatMap((y, i) => {
+        const total = cats.reduce((s, c) => s + a.kw_by_category_year[c][i], 0) || 1;
+        return cats.map((c) => ({ year: Number(y), cat: a.categories[c], key: c, share: a.kw_by_category_year[c][i] / total }));
+      }),
+    [a, cats],
+  );
+  const labels = cats.map((c) => a.categories[c]);
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm font-semibold">Share of awarded capacity per year</p>
+        <Segmented label="Base" value={base} onChange={setBase} options={[{ value: "known", label: "Known bidders" }, { value: "all", label: "All capacity" }]} />
+      </div>
+      <Legend a={a} cats={cats} />
+      <PlotFigure
+        deps={[rows]}
+        render={(width) =>
+          Plot.plot({
+            width,
+            height: 280,
+            marginLeft: 40,
+            ...axis(),
+            x: { label: null, tickFormat: (d: number) => String(d), ticks: a.race.years.map(Number) },
+            y: { label: null, percent: true, tickFormat: (d: number) => `${d}%`, grid: true },
+            color: { domain: labels, range: cats.map((c) => CATEGORY_COLOR[c]) },
+            marks: [
+              Plot.areaY(rows, { x: "year", y: "share", fill: "cat", order: labels, stroke: cssVar("--paper"), strokeWidth: 0.5, curve: "monotone-x" }),
+              Plot.tip(
+                rows,
+                Plot.pointerX(
+                  Plot.stackY({
+                    x: "year",
+                    y: "share",
+                    z: "cat",
+                    order: labels,
+                    title: (d: (typeof rows)[number]) => `${d.year} · ${d.cat}: ${Math.round(d.share * 100)}%`,
+                  }),
+                ),
+              ),
+            ],
+          })
+        }
+      />
+      <p className="text-xs text-ink-muted">
+        “Known bidders” leaves out the {Math.round(a.unattributed_share * 100)}% of capacity whose owner
+        the award list does not reveal; that share is spread across all types, mostly developers&apos;
+        project companies.
+      </p>
+    </div>
+  );
+}
+
+// --- Who owns the turbines, and why developers win ---------------------------
+
+export function AuctionPlayers({ a }: { a: Auctions }) {
+  const [view, setView] = useState<"awards" | "fleet">("awards");
+  const awards = a.operating_from_awards.slice(0, 12).map((r) => ({ ...r, bucket: r.group in BUCKET_NOTE }));
+  const fleet = a.fleet.groups.slice(0, 14);
+  const rows = view === "awards" ? awards : fleet;
+  const max = Math.max(...rows.map((r) => r.mw), 1);
+  const d = a.drivers;
+  const cols: AuctionCategory[] = ["developer", "utility", "municipal", "citizen"];
+  const metrics: { label: string; v: (x: (typeof d)[AuctionCategory]) => string; note?: string }[] = [
+    { label: "Awarded since 2019", v: (x) => mw(x.awarded_mw) },
+    { label: "Awards", v: (x) => x.awards.toLocaleString("en-GB") },
+    { label: "Bidding companies", v: (x) => x.distinct_bidders.toLocaleString("en-GB") },
+    { label: "Median award size", v: (x) => (x.median_award_mw == null ? "–" : `${x.median_award_mw} MW`) },
+    { label: "Site quality (est.)", v: (x) => (x.quality_pct_avg == null ? "–" : `${x.quality_pct_avg}%`), note: "Lower = weaker wind sites, which need a lower cost base to win" },
+    { label: "Full-load hours (est.)", v: (x) => `${int(x.full_load_hours_avg)} h` },
+    { label: "Months from bid to operation", v: (x) => (x.median_months_to_operation == null ? "–" : `${x.median_months_to_operation}`), note: "Median of turbines already running" },
+    { label: `In operation (awards before ${a.drivers_realised_cutoff.slice(0, 7)})`, v: (x) => (x.realised_share == null ? "–" : `${Math.round(x.realised_share * 100)}%`) },
+  ];
+  return (
+    <div className="space-y-12">
+      <div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-semibold">{view === "awards" ? "Auction projects since 2019 now in operation" : "All onshore wind in operation, by operator"}</p>
+          <Segmented label="Basis" value={view} onChange={setView} options={[{ value: "awards", label: "From auctions" }, { value: "fleet", label: "Whole fleet" }]} />
+        </div>
+        <div className="mt-4">
+          <GroupBars rows={rows} max={max} value={(r) => (r.share != null ? `${mw(r.mw)} · ${(r.share * 100).toFixed(1)}%` : mw(r.mw))} />
+        </div>
+        <p className="mt-3 text-xs text-ink-muted">
+          {view === "awards"
+            ? "Capacity of awarded turbines that MaStR lists as in operation, by the group that won the award."
+            : `Operator names from MaStR for all ${mw(a.fleet.total_mw)} of onshore wind in operation. Most wind farms are run by their own project company, so the owner is often not visible from the name (“not attributed”), and private owners are never named.`}
+        </p>
+      </div>
+
+      <div>
+        <p className="text-sm font-semibold">What the data shows, by bidder type</p>
+        <div className="mt-3 overflow-x-auto rounded-[20px] border border-rule">
+          <table className="figures w-full min-w-[34rem] text-sm">
+            <thead>
+              <tr className="border-b border-rule text-left text-xs text-ink-muted">
+                <th className="p-3 font-semibold" />
+                {cols.map((c) => (
+                  <th key={c} className="p-3 font-semibold">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: CATEGORY_COLOR[c] }} />
+                      {a.categories[c]}
+                    </span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {metrics.map((m) => (
+                <tr key={m.label} className="border-b border-rule last:border-0">
+                  <th className="p-3 text-left font-semibold">
+                    {m.label}
+                    {m.note && <span className="block text-[11px] font-normal text-ink-muted">{m.note}</span>}
+                  </th>
+                  {cols.map((c) => (
+                    <td key={c} className="p-3">{m.v(d[c])}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-sm font-semibold">Why developers and IPPs win more: our assessment</p>
+        <p className="mt-1 text-xs text-ink-muted">
+          Editorial analysis based on industry practice and the figures above. It is not measured from
+          the register and simplifies a varied market.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {DRIVERS.map((x) => (
+            <div key={x.title} className="rounded-[20px] bg-surface p-5">
+              <p className="font-bold">{x.title}</p>
+              <p className="mt-1 text-sm text-ink-muted">{x.text}</p>
+              <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                {(["developer", "utility", "municipal"] as const).map((c, i) => (
+                  <div key={c}>
+                    <p className="truncate text-ink-muted">{a.categories[c]}</p>
+                    <p className="font-semibold tracking-widest" style={{ color: CATEGORY_COLOR[c] }} aria-label={`${x.scores[i]} of 3`}>
+                      {"●".repeat(x.scores[i])}
+                      <span className="text-rule">{"●".repeat(3 - x.scores[i])}</span>
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Scores: developers & IPPs, utilities, Stadtwerke (3 = strong advantage in auctions). */
+const DRIVERS: { title: string; text: string; scores: [number, number, number] }[] = [
+  {
+    title: "Pipeline and land",
+    text: "Securing sites, permits and landowners is the developers' core business, with local teams in every region. Utilities often buy projects instead; Stadtwerke stay in their own region.",
+    scores: [3, 2, 2],
+  },
+  {
+    title: "Lean cost base",
+    text: "Small teams and standardised projects keep overheads low, so developers can bid lower and still earn their margin, even at weaker sites.",
+    scores: [3, 1, 2],
+  },
+  {
+    title: "Project finance",
+    text: "Non-recourse project finance and funds or institutional investors fund each wind farm on its own merits. Banks check every project element, which forces tight budgets and schedules.",
+    scores: [3, 2, 2],
+  },
+  {
+    title: "Speed of decisions",
+    text: "Bids are due four times a year. Owner-managed developers decide in days; group investment committees and municipal boards take longer.",
+    scores: [3, 1, 2],
+  },
+  {
+    title: "Pricing and risk appetite",
+    text: "Developers price close to cost and often sell projects (or stakes) after the award to recycle capital. Utilities set group hurdle rates and put capital into offshore, grids or abroad.",
+    scores: [3, 1, 1],
+  },
+  {
+    title: "Local acceptance",
+    text: "Citizen participation and local ownership help get permits. Stadtwerke and citizen wind farms are strong here; developers increasingly partner with municipalities.",
+    scores: [2, 1, 3],
+  },
+];

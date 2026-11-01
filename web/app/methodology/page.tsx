@@ -200,7 +200,20 @@ export default async function Methodology() {
             Bidders are sorted into company groups and types (developers and IPPs, utilities and
             Stadtwerke, citizen and local) by keywords in their company name. Many bidders are project
             companies whose name does not reveal their owner; they stay “not attributed”. Names of
-            bidders that are not companies are never shown.
+            bidders that are not companies are never shown. Types: developers and IPPs (including
+            Alterric), utilities (RWE, EnBW, Vattenfall, Uniper, …), Stadtwerke and municipal companies
+            (including enercity and Trianel), citizen and local, not attributed.
+          </p>
+          <p>
+            Full-load hours, site quality (Gütefaktor) and correction factor (Korrekturfaktor) of awarded
+            projects are estimates: each turbine is placed through its MaStR record, the Deutscher
+            Wetterdienst 200 m wind grid (mean wind 1981–2000 at 80 and 100 m) gives the wind at hub
+            height, and a generic power curve from rating and rotor diameter gives the yield, net of 12 %
+            typical losses. The quality factor compares the same turbine with the EEG reference site
+            (6.45 m/s at 100 m); the correction factor follows the EEG table of the bid year. The value a
+            project receives is estimated as the round&apos;s average award value times that factor,
+            because single bids are not published. Rounds before May 2019 list old register numbers that
+            cannot be linked and are left out.
           </p>
         </Section>
 
