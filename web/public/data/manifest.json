@@ -1,7 +1,7 @@
 {
   "contract_version": "1.6",
   "as_of": "2026-10-30",
-  "generated_at": "2026-11-01T16:58:48+00:00",
+  "generated_at": "2026-11-01T18:18:38+00:00",
   "pipeline_version": "0.1.0",
   "incomplete_after": {
     "biomass": "2026-06-07",
@@ -55,12 +55,22 @@
     {
       "name": "auctions/onshore.json",
       "rows": 34,
-      "bytes": 296637
+      "bytes": 301811
     },
     {
       "name": "auctions/awards.json",
       "rows": 5217,
-      "bytes": 3126210
+      "bytes": 3255539
+    },
+    {
+      "name": "auctions/solar.json",
+      "rows": 40,
+      "bytes": 141068
+    },
+    {
+      "name": "auctions/solar_awards.json",
+      "rows": 2874,
+      "bytes": 1758083
     }
   ]
 }
