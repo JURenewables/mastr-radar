@@ -1,4 +1,4 @@
-# Station contracts — v1.5 (locked)
+# Station contracts — v1.6 (locked)
 
 These contracts define exactly what each station of the data chain outputs.
 They are **locked**: changing one is its own work package,
@@ -403,10 +403,11 @@ add up; award rows match the rounds. Licence: see `docs/sources.md`.
 
 ---
 
-## v1.6 draft: auction yield, five bidder types, winners over time (waiting for approval)
+## v1.6: auction yield, bidder types, office attribution, maps (approved 1 Nov 2026)
 
-Changes the v1.5 auction files; nothing else. Until approved, the files exist
-only on the branch preview and `contract_version` stays `"1.5"`.
+Changes the v1.5 auction files and adds the internal station 2 company
+register. `contract_version` becomes `"1.6"`; the website still accepts older
+files.
 
 **Station 2 adds `data/extract/operators.parquet`** (internal, never
 published): every organisation in `Marktakteure` (natural persons left out,
@@ -489,3 +490,4 @@ every reported total has a source and a known round.
 | 1.3 | 2026-10-31 | Monitor files `monitor/buildout.json`, `points.json`, `stats.json`; boundaries `area_km2`; series definition D14. Approved by the user. |
 | 1.4 | 2026-10-31 | Data hub chain H1/H2, day files `days/` with SMARD and DWD weather, `stations.json`, population in `states[]`, size budget 50 MB. Approved by the user. |
 | 1.5 | 2026-10-31 | Turbine makers (`wind_industry` in `stats.json`), auctions chain A1/A2 with `auctions/onshore.json` and `auctions/awards.json`. Approved by the user. |
+| 1.6 | 2026-11-01 | Auctions since May 2019 with yield estimate (DWD), five bidder types, reviewed attributions and company-reported totals, office attribution via the new internal `data/extract/operators.parquet`, race, profiles and map points. Approved by the user. |

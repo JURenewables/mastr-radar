@@ -32,7 +32,7 @@ Sources and licences: `docs/sources.md`.
   auctions-fetch step.
 - Checks: pytest 85 passed, ruff clean, web lint and build clean.
 
-**On the branch only: contract v1.6 draft (waiting for approval)**
+**Contract v1.6 (approved 1 Nov 2026, live with PR #6)**
 - WP52 all 34 onshore rounds since May 2019 (tolerant parser for the older
   page wordings and list layouts).
 - WP53 yield estimate per awarded turbine (`wind.py`,
@@ -159,23 +159,21 @@ Sources and licences: `docs/sources.md`.
 
 ## Open decisions (yours)
 
-1. **Approve contract v1.6** (auction yield, five bidder types, winners
-   race, players), then merge and go live.
-2. **OpenStreetMap ODbL** for the WP41 grid map. Recommendation: accept.
-3. **Store the API keys in GitHub Secrets:** `ENTSOE_TOKEN`,
+1. **OpenStreetMap ODbL** for the WP41 grid map. Recommendation: accept.
+2. **Store the API keys in GitHub Secrets:** `ENTSOE_TOKEN`,
    `NETZTRANSPARENZ_CLIENT_ID` and `NETZTRANSPARENZ_CLIENT_SECRET`. Rotate the
    netztransparenz secret that was pasted in chat.
-4. **Better auction attribution (WP45b):** decide whether we maintain a
-   reviewed list mapping project companies to parent groups.
 
 ## Next steps
 
-1. After v1.6 approval: bump `CONTRACT_VERSION` (aggregate, hub) and
-   `SUPPORTED_CONTRACTS` to 1.6, merge `main` (keep the branch's consistent
-   data set), open the PR, merge, run the daily update.
-2. WP45b: shrink "not attributed" (reviewed list of project companies →
-   parent groups); optionally link 2017–Feb 2019 rounds via the old register
-   numbers (needs a new station 2 column).
+1. Check that the daily MaStR and hub runs after the v1.6 merge succeeded
+   (they rewrite all files with contract 1.6, including `operators.parquet`
+   and the auction files with the newest data).
+2. WP45b: keep shrinking "not attributed" (30 %): review the largest
+   unlabelled office addresses, add sourced entries to
+   `pipeline/config/auction_reviewed.yaml`; optionally link 2017–Feb 2019
+   rounds via the old register numbers (needs a new station 2 column).
 3. WP41 grid map, once the OSM decision and the API keys are in place.
 4. When a new auction round is published (Nov 2026: awards expected
-   Jan 2027), add its id to `settings.yaml → auctions.onshore_rounds`.
+   Jan 2027), add its id and path to `settings.yaml → auctions.onshore_rounds`
+   and, if available, the company-reported totals to `auction_reviewed.yaml`.

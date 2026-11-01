@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: Phase 8 extension (WP52–60: auction yield, bidder types, winners race, players, office attribution, /wind page, auction map) on the branch preview, waiting for your approval of contract v1.6. Phase 7 live except WP41 (grid map: waits for OSM licence OK and your ENTSO-E / netztransparenz keys)**
+**You are here: contract v1.6 approved and live (Phase 8 incl. WP52–61). Next: WP45b better attribution; WP41 grid map waits for OSM licence OK and your ENTSO-E / netztransparenz keys**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 

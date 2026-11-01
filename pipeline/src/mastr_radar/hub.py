@@ -29,7 +29,7 @@ QUARTER_MS = 15 * 60 * 1000
 ATTRIBUTION = ["Bundesnetzagentur | SMARD.de", "Deutscher Wetterdienst"]
 MAX_DAYS_BYTES = 30 * 1024 * 1024
 HOUR_MS = 3600 * 1000
-CONTRACT_VERSION = "1.5"
+CONTRACT_VERSION = "1.6"
 
 
 class HubCheckError(RuntimeError):
