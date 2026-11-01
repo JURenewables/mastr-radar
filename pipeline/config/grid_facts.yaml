@@ -1,0 +1,79 @@
+# Sourced context for the Grid page (contract v1.7, WP71 → grid/grid.json).
+# Only figures stated by the linked source. Money in € million.
+
+as_of: "2026-11-01"
+
+# Grid congestion management (Netzengpassmanagement), all of Germany.
+congestion:
+  - {year: 2022, cost_meur: 4200, source: "https://www.zfk.de/politik/deutschland/redispatch-kosten-kosten-vier-milliarden-euro"}
+  - {year: 2023, cost_meur: 3100, volume_twh: 34.3, source: "https://www.pv-magazine.de/2024/05/17/kosten-fuer-netzengpassmanagement-2023-um-ein-viertel-gesunken/"}
+  - {year: 2024, cost_meur: 2776, volume_twh: 30.3, re_compensation_meur: 554, pv_curtailed_gwh: 1389, source: "https://www.cleanthinking.de/faktencheck-redispatch-drei-milliarden/"}
+  - {year: 2025, cost_meur: 3071, volume_twh: 30.3, re_compensation_meur: 433, source: "https://www.boerse-online.de/dpa-afx/wind-und-sonnenstrom-netzengpaesse-sorgen-fuer-abschaltungen-513626.html"}
+
+congestion_split_2025:
+  source: "https://www.bundestag.de/presse/hib/kurzmeldungen-1210750"
+  items:
+    - {label: "Redispatch with conventional plants", meur: 1180}
+    - {label: "Grid reserve: standby", meur: 955}
+    - {label: "Grid reserve: dispatch", meur: 412}
+    - {label: "Compensation for curtailed renewables", meur: 435}
+    - {label: "Countertrading", meur: 96}
+
+facts:
+  - topic: congestion
+    text: "Solar curtailment for grid reasons rose by 94 % in 2025 while the total volume of congestion measures stayed at about 30 TWh."
+    source: "https://www.boerse-online.de/dpa-afx/wind-und-sonnenstrom-netzengpaesse-sorgen-fuer-abschaltungen-513626.html"
+  - topic: congestion
+    text: "Lower Saxony 2024: 2,412 GWh offshore wind, 911 GWh onshore wind and 29 GWh solar were curtailed (lost generation)."
+    source: "https://www.landtag-niedersachsen.de/drucksachen/drucksachen_19_12500/11001-11500/19-11192.pdf"
+  - topic: congestion
+    text: "Schleswig-Holstein 2024: 828 GWh of onshore renewables curtailed, still less than the year before."
+    source: "https://www.topagrar.com/energie/news/engpasse-im-stromnetz-sh-muss-erneuerbare-energieanlagen-seltener-abregeln-20014646.html"
+  - topic: demand
+    text: "Greater Frankfurt holds a bit over 1,100 MW, more than a third of Germany's data-centre capacity; the local grid operator expects limits into the mid-2030s."
+    source: "https://www.ingenieur.de/technik/fachbereiche/kuenstliche-intelligenz/zu-wenig-strom-fur-ki-wie-deutschland-jetzt-anschlusse-fur-rechenzentren-verteilt/"
+  - topic: demand
+    text: "E.ON's distribution grids: about 1.5 GW of data centres connected, 12 GW firmly promised and more than 500 requests for about 72 GW (end 2025)."
+    source: "https://www.ingenieur.de/technik/fachbereiche/kuenstliche-intelligenz/340-gw-bis-2035-knappe-stromnetze-und-ki-boom/"
+  - topic: demand
+    text: "By Q3 2025 the four TSOs had 717 connection requests for about 270 GW, of which 545 requests and 211 GW for large batteries."
+    source: "https://www.ingenieur.de/technik/fachbereiche/kuenstliche-intelligenz/340-gw-bis-2035-knappe-stromnetze-und-ki-boom/"
+  - topic: demand
+    text: "The national data-centre strategy (March 2026) aims to at least double data-centre capacity by 2030."
+    source: "https://www.taylorwessing.com/de/insights-and-events/insights/2026/03/rechenzentrumsstrategie-und-netzpaket"
+  - topic: expansion
+    text: "SuedLink (about 700 km, 4 GW, about €10bn) and SuedOstLink are planned to run from 2028; the Elbe tunnel for SuedLink was completed in June 2026."
+    source: "https://www.renewable-energy-industry.com/news/world/article-7625-suedlink-elbe-tunnel-completed-germanys-major-power-highways-approach-2027-28-commissioning"
+
+# Rules coming in or recently in force.
+regulation:
+  - date: "2021-10"
+    name: "Redispatch 2.0"
+    status: in_force
+    what: "All plants from 100 kW, including wind and solar, take part in grid redispatch; curtailed operators are compensated."
+    source: "https://www.bdew.de/media/documents/RD2.0_Netzbetreiberkoordinierungskonzept_NKK_v1.5.pdf"
+  - date: "2025-02"
+    name: "Solarspitzengesetz"
+    status: in_force
+    what: "New solar plants get no payment in hours with negative prices; small plants without a smart meter may feed in at most 60 % of their rating."
+    source: "https://www.topagrar.com/betriebsleitung/news/solarspitzengesetz-kein-geld-bei-negativen-preisen-20014251.html"
+  - date: "2025-02"
+    name: "Flexible connection agreements (§ 8a EEG, § 17 (2b) EnWG)"
+    status: in_force
+    what: "Grid operators and project owners may agree a capped feed-in, overbuild a connection and share it between plants (cable pooling)."
+    source: "https://www.gleisslutz.com/de/know-how/flexible-netzanschlussvereinbarungen-fca-typische-modelle-und-verhandlungspunkte"
+  - date: "2026-04"
+    name: "TSO maturity procedure (Reifegradverfahren)"
+    status: in_force
+    what: "The four TSOs rank connection requests by project maturity instead of first come, first served."
+    source: "https://cms.law/de/deu/legal-updates/netzpaket-2026-neue-regeln-fuer-netzanschluesse-geplant"
+  - date: "2026-07"
+    name: "Grid package (Netzpaket) with 'Redispatchvorbehalt'"
+    status: in_parliament
+    what: "Cabinet bill of 29 Jul 2026: new plants in capacity-limited grid areas would lose redispatch compensation for a period; ends first come, first served for connections. Hearing on 7 Oct 2026; critics question EU-law compliance."
+    source: "https://www.roedl.com/insights/netzpaket-light-referentenentwurf/"
+  - date: "2026-07"
+    name: "Data centres: waste-heat duty"
+    status: in_force
+    what: "New data centres must make at least 10 % of their waste heat usable."
+    source: "https://www.boerse-express.com/news/articles/rechenzentren-neue-abwaerme-pflicht-ab-juli-und-29-mrd-euro-923350"

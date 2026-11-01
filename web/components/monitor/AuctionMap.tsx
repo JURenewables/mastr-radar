@@ -6,21 +6,33 @@
 import { interpolateRgb } from "d3-interpolate";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { mw, type Auctions, type CompanyProfile } from "@/lib/monitor";
+import { mw } from "@/lib/monitor";
 import { cssVar } from "@/lib/theme";
 
 import { roundLabel } from "./Auctions";
 import { prefersReducedMotion, projectGermany, setupCanvas } from "./canvasMap";
 import { Stat, Takeaways } from "./ui";
+export { Stat };
 
 type Pt = { lon: number; lat: number; mw: number; group: string | null; flh: number; ri: number; year: string };
 
-function usePoints(a: Auctions) {
+/** What the maps need: award-level rounds and flat point arrays. */
+export interface MapSource {
+  rounds: { id: string; bid_date: string; list_awards: number; list_kw: number }[];
+  points: { groups: string[]; rounds: Record<string, number[]> };
+  /** Numbers per award in points (6 for wind, 7 for solar). */
+  stride?: number;
+  /** Label for the 6th number (full-load hours or specific yield). */
+  valueLabel?: (v: number) => string;
+}
+
+function usePoints(a: MapSource) {
   return useMemo(() => {
     const out: Pt[] = [];
+    const stride = a.stride ?? 6;
     a.rounds.forEach((r, ri) => {
       const P = a.points.rounds[r.id] ?? [];
-      for (let i = 0; i < P.length; i += 6) {
+      for (let i = 0; i < P.length; i += stride) {
         out.push({ lon: P[i] / 100, lat: P[i + 1] / 100, mw: P[i + 2] / 10, group: P[i + 4] >= 0 ? a.points.groups[P[i + 4]] : null, flh: P[i + 5], ri, year: r.bid_date.slice(0, 4) });
       }
     });
@@ -95,13 +107,13 @@ function pickNearest(e: React.PointerEvent<HTMLCanvasElement>, placed: { p: Pt; 
   return best;
 }
 
-function HoverCard({ a, p }: { a: Auctions; p: Pt }) {
+function HoverCard({ a, p }: { a: MapSource; p: Pt }) {
   return (
     <div className="pointer-events-none absolute bottom-3 left-3 right-3 rounded-[16px] border border-rule bg-paper/95 p-3 text-sm shadow-sm sm:right-auto sm:max-w-xs">
       <p className="font-bold">{p.group ?? "Owner not known"}</p>
       <p className="figures text-ink-muted">
         {roundLabel(a.rounds[p.ri].bid_date)} · {p.mw.toLocaleString("en-GB", { maximumFractionDigits: 1 })} MW
-        {p.flh > 0 && ` · ≈ ${p.flh.toLocaleString("en-GB")} full-load hours`}
+        {p.flh > 0 && ` · ${a.valueLabel ? a.valueLabel(p.flh) : `≈ ${p.flh.toLocaleString("en-GB")} full-load hours`}`}
       </p>
     </div>
   );
@@ -109,7 +121,7 @@ function HoverCard({ a, p }: { a: Auctions; p: Pt }) {
 
 // --- All awards, round by round ---------------------------------------------
 
-export function AuctionMovie({ a, geo }: { a: Auctions; geo: GeoJSON.FeatureCollection }) {
+export function AuctionMovie({ a, geo }: { a: MapSource; geo: GeoJSON.FeatureCollection }) {
   const all = usePoints(a);
   const last = a.rounds.length - 1;
   const [ri, setRi] = useState(last);
@@ -184,7 +196,7 @@ export function AuctionMovie({ a, geo }: { a: Auctions; geo: GeoJSON.FeatureColl
         {hover && <HoverCard a={a} p={hover} />}
       </div>
       <p className="text-xs text-ink-muted">
-        Blue: the awards of the selected round, sized by capacity. Grey: all earlier awards since May 2019.
+        Blue: the awards of the selected round, sized by capacity. Grey: all earlier awards since {roundLabel(a.rounds[0].bid_date)}.
         Only awards of companies have a public location.
       </p>
     </div>
@@ -204,12 +216,31 @@ export function yearColors(years: string[]): Record<string, string> {
   return out;
 }
 
-export function CompanyMap({ a, geo, takeaways }: { a: Auctions; geo: GeoJSON.FeatureCollection; takeaways: (p: CompanyProfile) => { points: ReactNode[]; caveats: ReactNode[] } }) {
+export interface MapProfile {
+  group: string;
+  kw_by_year: number[];
+  awards: number;
+  rounds: number;
+}
+
+export function CompanyMap<P extends MapProfile>({
+  a,
+  geo,
+  profiles,
+  years,
+  takeaways,
+  stats,
+}: {
+  a: MapSource;
+  geo: GeoJSON.FeatureCollection;
+  profiles: P[];
+  years: string[];
+  takeaways: (p: P) => { points: ReactNode[]; caveats: ReactNode[] };
+  stats: (p: P) => ReactNode;
+}) {
   const all = usePoints(a);
-  const profiles = a.company_profiles;
   const [group, setGroup] = useState(profiles[0]?.group ?? "");
   const [hover, setHover] = useState<Pt | null>(null);
-  const years = a.race.years;
   const colors = useMemo(() => yearColors(years), [years]);
   const [hiddenYears, setHiddenYears] = useState<string[]>([]);
   const mine = useMemo(() => all.filter((p) => p.group === group && !hiddenYears.includes(p.year)).sort((p, q) => p.ri - q.ri), [all, group, hiddenYears]);
@@ -266,10 +297,8 @@ export function CompanyMap({ a, geo, takeaways }: { a: Auctions; geo: GeoJSON.Fe
         </div>
         {prof && (
           <div className="grid content-start grid-cols-2 gap-3">
-            <Stat label="Awarded since 2019" value={mw(total / 1000)} sub={`${prof.awards} awards in ${prof.rounds} of ${a.rounds.length} rounds`} />
-            <Stat label="Site quality (est.)" value={prof.quality_pct_avg == null ? "–" : `${prof.quality_pct_avg}%`} sub={prof.full_load_hours_avg ? `≈ ${prof.full_load_hours_avg.toLocaleString("en-GB")} full-load hours` : undefined} />
-            <Stat label="Median award" value={`${prof.median_award_mw} MW`} sub={`${prof.states} states`} />
-            <Stat label="Turbine maker" value={Object.keys(prof.kw_by_maker)[0] ?? "–"} sub={(() => { const m = Object.values(prof.kw_by_maker); const s = m.reduce((x, y) => x + y, 0); return s ? `${Math.round((m[0] / s) * 100)}% of its turbines` : undefined; })()} />
+            <Stat label="Awarded" value={mw(total / 1000)} sub={`${prof.awards} awards in ${prof.rounds} of ${a.rounds.length} rounds`} />
+            {stats(prof)}
           </div>
         )}
       </div>

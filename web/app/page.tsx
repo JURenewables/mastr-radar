@@ -81,6 +81,19 @@ export default async function Home() {
         <Monitor asOf={manifest.as_of} />
 
         <Link
+          href="/solar"
+          className="mb-4 block rounded-[20px] bg-surface p-6 transition-colors hover:bg-rule sm:p-8"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Solar</p>
+          <p className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
+            Solar parks, batteries and every solar auction since 2019 →
+          </p>
+          <p className="mt-2 max-w-2xl text-ink-muted">
+            Prices, where the parks go, who wins, how big parks are split into capped bids, and how
+            fast solar parks get their own battery.
+          </p>
+        </Link>
+        <Link
           href="/wind"
           className="mb-4 block rounded-[20px] bg-surface p-6 transition-colors hover:bg-rule sm:p-8"
         >

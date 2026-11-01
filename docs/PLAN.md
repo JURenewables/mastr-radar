@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.6 approved and live (Phase 8 incl. WP52–61). Next: WP45b better attribution; WP41 grid map waits for OSM licence OK and your ENTSO-E / netztransparenz keys**
+**You are here: contract v1.7 live (1 Nov 2026): Monitor, Solar, Wind, Grid, Players, AI guide. Next: WP73 data platform (Netztransparenz, ENTSO-E once keys are in GitHub Secrets), WP67 grid distance and WP41 grid map (need OSM decision), WP45b attribution**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -251,6 +251,42 @@ real stress signals (line loading itself is not published).
   where, who wins, why) with generated takeaways and caveats per section;
   animated award map (round by round, no company colours); company map
   coloured by year with profile and takeaways; turbine makers per company.
+- [x] **WP62. Unit details (station 2, internal):** grid connection voltage
+  and capacity, award number, declared yield ratio, permit date, solar type,
+  tracker, land use, battery on site.
+- [x] **WP63. Solar auctions:** ground-mounted rounds since 2019 (awards since
+  2023) and innovation rounds; links via award numbers; solar groups added.
+- [x] **WP64. Solar yield, batteries, portfolios** (DWD radiation grid).
+- [x] **WP65. Wind success drivers:** calibration with declared yield ratios;
+  permitted turbines awarded vs not by year, site quality, grid voltage;
+  company volume vs site quality.
+- [x] **WP66. Solar page** (`/solar`, five chapters) and cross-technology
+  view (groups in wind and solar) on both pages; nav Monitor | Solar | Wind.
+- [x] **WP68. Rise and fall:** share early vs late, rounds with an award,
+  year-to-year swing and status (new, rising, steady, fading, dropped) per
+  group, on the wind and solar pages.
+- [x] **WP69. Business models and exits:** sourced company facts (develop and
+  sell vs IPP, project vs corporate finance), retreats and insolvencies
+  (Senvion, Siemens Gamesa, BayWa r.e., ABO Energy, SoWiTec, Enerparc) and
+  turbine makers worldwide (GWEC). Follow-up: add JUWI, PNE, Energiekontor,
+  ENERTRAG, Anumar once sources are checked.
+- [x] **WP70. A market under strain:** price slide vs ceiling, submitted
+  bids vs volume, awarded-but-unbuilt backlog with the 36-month wind
+  deadline, unbuilt awards held by companies in insolvency or restructuring,
+  what led up to it and the dangers (new chapter on both pages).
+- [x] **WP71. Grid page** (`/grid`): grid operators and concentration, TSO
+  control areas map, voltage levels, large consumers and the demand wave,
+  congestion costs, connection rules; from new MaStR grid fields (station 2
+  `extract-grid`) plus sourced context. Next: line-level model (needs OSM
+  decision, Netztransparenz and ENTSO-E access).
+- [x] **WP72. Players worldwide** (`/players`): 18 utilities, IPPs,
+  investors and developers with staff, earnings, debt, capacity, markets,
+  mix, momentum; Wind and Solar pages labelled as Germany. Follow-up: add
+  Iberdrola, Engie, Encavis, Trianel/enercity, Nordex/Enercon/Vestas
+  orders by customer.
+- [ ] **WP73. AI-friendly data platform:** see `docs/platform-plan.md`.
+- [ ] **WP67. Grid distance:** distance to the nearest substation (needs the
+  OpenStreetMap ODbL decision).
 - [ ] **WP45b. Better attribution (continue):** map project companies to their parent
   groups (e.g. from MaStR operator data or a reviewed list) to shrink the
   "not attributed" share. Older rounds (2017–2024).

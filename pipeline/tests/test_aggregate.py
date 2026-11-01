@@ -73,7 +73,7 @@ def test_kpis(built):
 
 def test_manifest(built):
     _, out, manifest = built
-    assert manifest["contract_version"] == "1.6"
+    assert manifest["contract_version"] == "1.7"
     assert manifest["as_of"] == "2026-10-30"
     files = {f["name"]: f for f in manifest["files"]}
     assert set(files) == {

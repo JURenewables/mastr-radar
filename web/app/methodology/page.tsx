@@ -224,6 +224,50 @@ export default async function Methodology() {
           </p>
         </Section>
 
+        <Section title="Solar auctions and success drivers">
+          <p>
+            Solar awards link to the register through the award number that each solar plant&apos;s EEG
+            record carries. Parks not yet registered are placed at the centre of their municipality.
+            Yield is estimated from the Deutscher Wetterdienst radiation grid (1991–2020) and the type of
+            system (fixed south, east-west or tracker) with a typical performance ratio. A park counts as
+            having a battery if the register says so, if a battery is linked to the award, or if a battery
+            of at least 500 kW stands within 1 km. A portfolio is two or more awards of one company in the
+            same district and round.
+          </p>
+          <p>
+            Wind site quality is calibrated with the ratio of estimated to reference yield that operators
+            declare in the register for several thousand turbines; where a turbine has a declared value,
+            that value is used. To see what distinguishes winners, all wind turbines with a permit are
+            compared: BNetzA only publishes winning bids, so turbines without an award may still bid, may
+            have lost, or may sell their power without EEG support.
+          </p>
+          <p>
+            &quot;Rise and fall&quot; compares each company group&apos;s share of awarded capacity in the
+            first and last third of the years. Because losing bids are not published, &quot;rounds with
+            an award&quot; counts the rounds since a group&apos;s first award, not its bids; the
+            year-to-year swing is the coefficient of variation of its yearly awarded capacity. Business
+            models, financing and exits are hand-collected from company and press sources; each
+            statement links its source, and the list is not complete.
+          </p>
+          <p>
+            &quot;A market under strain&quot; counts an award as running when its linked units are in
+            operation in the register; late registrations make recent rounds look less built. The wind
+            deadline is the publication date plus 36 months (§ 36e EEG), which BNetzA can extend.
+            Submitted bid volumes come from BNetzA press releases, because the round pages only list the
+            awards. Unbuilt capacity of companies in insolvency or restructuring uses the company facts
+            above. The listed dangers are our assessment.
+          </p>
+          <p>
+            The grid page uses the register&apos;s grid connection points: each large unit is assigned
+            the grid operator, the TSO control area and the voltage level of its connection point. The
+            control area shown per district is the one most of its large units connect to. Large
+            electricity consumers are those registered in the register (connected at high or extra-high
+            voltage). It is not a load-flow model. Congestion costs, rules and demand facts come from
+            the linked sources. The players page combines company reports (linked per company) with
+            each company&apos;s German auction results; momentum is our assessment.
+          </p>
+        </Section>
+
         <Section title="Known limitations">
           <ul className="list-disc space-y-2 pl-6">
             <li>

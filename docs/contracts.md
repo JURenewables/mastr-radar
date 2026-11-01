@@ -480,6 +480,132 @@ every reported total has a source and a known round.
 
 ---
 
+## v1.7: solar auctions, unit details, success drivers, dynamics, company facts, market risk, players, grid (approved 1 Nov 2026)
+
+Additive. Until approved, the files exist only on the branch preview and
+`contract_version` stays `"1.6"`.
+
+**Station 2 adds `data/extract/unit_details.parquet`** (internal, never
+published): all onshore wind units, solar units that are not building or
+balcony units or are ≥ 100 kW, and storage ≥ 100 kW. Columns: `unit_id`,
+`technology`, `location_id`, `grid_voltage` and `grid_capacity_kw` (from
+`Netzanschlusspunkte` via the unit's location), `award_no`, `award_kw`,
+`yield_ratio_pct` (from the EEG plant record; the declared ratio of estimated
+to reference yield for wind), `permit_date`, `permit_kind`
+(`EinheitenGenehmigung`), `solar_kind`, `solar_orientation`, `solar_tracker`,
+`solar_area_ha`, `solar_land_before`, `solar_features`, `storage_same_site`,
+`high_voltage`, `park_name`. Check: contract columns, ≥ 30,000 rows, unique
+ids. Written by `mastr-radar extract` (or `extract-details` on its own).
+
+**Solar auctions** (`settings.yaml → auctions.solar_rounds`,
+`innovation_rounds`; cached in `data/auctions/solar/`; DWD radiation grid in
+`data/auctions/dwd/`). Prices per round since 2019 (innovation since 2021);
+award-level analysis where the list gives kW (ground-mounted solar since
+2023, innovation since Sept 2023). Awards link to MaStR through the award
+number stored in the plant's EEG record (innovation: also register numbers).
+Location: centre of the linked units, else the municipality centre from
+public unit coordinates. Yield = DWD global radiation 1991–2020 × system
+factor (fixed south 1.12, east-west 1.00, tracker 1.30) × performance ratio
+0.85 (`config/solar_yield.yaml`). Battery on site = MaStR flag, a linked
+battery unit, or a battery ≥ 500 kW within 1 km. Portfolio = ≥ 2 awards of
+one group (or one bidder) in the same district and round.
+
+**`auctions/solar.json`**: `rounds[]` (programme, prices, ceiling, awarded
+kW, `award_level`, `max_award_kw`, `kw_by_category`, `linked_share`,
+`co_located_share`, `co_located_known_kw`, `tracker_share`, `special_share`,
+`specific_yield_avg`), `winners_by_year`, `race`, `kw_by_category_year`,
+`kw_by_state_year`, `portfolios` (`by_round`, `largest`), `company_profiles`,
+`points` (7 integers per award: lon×100, lat×100, kW/100, category, group,
+kWh/kWp, battery 1/0/−1), `attribution_kw`, `unattributed_share`,
+`grid_voltage_kw`, `cross_tech` (groups in wind and solar since 2023),
+`model`. **`auctions/solar_awards.json`**: one row per award (bidder only for
+companies, D4).
+
+**Wind additions in `auctions/onshore.json`**: quality factor calibrated with
+the declared MaStR ratios (`model.calibration`: factor, n, correlation;
+declared value used where present); `success` (award rate of permitted
+turbines by permit year, site-quality band and grid voltage; voltage by
+bidder type; company volume vs site quality with Spearman correlation).
+
+**Check:** solar rounds match settings; prices in order; award list within
+±10 % of the published total; average specific yield 850–1,500 kWh/kWp; no
+location for bidders that are not companies; no NaN in published JSON.
+
+**Rise and fall (`dynamics` in `auctions/onshore.json` and `auctions/solar.json`)**
+(WP68): per company group with ≥ 100 MW awarded (named groups only):
+`kw_by_year`, `share_early` / `share_late` (mean yearly share in the first and
+last third of the years), `momentum_pp`, `rounds_won`, `rounds_possible`
+(rounds since the first award), `hit_rate`, `volatility` (coefficient of
+variation of yearly kW since the first award), `first_bid`, `last_bid`,
+`status`: `new` (first award in the last third of the rounds), `dropped` (no
+award in the last `recent_rounds` rounds: 6 wind, 4 solar), `rising` /
+`fading` (share change ≥ +0.5 / ≤ −0.5 points), else `steady`.
+
+**Company facts (`auctions/company_facts.json`)** (WP69): built from the
+hand-checked `pipeline/config/company_facts.yaml`. `as_of`; `companies`
+(`group` as in auction_groups.yaml, `model` develop_sell / ipp / mixed /
+investor, `finance` project / corporate / fund / mixed / null,
+`international`, `note`, `sources`); `events` (`company`, `group`, `date`
+YYYY-MM, `kind` insolvency / restructuring / sales_halt / exit, `tech` wind /
+solar / both, `issue`, `sources`), sorted by date; `oems` (GWEC ranking:
+`source_year`, `scope`, `makers` with `gw` and optional `countries`, `notes`,
+`sources`), `market` (`oversubscription`: tech, bid_date, tender_mw,
+submitted_mw, bids, source, from BNetzA press releases; `facts`: tech, text,
+source). **Check:** every entry has at least one https source; codes from
+the lists above; dates YYYY-MM; GW > 0; submitted ≥ tender > 0.
+
+**Market risk (`auctions/market_risk.json`)** (WP70): built from the files
+above. `as_of`; per technology (`wind`, `solar`): `deadline_months` (36 for
+wind, § 36e EEG; null for solar), `rounds` (id, programme, bid_date,
+published, ceiling_ct, avg_ct, awarded_kw, operating_kw = linked units in
+operation, unbuilt_kw, expires = published + deadline, past_deadline),
+`unbuilt_kw` (rounds not past the deadline), `unbuilt_expiring_12m_kw`,
+`past_deadline_unbuilt_kw`, `price_peak` / `price_last` (highest average of
+the last 12 main-programme rounds, latest), `exposure` (unbuilt kW of groups
+with an insolvency or restructuring event), `market`, `facts`. **Check:**
+0 ≤ operating ≤ awarded; unbuilt = awarded − operating; exposure within
+awarded.
+
+**Players (`auctions/players.json`)** (WP72): built from the hand-checked
+`pipeline/config/players.yaml`. `as_of`; `players` (name, group as in
+auction_groups.yaml or null, type utility / municipal / ipp / investor /
+developer, hq, owner, year, employees {value, unit, note}, currency, revenue,
+ebitda {value, label}, net_debt (negative = net cash), capacity_gw,
+renewables_gw, own_portfolio_gw, capacity_note, markets, mix, turbines,
+momentum forward / steady / transition / stuck, why, sources) plus `germany`
+(wind_awarded_mw, wind_status, solar_awarded_mw, solar_status, wind_fleet_mw,
+joined from the auction files). **Check:** known type and momentum; a reason
+for every momentum; https sources; money needs a currency; employees a
+positive integer with unit; capacities in range.
+
+**Station 2 grid register (internal, never published)** (WP71):
+`data/extract/grid_units.parquet` (unit_id, grid_operator_id, control_area,
+voltage: extra_high / extra_high_to_high / high / high_to_medium / medium /
+medium_to_low / low) for the units in unit_details.parquet, from the grid
+connection point with the largest capacity; `grid_operators.parquet`
+(operator_id, tso, dso) for electricity grid operators;
+`consumers.parquet` (large electricity consumers: unit_id, status, state,
+district, district_key, lat, lon, units_over_50mw, commissioning_date,
+planned_date, operator_id, control_area). Command `mastr-radar extract-grid`
+(also part of `extract`). **Check:** columns; ≥ 20,000 grid units, ≥ 500
+consumers; four TSOs.
+
+**Grid (`grid/grid.json`)** (WP71): `as_of`, `scope`, `coverage_share`
+(share of large-unit capacity with grid data), `control_areas` (four TSOs:
+kW by technology in operation, planned kW, large consumers operating and
+planned), `operators` (registered, tsos, with_large_units, top10_share,
+operators_for_half, top 25 with name, tso, kW by technology, units, share,
+high_voltage_share), `voltage` (kW by technology per level), `areas`,
+`districts` (district key → [area index, wind+solar kW, storage kW]),
+`consumers` (operating, planned, sites_with_units_over_50mw, by_state,
+planned_by_year, points: lon×100, lat×100, status 1/2, over-50-MW flag; no
+names), `context` (from `config/grid_facts.yaml`: congestion costs and
+volumes by year, 2025 cost split, facts, regulation timeline; every item
+sourced). **Check:** the four areas; coverage ≥ 50 %; ≥ 300 districts; points
+in fours; every context item has an https source.
+
+---
+
 ## Version history
 
 | Version | Date | Change |
@@ -491,3 +617,4 @@ every reported total has a source and a known round.
 | 1.4 | 2026-10-31 | Data hub chain H1/H2, day files `days/` with SMARD and DWD weather, `stations.json`, population in `states[]`, size budget 50 MB. Approved by the user. |
 | 1.5 | 2026-10-31 | Turbine makers (`wind_industry` in `stats.json`), auctions chain A1/A2 with `auctions/onshore.json` and `auctions/awards.json`. Approved by the user. |
 | 1.6 | 2026-11-01 | Auctions since May 2019 with yield estimate (DWD), five bidder types, reviewed attributions and company-reported totals, office attribution via the new internal `data/extract/operators.parquet`, race, profiles and map points. Approved by the user. |
+| 1.7 | 2026-11-01 | Solar and innovation auctions, internal unit details and grid register, wind calibration and success drivers, rise-and-fall dynamics, company facts, market risk, players worldwide, grid page. Approved by the user. |

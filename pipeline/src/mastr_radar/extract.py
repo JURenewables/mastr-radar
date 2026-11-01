@@ -238,6 +238,284 @@ def write_operator_register(zip_path: Path, out_path: Path, cfg: dict | None = N
     return len(rows)
 
 
+UNIT_DETAILS_SCHEMA = pa.schema(
+    [
+        ("unit_id", pa.string()),
+        ("technology", pa.string()),
+        ("location_id", pa.string()),
+        ("grid_voltage", pa.string()),
+        ("grid_capacity_kw", pa.float64()),
+        ("award_no", pa.string()),
+        ("award_kw", pa.float64()),
+        ("yield_ratio_pct", pa.float64()),
+        ("permit_date", pa.date32()),
+        ("permit_kind", pa.string()),
+        ("solar_kind", pa.string()),
+        ("solar_orientation", pa.string()),
+        ("solar_tracker", pa.bool_()),
+        ("solar_area_ha", pa.float64()),
+        ("solar_land_before", pa.string()),
+        ("solar_features", pa.string()),
+        ("storage_same_site", pa.bool_()),
+        ("high_voltage", pa.bool_()),
+        ("park_name", pa.string()),
+    ]
+)
+
+
+def _flag(v) -> bool | None:
+    return None if v in (None, "") else v.strip() in ("1", "true", "True")
+
+
+def write_unit_details(zip_path: Path, out_path: Path, cfg: dict | None = None) -> int:
+    """Station 2 (v1.7): details for auction analysis, joined from the
+    unit, EEG, permit and grid-connection files → unit_details.parquet."""
+    cfg = cfg or load_columns_config()
+    dc = cfg["unit_details"]
+    sc = dc["solar"]
+    rows: dict[str, dict] = {}
+    with zipfile.ZipFile(zip_path) as zf:
+        catalog = read_catalog(zf)
+
+        def cat(v):
+            return None if v in (None, "") else catalog.get(v, v)
+
+        def base(r, tech):
+            return {
+                "unit_id": r.get("EinheitMastrNummer"),
+                "technology": tech,
+                "location_id": r.get(dc["common"]["location_id"]),
+                "_eeg": r.get("EegMaStRNummer") or r.get("EegMastrNummer"),
+                "_permit": r.get(dc["common"]["permit_id"]),
+            }
+
+        wsrc = cfg["sources"]["wind"]
+        for r in iter_records(zf, wsrc["files"], wsrc["record"]):
+            tech = wsrc["technology_values"].get(cat(r.get(wsrc["technology_field"])) or "")
+            if tech != "wind_onshore":
+                continue
+            row = base(r, tech)
+            row["park_name"] = _text(r.get("NameWindpark"))
+            rows[row["unit_id"]] = row
+        for r in iter_records(
+            zf, cfg["sources"]["solar"]["files"], cfg["sources"]["solar"]["record"]
+        ):
+            kind = cat(r.get(sc["kind"]))
+            kw = _float(r.get("Bruttoleistung")) or 0
+            small_kind = kind in ("Gebäudesolaranlage",) or (kind or "").startswith(
+                "Steckerfertige"
+            )
+            if small_kind and kw < dc["solar_min_kw"]:
+                continue
+            row = base(r, "solar")
+            orient = cat(r.get(sc["orientation"]))
+            feats = [cat(x.strip()) for x in (r.get(sc["features"]) or "").split(",") if x.strip()]
+            row.update(
+                solar_kind=kind,
+                solar_orientation=orient,
+                solar_tracker=None if orient is None else orient == sc["tracker_value"],
+                solar_area_ha=_float(r.get(sc["area_ha"])),
+                solar_land_before=cat(r.get(sc["land_before"])),
+                solar_features="; ".join(f for f in feats if f) or None,
+                storage_same_site=_flag(r.get(sc["storage_same_site"])),
+                high_voltage=_flag(r.get(sc["high_voltage"])),
+                park_name=_text(r.get(sc["park_name"])),
+            )
+            rows[row["unit_id"]] = row
+        stc = cfg["sources"]["storage"]
+        for r in iter_records(zf, stc["files"], stc["record"]):
+            if (_float(r.get("Bruttoleistung")) or 0) < dc["storage_min_kw"]:
+                continue
+            row = base(r, "storage")
+            rows[row["unit_id"]] = row
+
+        ec = dc["eeg"]
+        want_eeg = {r["_eeg"]: uid for uid, r in rows.items() if r["_eeg"]}
+        for files, record in zip(ec["files"], ec["records"], strict=True):
+            for r in iter_records(zf, files, record):
+                uid = want_eeg.get(r.get(ec["id"]))
+                if uid:
+                    rows[uid].update(
+                        award_no=_text(r.get(ec["award_no"])),
+                        award_kw=_float(r.get(ec["award_kw"])),
+                        yield_ratio_pct=_float(r.get(ec["yield_ratio"])),
+                    )
+        pc_ = dc["permits"]
+        want_permit = {}
+        for uid, r in rows.items():
+            if r["_permit"]:
+                want_permit.setdefault(r["_permit"], []).append(uid)
+        for r in iter_records(zf, pc_["files"], pc_["record"]):
+            for uid in want_permit.get(r.get(pc_["id"]), []):
+                rows[uid].update(
+                    permit_date=_date(r.get(pc_["date"])), permit_kind=cat(r.get(pc_["kind"]))
+                )
+        gc = dc["grid"]
+        want_loc = {}
+        for uid, r in rows.items():
+            if r["location_id"]:
+                want_loc.setdefault(r["location_id"], []).append(uid)
+        for r in iter_records(zf, gc["files"], gc["record"]):
+            for uid in want_loc.get(r.get(gc["location_id"]), []):
+                cap = _float(r.get(gc["capacity_kw"]))
+                prev = rows[uid].get("grid_capacity_kw") or 0
+                if "grid_voltage" not in rows[uid] or (cap or 0) > prev:
+                    rows[uid].update(grid_voltage=cat(r.get(gc["voltage"])), grid_capacity_kw=cap)
+    names = UNIT_DETAILS_SCHEMA.names
+    table = pa.Table.from_pylist(
+        [{k: r.get(k) for k in names} for r in rows.values()], UNIT_DETAILS_SCHEMA
+    )
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    pq.write_table(table, out_path, compression="zstd")
+    return table.num_rows
+
+
+GRID_UNITS_SCHEMA = pa.schema(
+    [
+        ("unit_id", pa.string()),
+        ("grid_operator_id", pa.string()),
+        ("control_area", pa.string()),
+        ("voltage", pa.string()),
+    ]
+)
+GRID_OPERATORS_SCHEMA = pa.schema(
+    [("operator_id", pa.string()), ("tso", pa.bool_()), ("dso", pa.bool_())]
+)
+CONSUMERS_SCHEMA = pa.schema(
+    [
+        ("unit_id", pa.string()),
+        ("status", pa.string()),
+        ("state", pa.string()),
+        ("district", pa.string()),
+        ("district_key", pa.string()),
+        ("lat", pa.float64()),
+        ("lon", pa.float64()),
+        ("units_over_50mw", pa.int32()),
+        ("commissioning_date", pa.date32()),
+        ("planned_date", pa.date32()),
+        ("operator_id", pa.string()),
+        ("control_area", pa.string()),
+    ]
+)
+
+
+def write_grid_register(
+    zip_path: Path, details_path: Path, out_dir: Path, cfg: dict | None = None
+) -> dict[str, int]:
+    """Station 2 (v1.7, WP71): grid operator, control area and voltage per
+    unit in unit_details.parquet; grid operator roles; large electricity
+    consumers. Writes grid_units, grid_operators and consumers parquet files."""
+    cfg = cfg or load_columns_config()
+    gc = cfg["grid_register"]
+    details = pq.read_table(details_path, columns=["unit_id", "location_id"]).to_pylist()
+    want: dict[str, list[str]] = {}
+    for d in details:
+        if d["location_id"]:
+            want.setdefault(d["location_id"], []).append(d["unit_id"])
+    units: dict[str, dict] = {}
+    caps: dict[str, float] = {}
+    roles: dict[str, dict] = {}
+    consumers = []
+    with zipfile.ZipFile(zip_path) as zf:
+        catalog = read_catalog(zf)
+
+        def cat(v):
+            return None if v in (None, "") else catalog.get(v, v)
+
+        c = gc["connections"]
+        for r in iter_records(zf, c["files"], c["record"]):
+            ids = want.get(r.get(c["location_id"]))
+            if not ids:
+                continue
+            cap = _float(r.get(c["capacity_kw"])) or 0
+            for uid in ids:
+                if uid in units and cap <= caps[uid]:
+                    continue
+                caps[uid] = cap
+                units[uid] = {
+                    "unit_id": uid,
+                    "grid_operator_id": r.get(c["grid_operator_id"]),
+                    "control_area": cat(r.get(c["control_area"])),
+                    "voltage": gc["voltage_values"].get(cat(r.get(c["voltage"])) or "", None),
+                }
+        rc = gc["roles"]
+        for r in iter_records(zf, rc["files"], rc["record"]):
+            aid = r.get(rc["actor_id"]) or ""
+            if not aid.startswith(rc["electricity_prefix"]):
+                continue
+            role = r.get(rc["role"])
+            row = roles.setdefault(aid, {"operator_id": aid, "tso": False, "dso": False})
+            row["tso"] |= role == rc["tso_value"]
+            row["dso"] |= role == rc["dso_value"]
+        cc = gc["consumers"]
+        for r in iter_records(zf, cc["files"], cc["record"]):
+            key = r.get(cc["municipality_key"]) or ""
+            n = r.get(cc["over_50mw"])
+            consumers.append(
+                {
+                    "unit_id": r.get(cc["id"]),
+                    "status": gc["status_values"].get(cat(r.get(cc["status"])) or "", None),
+                    "state": cat(r.get(cc["state"])),
+                    "district": _text(r.get(cc["district"])),
+                    "district_key": key[:5] or None,
+                    "lat": _float(r.get(cc["lat"])),
+                    "lon": _float(r.get(cc["lon"])),
+                    "units_over_50mw": int(n) if n and n.isdigit() else None,
+                    "commissioning_date": _date(r.get(cc["commissioning_date"])),
+                    "planned_date": _date(r.get(cc["planned_date"])),
+                    "operator_id": r.get(cc["operator_id"]),
+                    "control_area": cat((r.get(cc["control_area"]) or "").split(",")[0].strip()),
+                }
+            )
+    out_dir.mkdir(parents=True, exist_ok=True)
+    counts = {}
+    for name, rows, schema in (
+        ("grid_units.parquet", list(units.values()), GRID_UNITS_SCHEMA),
+        ("grid_operators.parquet", list(roles.values()), GRID_OPERATORS_SCHEMA),
+        ("consumers.parquet", consumers, CONSUMERS_SCHEMA),
+    ):
+        pq.write_table(pa.Table.from_pylist(rows, schema), out_dir / name, compression="zstd")
+        counts[name] = len(rows)
+    return counts
+
+
+def check_grid_register(out_dir: Path, cfg: dict | None = None) -> None:
+    cfg = cfg or load_columns_config()
+    gc = cfg["grid_register"]
+    problems = []
+    for name, schema, minimum in (
+        ("grid_units.parquet", GRID_UNITS_SCHEMA, gc["min_connections"]),
+        ("grid_operators.parquet", GRID_OPERATORS_SCHEMA, 100),
+        ("consumers.parquet", CONSUMERS_SCHEMA, gc["min_consumers"]),
+    ):
+        t = pq.read_table(out_dir / name)
+        if t.schema.remove_metadata() != schema:
+            problems.append(f"{name}: columns differ from the contract.")
+        if t.num_rows < minimum:
+            problems.append(f"{name}: {t.num_rows} rows, expected at least {minimum}.")
+    ops = pq.read_table(out_dir / "grid_operators.parquet").to_pandas()
+    if not 3 <= int(ops["tso"].sum()) <= 6:
+        problems.append("grid_operators.parquet: expected the four TSOs.")
+    if problems:
+        raise UnitsCheckError("; ".join(problems))
+
+
+def check_unit_details(path: Path, min_rows: int) -> None:
+    table = pq.read_table(path)
+    problems = []
+    if table.schema.remove_metadata() != UNIT_DETAILS_SCHEMA:
+        problems.append("unit_details.parquet: columns differ from the contract.")
+    if table.num_rows < min_rows:
+        problems.append(
+            f"unit_details.parquet: {table.num_rows} rows, expected at least {min_rows}."
+        )
+    ids = table.column("unit_id")
+    if ids.null_count or len(set(ids.to_pylist())) != table.num_rows:
+        problems.append("unit_details.parquet: unit ids missing or not unique.")
+    if problems:
+        raise UnitsCheckError("; ".join(problems))
+
+
 def check_operator_register(path: Path, min_rows: int) -> None:
     table = pq.read_table(path)
     problems = []

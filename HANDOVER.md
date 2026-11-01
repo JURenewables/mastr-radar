@@ -1,7 +1,7 @@
 # Handover — 1 Nov 2026
 
 Branch `claude/blissful-cannon-t3pa07` (restarted from `main` after PR #5).
-Live site: https://mastr-radar.vercel.app (from `main`, contract v1.5).
+Live site: https://mastr-radar.vercel.app (from `main`, contract v1.7).
 Branch preview (Vercel login needed):
 https://mastr-radar-git-claude-blissful-cannon-t3pa07-re-s-ma-str.vercel.app
 
@@ -48,6 +48,41 @@ Sources and licences: `docs/sources.md`.
   fleet), data table by bidder type, editorial drivers matrix.
 - Checks: pytest 100 passed, ruff clean, web lint and build clean, station 3
   check passes.
+
+**Contract v1.7 (approved 1 Nov 2026, merged to main)**
+- WP62 `data/extract/unit_details.parquet` (internal): grid voltage and
+  capacity, award number, declared wind yield ratio, permit date, solar type,
+  tracker, land use, battery on site (`mastr-radar extract-details`).
+- WP63–64 solar auctions (`solar_auctions.py`): ground-mounted since 2019
+  (awards since 2023), innovation since 2020; yield from the DWD radiation
+  grid; batteries on site; portfolios; solar company groups.
+- WP65 wind success drivers and calibration: model quality × 0.79 (median of
+  4,431 declared MaStR ratios; correlation 0.44); declared value used where
+  present. Findings: 95 % of turbines permitted 2021–23 won regardless of
+  site quality; volume vs site quality rank correlation +0.18.
+- WP66 `/solar` page and wind/solar cross-technology section.
+- WP68 rise and fall (`dynamics` in onshore.json and solar.json): share
+  early vs late, rounds with an award, year-to-year swing, status per group.
+- WP69 business models and exits: `pipeline/config/company_facts.yaml` →
+  `auctions/company_facts.json` (every statement sourced). Big news found:
+  Enerparc, the top solar auction winner, filed for insolvency in Sept 2026;
+  SoWiTec in July 2026; ABO Energy and BayWa r.e. are restructuring.
+- WP70 "A market under strain" (`auctions/market_risk.json`): wind prices
+  −35 % Feb 24 → Aug 26 with 2.1× bids; 29 GW of wind awards not yet
+  running, 3.3 GW due within 12 months; 1.7 GW of unbuilt solar awards sit
+  with insolvent Enerparc (15 % of the solar backlog), 0.5 GW of wind with
+  ABO. ABO is in out-of-court restructuring (bank standstill to 30 Nov
+  2026), not insolvent, as of the sources found on 1 Nov 2026: re-check.
+- WP71 `/grid`: new station 2 command `extract-grid` (grid operator, TSO
+  control area and voltage per large unit; grid operator roles; 1,058 large
+  consumers) → `grid/grid.json`. 6 grid operators connect half of large
+  wind/solar/storage; 476 large consumers planned. Context (congestion costs,
+  rules incl. Redispatchvorbehalt bill) in `config/grid_facts.yaml`.
+- WP72 `/players`: 18 companies in `config/players.yaml` (sourced), joined
+  with German auction results. Wind/Solar now titled "Germany's …".
+- WP73a AI guide on `/open-data` and `/llms.txt`; plan in
+  `docs/platform-plan.md`. Architecture map:
+  https://claude.ai/artifact/XyzJEANiHVLTQojAnRPMUz
 
 ## In progress / resolved during this session
 

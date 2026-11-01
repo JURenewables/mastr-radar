@@ -1,0 +1,344 @@
+# Players in the German wind and solar market: who they are at home and abroad
+# (contract v1.7 → auctions/players.json). Hand-checked; every figure
+# needs a source in `sources`. Leave a field out (null) when no source gives it.
+# Money in millions of the company's reporting currency (`currency`).
+# net_debt: positive = net debt, negative = net cash.
+# `group` must match the auction group name so the site can join German data.
+# momentum: forward / steady / transition / stuck (our assessment, with `why`).
+
+as_of: "2026-11-01"
+
+players:
+  # --- Utilities ---------------------------------------------------------------
+  - name: RWE
+    group: RWE
+    type: utility
+    hq: Essen, Germany
+    owner: Listed (DAX)
+    year: 2025
+    employees: {value: 20120, unit: FTE}
+    currency: EUR
+    revenue: 17628
+    ebitda: {value: 5087, label: Adjusted EBITDA}
+    net_debt: 10921
+    capacity_gw: 38.7
+    capacity_note: "Renewables, batteries and flexible generation (Sept 2025); 11.4 GW under construction; target 65 GW by 2031."
+    markets: "Europe, US, Asia-Pacific (offshore wind)"
+    mix: "Offshore and onshore wind, solar, batteries, gas; lignite in Germany until the legal exit."
+    momentum: forward
+    why: "Largest German renewable builder by capacity under construction (11.4 GW), but adjusted EBITDA fell 10 % in 2025. Small in German onshore auctions relative to its size."
+    sources:
+      - https://www.rwe.com/en/investor-relations/rwe-share/key-data/
+      - https://www.rwe.com/en/investor-relations/financial-calendar-and-publications/news-and-ad-hoc-announcements/news/news-2025-11-12/
+      - https://chemxplore.com/news/rwe-financial-performance-2025
+
+  - name: EnBW
+    group: EnBW
+    type: utility
+    hq: Karlsruhe, Germany
+    owner: State of Baden-Württemberg and OEW (municipal association)
+    year: 2025
+    employees: {value: 31541, unit: headcount}
+    currency: EUR
+    revenue: 34390
+    ebitda: {value: 5072, label: Adjusted EBITDA}
+    net_debt: 13152
+    capacity_gw: 11.2
+    renewables_gw: 7.4
+    capacity_note: "65.6 % of capacity renewable; 25.7 TWh generated, 13.6 TWh renewable."
+    markets: "Mainly Germany; offshore wind also in the UK"
+    mix: "Renewables 7.4 GW; hydrogen-ready gas plants replacing coal (Stuttgart-Münster, Heilbronn, Altbach); last lignite stake (Lippendorf) sold."
+    momentum: forward
+    why: "Earnings up, net debt down by €1.1bn, offshore wind He Dreiht feeding in since Nov 2025. Grid business carries more than half of EBITDA."
+    sources:
+      - https://www.enbw.com/geschaeftsbericht-2025/kennzahlen/
+      - https://www.enbw.com/annual-report-2025/management-report/
+
+  - name: Vattenfall
+    group: Vattenfall
+    type: utility
+    hq: Stockholm, Sweden
+    owner: Swedish state (100 %)
+    year: 2025
+    employees: {value: 20869, unit: headcount}
+    currency: SEK
+    revenue: 234915
+    ebitda: {value: 49236, label: EBITDA}
+    net_debt: 73442
+    net_debt_label: Adjusted net debt
+    capacity_gw: 23.4
+    capacity_note: "Generation 102.1 TWh: nuclear 39 %, hydro 37 %, wind 17 %, fossil 7 %."
+    markets: "Sweden, Germany, Netherlands, Denmark, UK"
+    mix: "Nuclear and hydro (Sweden), wind on- and offshore, fossil 7 % of output; growth capex 2026–30 mainly wind (SEK 59bn of 92bn)."
+    momentum: steady
+    why: "Strong balance sheet, final investment decision on Nordlicht offshore (Germany's largest wind project), but little new capacity in 2025."
+    sources:
+      - https://group.vattenfall.com/globalassets/com/about-us/vattenfall-in-brief/vattenfall-in-brief-onepager-2026-03.pdf
+      - https://group.vattenfall.com/siteassets/corporate/investors/interim_reports/2025/q4-report-2025.pdf
+
+  - name: Uniper
+    group: null
+    type: utility
+    hq: Düsseldorf, Germany
+    owner: German federal government (rescued 2022; reprivatisation started 2026, state to keep 25 % + 1 share)
+    year: 2025
+    employees: {value: 7457, unit: headcount, note: "30 Sept 2025"}
+    currency: EUR
+    revenue: 60955
+    ebitda: {value: 1097, label: Adjusted EBITDA}
+    net_debt: -2823
+    net_debt_label: Economic net cash
+    capacity_gw: 18.5
+    capacity_note: "European generation: gas 11.2 GW, hydro 3.6 GW, coal 2.3 GW, nuclear (Sweden) 1.4 GW."
+    markets: "Germany, Sweden, UK, Netherlands, Hungary and others; global gas and LNG trading"
+    mix: "Gas-heavy fleet plus hydro and Swedish nuclear; coal exit planned by 2029, Datteln 4 must be sold by end 2026; hydrogen import terminal planned in Wilhelmshaven; renewables (Green Generation) small but growing."
+    momentum: transition
+    why: "Adjusted EBITDA fell 58 % to €1.1bn after the crisis-era windfall; about 400 jobs cut; ownership in flux. Not a bidder in German onshore or solar auctions under its own name."
+    sources:
+      - https://www.uniper.energy/news/uniper-achieves-financial-targets-for-fiscal-year-2025-and-proposes-dividend-payment-of-072-per-share
+      - https://www.uniper.energy/sites/default/files/2026-07/260730_S%26P_Uniper.pdf
+      - https://www.energyconnects.com/news/utilities/2026/may/berlin-kicks-off-uniper-sale-as-it-eyes-utility-mega-deal/
+      - https://pgjonline.com/news/2025/august/uniper-to-cut-400-jobs-amid-strategic-refocus-lng-expansion-plans
+      - https://www.uniper.energy/news/uniper-posts-strong-2024-earnings-and-significantly-reduces-business-risks
+
+  - name: EWE
+    group: null
+    group_note: "Wins German wind auctions through Alterric (50 % joint venture), shown separately."
+    type: utility
+    hq: Oldenburg, Germany
+    owner: Municipalities in north-west Germany (74 %) and Ardian (26 %)
+    year: 2025
+    employees: {value: 11159, unit: average headcount}
+    currency: EUR
+    ebitda: {value: 569, label: Adjusted operating EBIT}
+    markets: "Germany, Poland, Turkey (gas and grids); wind via Alterric in Germany, France, Greece"
+    mix: "Grids, gas and electricity supply, telecoms; wind through Alterric; hydrogen projects in the north-west."
+    momentum: steady
+    why: "Operating EBIT down 10 % on a weak wind year; investment raised to €1.6bn."
+    sources:
+      - https://www.ewe.com/en/media-center/press-releases/2026/04/ewe-increases-investment-to-target-level-ewe-ag
+      - https://www.lobbyregister.bundestag.de/media/15/34/763767/EWE-Finanzbericht-2025.pdf
+
+  - name: Statkraft
+    group: null
+    type: utility
+    hq: Oslo, Norway
+    owner: Norwegian state (100 %)
+    year: 2025
+    employees: {value: 6500, unit: headcount, note: "about"}
+    currency: NOK
+    ebitda: {value: 26800, label: Underlying EBITDA}
+    net_debt: 40300
+    net_debt_label: Net interest-bearing debt
+    markets: "20 countries"
+    mix: "Mostly Norwegian hydro (51 of 72 TWh in 2025); onshore wind, solar and district heating;"
+    momentum: steady
+    why: "Record output and NOK 12bn less net debt in 2025."
+    sources:
+      - https://www.statkraft.com/IR/financial-key-figures/
+      - https://www.energy-pedia.com/news/norway/statkraft-reports-strong-fourth-quarter-results-and-record-high-production-203091
+
+  - name: LEAG
+    group: LEAG
+    type: utility
+    hq: Cottbus, Germany
+    owner: EPH (Czech) and PPF
+    employees: {value: 7000, unit: headcount, note: "about"}
+    markets: "Germany (Lusatia)"
+    mix: "Lignite mines and power plants; building solar and wind on former mining land (target 7 GW by 2030, 14 GW by 2040) and large batteries (Jänschwalde 1 GW / 4 GWh, Boxberg 400 MW / 1.6 GWh)."
+    momentum: transition
+    why: "A lignite company turning its mining land into a renewables and storage hub ('GigawattFactory')."
+    sources:
+      - https://www.cleanthinking.de/leag-gigawattfactory-erneuerbare-lausitz/
+      - https://ms-aktuell.de/welt/leag-gigabattery-boxberg-31-08-2026/
+
+  # --- IPPs and investors ------------------------------------------------------
+  - name: Alterric
+    group: Alterric
+    type: ipp
+    hq: Aurich, Germany
+    owner: EWE and Aloys Wobben Stiftung (Enercon owner), 50/50
+    employees: {value: 600, unit: headcount, note: "about"}
+    capacity_gw: 2.5
+    capacity_note: "Own wind portfolio; target up to 5 GW by 2030."
+    markets: "Germany, France, Greece"
+    mix: "Onshore wind (Enercon) and hybrid parks."
+    momentum: forward
+    why: "One of the fastest-rising groups in German wind auctions; corporate credit line raised to €350m."
+    sources:
+      - https://www.alterric.com/en/pressemitteilung/aws-and-ewe-establish-joint-venture-for-project-management-and-operation/
+      - https://www.cleanenergywire.org/news/new-german-company-aims-achieve-5-gw-onshore-wind-2030
+
+  - name: Qualitas Energy
+    group: Qualitas Energy
+    type: investor
+    hq: Madrid, Spain
+    owner: Independent investment manager (Q-Energy funds)
+    employees: {value: 500, unit: headcount, note: "more than, incl. service companies"}
+    capacity_gw: 11
+    capacity_note: "Operating and development assets; €4.6bn raised across funds since inception."
+    markets: "Spain, Germany, UK, Italy, Poland, US, Chile"
+    mix: "Onshore wind, solar, storage; repowering of old German wind farms."
+    momentum: forward
+    why: "Grew in Germany by buying developers and pipelines (DunoAir, PNE portfolio); biggest share gain in German wind auctions."
+    sources:
+      - https://qualitasenergy.com/wp-content/uploads/260529_Qualitas-Energy_Corporate-Presentation.pdf
+      - https://www.nsenergybusiness.com/news/qualitas-energy-acquires-dunoairs-1-4gw-german-onshore-wind-development-business/
+
+  - name: Enerparc
+    group: Enerparc
+    type: ipp
+    hq: Hamburg, Germany
+    owner: Founders (insolvency administrator in charge since Sept 2026)
+    employees: {value: 700, unit: headcount, note: "nearly"}
+    capacity_gw: 3.8
+    capacity_note: "Solar in operation; 1.5 GW under construction; target was 10 GW own + 10 GW third party by 2030."
+    markets: "More than 25 countries (projects built); own portfolio mainly Germany"
+    mix: "Solar, solar-plus-storage; EPC, O&M and power marketing (Sunnic)."
+    momentum: stuck
+    why: "Largest solar auction winner; filed for insolvency in Sept 2026 after a financing for solar-plus-storage failed."
+    sources:
+      - https://energynews.pro/en/german-solar-developer-enerparc-files-for-insolvency-in-hamburg
+      - https://www.pv-magazine.com/2026/10/05/enerparc-attracts-more-than-100-potential-investors-as-insolvency-sale-moves-forward/
+      - https://www.enerparc.de/en/company/about-us
+
+  # --- Developers --------------------------------------------------------------
+  - name: UKA
+    group: UKA
+    type: developer
+    hq: Meißen, Germany
+    owner: Owner-managed
+    markets: "Germany, US"
+    mix: "Onshore wind and solar; develops, builds and sells to investors."
+    turbines: "Ordered 226 Nordex turbines (more than 1.5 GW) in 18 months to June 2025, then about 700 MW more in July 2026."
+    momentum: forward
+    why: "Largest winner of German onshore wind auctions since 2019; framework agreement with Nordex."
+    sources:
+      - https://www.boerse-online.de/dpa-afx/eqs-news-nordex-group-erhaelt-von-uka-auftraege-ueber-435-mw-fuer-turbinen-des-typs-n1756x-und-n1636x-fuer-projekte-in-deutschland-deutsch-454783.html
+      - https://www.energyglobal.com/wind/07072026/nordex-group-receives-orders-totalling-700-mw-from-uka-in-germany/
+      - https://www.uka-gruppe.de/en/
+
+  - name: wpd
+    group: wpd
+    type: developer
+    hq: Bremen, Germany
+    owner: Private
+    year: 2025
+    employees: {value: 1300, unit: headcount, note: "about"}
+    capacity_gw: 6.97
+    own_portfolio_gw: 3.51
+    capacity_note: "2,810 turbines built; 3.5 GW kept in its own portfolio."
+    markets: "33 countries"
+    mix: "Onshore and offshore wind, some solar."
+    momentum: forward
+    why: "Rising share in German wind auctions; about 1 GW under construction in Germany."
+    sources:
+      - https://www.wpd.de/downloads/wpd-fdf.pdf
+      - https://www.renewable-energy-industry.com/companies/profile-133-wpd-gmbh
+
+  - name: JUWI
+    group: JUWI
+    type: developer
+    hq: Wörrstadt, Germany
+    owner: MVV Energie (Mannheim municipal utility group)
+    employees: {value: 1350, unit: headcount, note: "about, in 8 countries"}
+    capacity_gw: 7.0
+    capacity_note: "Wind and solar realised since 1996 (more than 3,000 units)."
+    markets: "Germany, US, Australia, South Africa, Greece and others"
+    mix: "Onshore wind and solar development, EPC and O&M."
+    momentum: steady
+    why: "Wins in about three of four German wind rounds since its first award."
+    sources:
+      - https://rejobs.org/de/erneuerbare-energien-jobs/arbeitgeber/juwi
+      - https://www.pv-tech.org/juwi-merges-with-wind-developer-windwarts-energie
+
+  - name: PNE
+    group: PNE
+    type: developer
+    hq: Cuxhaven, Germany
+    owner: Listed; Morgan Stanley Infrastructure Partners largest shareholder
+    year: 2025
+    currency: EUR
+    revenue: 376.4
+    revenue_label: Total operating revenue
+    ebitda: {value: 87.0, label: EBITDA before special effects}
+    own_portfolio_gw: 0.5
+    markets: "Germany and Europe; exited the US, UK and Sweden"
+    mix: "Onshore wind, solar, storage; growing own portfolio ('Scale up')."
+    momentum: transition
+    why: "Record revenue and 428 MW sold in 2025, but a net loss from write-downs abroad; now focusing on core markets."
+    sources:
+      - https://www.webdisclosure.com/press-release/pne-wind-ag-etr-pne3-pne-ag-closes-the-2025-financial-year-with-successful-operational-performance-and-focuses-on-core-markets-and-profitability-pRTx9VBbhOq
+      - https://www.solarserver.de/2026/01/15/pne-auslandsgeschaeft-belastet-ergebnis-2025/
+      - https://www.rttnews.com/3634382/pne-ag-stock-down-on-wider-fy25-loss-sees-higher-fy26-ebitda.aspx
+
+  - name: Energiekontor
+    group: Energiekontor
+    type: developer
+    hq: Bremen, Germany
+    owner: Listed
+    year: 2025
+    employees: {value: 260, unit: headcount}
+    currency: EUR
+    revenue: 167.9
+    ebitda: {value: 86.1, label: EBITDA}
+    own_portfolio_gw: 0.455
+    capacity_gw: 1.5
+    capacity_note: "40 own parks (455 MW) plus about 230 MW under construction for the own portfolio; about half of projects kept, half sold."
+    markets: "Germany, UK, France, Portugal, US"
+    mix: "Onshore wind and solar."
+    momentum: steady
+    why: "Cut its 2025 profit target from €70–90m to €30–40m because of delays in Germany and the UK; losing share in German wind auctions."
+    sources:
+      - https://www.energiekontor.de/fileadmin/user_upload/IR/Praesentationen_Factsheet/2026-06_Energiekontor_Factsheet_de.pdf
+      - https://www.boerse-online.de/dpa-afx/eqs-news-energiekontor-ag-energiekontor-erzielt-solides-konzernergebnis-im-geschaeftsjahr-2025-und-staerkt-basis-fuer-weiteres-wachstum-deutsch-513781.html
+      - https://www.4investors.de/nachrichten/boerse.php?ID=186271
+
+  - name: ABO Energy
+    group: ABO Energy
+    type: developer
+    hq: Wiesbaden, Germany
+    owner: Listed (KGaA)
+    employees: {value: 1200, unit: headcount, note: "about"}
+    markets: "16 countries on 4 continents"
+    mix: "Wind, solar, storage, hybrid and hydrogen; develops and sells (e.g. 4.4 GW Finnish wind pipeline to Fortum, 2025)."
+    momentum: stuck
+    why: "First-ever loss (about €170m for 2025); out-of-court restructuring with a bank standstill to 30 Nov 2026."
+    sources:
+      - https://en.wikipedia.org/wiki/ABO_Energy
+      - https://www.aboenergy.com/en/media-center/press/2026/2026-01-26_standstill-agreement-press-release.html
+      - https://www.4investors.de/nachrichten/boerse.php?sektion=stock&ID=191334
+
+  - name: ENERTRAG
+    group: ENERTRAG
+    type: developer
+    hq: Dauerthal (Uckermark), Germany
+    owner: Private
+    employees: {value: 1200, unit: headcount, note: "over"}
+    capacity_gw: 3.0
+    capacity_note: "Wind and solar in operation; own 660 km grid in the Uckermark."
+    markets: "Germany, Poland, Vietnam and others"
+    mix: "Onshore wind, solar, own grid, green hydrogen (Prenzlau, Heidekrautbahn trains)."
+    momentum: forward
+    why: "Rising share in German wind auctions; integrates wind, grid and hydrogen in one region."
+    sources:
+      - https://rejobs.org/en/renewable-energy-jobs/employer/enertrag-se
+      - https://vietnam.enertrag.com/fileadmin/Startseite_neu/Enertrag_Corporate_Brochure_2023.pdf
+
+  - name: BayWa r.e.
+    group: BayWa r.e.
+    type: developer
+    hq: Munich, Germany
+    owner: BayWa AG (51 % stake planned for sale) and Energy Infrastructure Partners
+    year: 2024
+    currency: EUR
+    revenue: 4100
+    ebitda: {value: -732, label: EBIT 2024}
+    markets: "Europe and the Americas; left Asia-Pacific"
+    mix: "Solar and wind development, solar wholesale, power trading."
+    momentum: stuck
+    why: "EBIT of −€732m in 2024; new 2026–28 plan missed targets, so the parent's restructuring concept had to be redone (Mar 2026)."
+    sources:
+      - https://www.topagrar.com/betriebsleitung/news/trotz-milliardenverlust-2024-baywa-chefs-bleiben-zuversichtlich-20016180.html
+      - https://shareholders-germany.blogspot.com/2026/03/baywa-ag-adjustment-of-restructuring.html
+      - https://us.baywa-re.com/en/news/baywa-r-e-sharpens-profile

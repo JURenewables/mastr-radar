@@ -30,7 +30,7 @@ from mastr_radar import monitor, wind
 
 BASE = "https://www.bundesnetzagentur.de"
 ROUND_PAGE = (
-    BASE + "/DE/Fachthemen/ElektrizitaetundGas/Ausschreibungen/Wind_Onshore/"
+    BASE + "/DE/Fachthemen/ElektrizitaetundGas/Ausschreibungen/{programme}/"
     "BeendeteAusschreibungen/{path}"
 )
 GROUPS_CONFIG = Path(__file__).resolve().parents[2] / "config" / "auction_groups.yaml"
@@ -73,6 +73,7 @@ STATES = [
     "Thüringen",
 ]
 SOURCE = "Bundesnetzagentur, Ausschreibungen Wind an Land (www.bundesnetzagentur.de)"
+AWARD_NO = re.compile(r"(WIN|SOL|INN|GEM)\d", re.IGNORECASE)
 REGISTER_ID = re.compile(r"\b(SEE\d{12}|EEG\d{12}|A\d{13})\b")
 TURBINE_KW = re.compile(r"\((SEE\d{12}|EEG\d{12}),\s*([\d.]+(?:,\d+)?) kW\)")
 LIST_TOLERANCE = 0.10  # award list vs published total (late awards, court rulings)
@@ -108,25 +109,29 @@ def _get(url: str, tries: int = 4) -> requests.Response:
     raise AssertionError("unreachable")
 
 
-def fetch(rounds: list[dict], cache_dir: Path) -> int:
+def fetch(rounds: list[dict], cache_dir: Path, grids: bool = True) -> int:
     """Download what is not cached yet: round pages, award lists, DWD wind grid."""
     cache_dir.mkdir(parents=True, exist_ok=True)
     new = 0
     for rnd in rounds:
         page = cache_dir / f"{rnd['id']}.html"
         if not page.exists():  # finished rounds do not change
-            page.write_text(_get(ROUND_PAGE.format(**rnd)).text, encoding="utf-8")
+            url = ROUND_PAGE.format(
+                programme=rnd.get("programme", "Wind_Onshore"), path=rnd["path"]
+            )
+            page.write_text(_get(url).text, encoding="utf-8")
             new += 1
         xlsx = cache_dir / f"{rnd['id']}.xlsx"
         if not xlsx.exists():
-            link = re.search(
-                r'href="([^"]+Zuschlagslisten/[^"]+\.xlsx)[^"]*"', page.read_text("utf-8")
+            text = page.read_text("utf-8")
+            link = re.search(r'href="([^"]+Zuschlagslisten/[^"]+\.xlsx)[^"]*"', text) or re.search(
+                r'href="([^"]*(?:[Zz]uschl|[Ll]iste)[^"]*\.xlsx)[^"]*"', text
             )
             if not link:
                 raise AuctionCheckError(f"{rnd['id']}: no award list linked on the round page.")
             xlsx.write_bytes(_get(BASE + html.unescape(link.group(1))).content)
             new += 1
-    return new + wind.fetch_grids(cache_dir / "dwd")
+    return new + (wind.fetch_grids(cache_dir / "dwd") if grids else 0)
 
 
 # --- Parsing ----------------------------------------------------------------
@@ -231,7 +236,7 @@ def parse_award_list(path: Path) -> list[dict]:
             if _col(h[1], "registernummer") is not None or _col(h[1], "anlagennummer") is not None
         ),
         None,
-    )
+    ) or next(((ws, h) for ws, h in sheets if _col(h[1], "gemeinde") is not None), None)
 
     ws, (start, cols) = compact
     i_bid, i_award = cols["name des bieters"], _col(cols, "zuschlags-nr")
@@ -241,7 +246,7 @@ def parse_award_list(path: Path) -> list[dict]:
         if len(row) <= max(i_bid, i_award, i_site):
             continue
         no = str(row[i_award] or "").strip()
-        if not row[i_bid] or not re.match(r"WIN\d", no):
+        if not row[i_bid] or not AWARD_NO.match(no):
             continue
         site = str(row[i_site] or "").replace("_x000D_", " ")
         kw = row[i_kw] if i_kw is not None and isinstance(row[i_kw], int | float) else None
@@ -259,13 +264,19 @@ def parse_award_list(path: Path) -> list[dict]:
         i_reg = _col(cols, "registernummer")
         i_reg = i_reg if i_reg is not None else _col(cols, "anlagennummer")
         i_state = _col(cols, "bundesland")
+        i_mun, i_dis = _col(cols, "gemeinde"), _col(cols, "landkreis")
         for row in ws.iter_rows(min_row=start + 2, values_only=True):
             a = awards.get(str(row[i_award] or "").strip()) if len(row) > i_award else None
             if a is None:
                 continue
             if i_state is not None and row[i_state] in STATES:
                 a["state"] = a["state"] or row[i_state]
-            reg = str(row[i_reg] or "").strip()
+            if i_mun is not None and row[i_mun] and not a.get("municipality"):
+                a["municipality"] = str(row[i_mun]).strip()
+                a["district"] = (
+                    str(row[i_dis]).strip() if i_dis is not None and row[i_dis] else None
+                )
+            reg = str(row[i_reg] or "").strip() if i_reg is not None else ""
             if REGISTER_ID.fullmatch(reg) and reg not in a["turbines"]:
                 a["turbines"].append(reg)
     return list(awards.values())
@@ -395,7 +406,7 @@ def _load_turbines(units_path: Path) -> pd.DataFrame:
     df = pq.read_table(units_path, columns=UNIT_COLS).to_pandas()
     df = df[df["technology"] == "wind_onshore"]
     by_eeg = df.dropna(subset=["eeg_id"]).drop_duplicates("eeg_id").set_index("eeg_id")
-    both = pd.concat([df.set_index("unit_id"), by_eeg.drop(columns="unit_id")])
+    both = pd.concat([df.set_index("unit_id", drop=False), by_eeg])
     return both[~both.index.duplicated()]
 
 
@@ -490,6 +501,33 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         if y:
             yields[reg] = y
 
+    # Calibrate the modelled quality factor with the ratios operators declare in
+    # MaStR (estimated yield / reference yield, the basis of the EEG correction).
+    det_path = units_path.with_name("unit_details.parquet")
+    det = (
+        pq.read_table(det_path).to_pandas().set_index("unit_id")
+        if det_path.exists()
+        else pd.DataFrame()
+    )
+    declared = {}
+    if len(det):
+        dr = det["yield_ratio_pct"].dropna()
+        dr = dr[(dr >= 30) & (dr <= 160)]
+        declared = dr.to_dict()
+    calib = _calibrate(det, units, grid, wcfg, declared)
+    for reg, y in yields.items():
+        uid = (
+            reg
+            if reg in declared
+            else linked.at[reg, "unit_id"]
+            if "unit_id" in linked.columns
+            else reg
+        )
+        if uid in declared:
+            y["quality_pct"], y["quality_source"] = declared[uid], "declared"
+        else:
+            y["quality_pct"], y["quality_source"] = y["quality_pct"] * calib["factor"], "model"
+
     offices = office_groups(
         parsed, linked, units_path.with_name("operators.parquet"), cfg, reviewed
     )
@@ -570,6 +608,7 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
                 "kw_operating": float(operating["capacity_kw"].fillna(0).sum()),
                 "months_to_operation": _r(float(np.median(months)), 1) if months else None,
                 "maker": max(set(brands), key=brands.count) if brands else None,
+                "grid_voltage": _mode(det, lk["unit_id"] if "unit_id" in lk.columns else []),
                 "model": max(set(models), key=models.count) if models else None,
                 "hub_height_m": _r(_weighted(lk["hub_height_m"], lk["capacity_kw"])),
                 "rotor_diameter_m": _r(_weighted(lk["rotor_diameter_m"], lk["capacity_kw"])),
@@ -732,6 +771,9 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
             for st in sorted(df["state"].dropna().unique())
         },
         "company_profiles": _profiles(df, years, cutoff),
+        "dynamics": dynamics(
+            df, years, [r["id"] for r in round_out], [r["bid_date"] for r in round_out]
+        ),
         "median_award_mw": round(float(df.loc[df["kw"] > 0, "kw"].median()) / 1000, 1),
         "company_reported": _reported(reviewed, round_out, df),
         "reviewed_awards": int((df["attribution"] == "reviewed").sum()),
@@ -742,7 +784,9 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         "unattributed_share": round(
             float(df.loc[df["category"] == "unattributed", "kw"].sum() / df["kw"].sum()), 4
         ),
+        "success": _success(df, det, units, grid, wcfg, declared, calib, linked),
         "model": {
+            "calibration": calib,
             "wind": "DWD 200 m grid: mean wind 1981–2000 at 80/100 m, Weibull k at 80 m",
             "losses": wcfg["losses"],
             "power_coefficient": wcfg["power_curve"]["power_coefficient"],
@@ -761,7 +805,9 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         ("awards.json", {"source": SOURCE, "awards": rows}, len(rows)),
     ):
         path = folder / name
-        path.write_text(json.dumps(data, separators=(",", ":"), ensure_ascii=False))
+        path.write_text(
+            json.dumps(data, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
+        )
         entries.append({"name": f"auctions/{name}", "rows": n, "bytes": path.stat().st_size})
     return entries
 
@@ -856,6 +902,205 @@ def _reported(reviewed: dict, rounds: list[dict], df: pd.DataFrame) -> list[dict
                 "note": e.get("note"),
                 "source": e["source"],
             }
+        )
+    return out
+
+
+DYN_MIN_KW = 100_000
+
+
+def dynamics(
+    df: pd.DataFrame, years: list[str], round_ids: list[str], bid_dates: list[str], recent: int = 6
+) -> dict:
+    """Rise and fall of company groups: share early vs late, consistency, volatility.
+
+    Shared by wind and solar. `early`/`late` = first and last third of the years
+    (at least one year each); the running year counts as late.
+    """
+    named = df[df["group"].notna() & (df["rank_group"] == df["group"])]
+    total_by_year = df.groupby("year")["kw"].sum()
+    k = max(1, len(years) // 3)
+    early, late = years[:k], years[-k:]
+    order = {r: i for i, r in enumerate(round_ids)}
+    rows = []
+    for g, d in named.groupby("group"):
+        kw = d["kw"].sum()
+        if kw < DYN_MIN_KW:
+            continue
+        by_year = [float(d.loc[d["year"] == y, "kw"].sum()) for y in years]
+        share = [
+            v / float(total_by_year.get(y, 0) or 1) for v, y in zip(by_year, years, strict=True)
+        ]
+        won = sorted({order[r] for r in d["round"]})
+        possible = len(round_ids) - won[0]
+        active = [v for v, y in zip(by_year, years, strict=True) if y >= d["year"].min()]
+        mean = float(np.mean(active)) if active else 0
+        cv = float(np.std(active) / mean) if mean else None
+        e, l_ = float(np.mean(share[:k])), float(np.mean(share[-k:]))
+        first, last = d["bid_date"].min(), d["bid_date"].max()
+        n = len(round_ids)
+        if won[0] >= n * 2 / 3:
+            status = "new"  # first award in the last third of the rounds
+        elif won[-1] < n - recent:
+            status = "dropped"  # no award in the last `recent` rounds
+        elif l_ - e >= 0.005:
+            status = "rising"
+        elif l_ - e <= -0.005:
+            status = "fading"
+        else:
+            status = "steady"
+        rows.append(
+            {
+                "group": g,
+                "category": d["category"].iloc[0],
+                "mw": round(float(kw) / 1000),
+                "kw_by_year": by_year,
+                "share_early": round(e, 4),
+                "share_late": round(l_, 4),
+                "momentum_pp": round((l_ - e) * 100, 2),
+                "rounds_won": len(won),
+                "rounds_possible": possible,
+                "hit_rate": round(len(won) / possible, 3) if possible else None,
+                "volatility": None if cv is None else round(cv, 2),
+                "first_bid": first,
+                "last_bid": last,
+                "status": status,
+            }
+        )
+    rows.sort(key=lambda r: -r["mw"])
+    return {"years": years, "early": early, "late": late, "recent_rounds": recent, "groups": rows}
+
+
+def _mode(det: pd.DataFrame, ids) -> str | None:
+    if not len(det):
+        return None
+    v = det.reindex(list(ids))["grid_voltage"].dropna()
+    return v.mode().iloc[0] if len(v) else None
+
+
+def _model_quality(rows: pd.DataFrame, grid, wcfg: dict) -> pd.Series:
+    """Modelled (uncalibrated) quality factor for turbines with location and size."""
+    r = rows.dropna(subset=["lat", "lon", "hub_height_m", "rotor_diameter_m", "capacity_kw"])
+    if r.empty:
+        return pd.Series(dtype=float)
+    site = grid.sample(r["lon"].to_numpy(), r["lat"].to_numpy())
+    out = {}
+    for i, (uid, x) in enumerate(r.iterrows()):
+        y = wind.turbine_yield(
+            x["capacity_kw"],
+            x["rotor_diameter_m"],
+            x["hub_height_m"],
+            {k: site[k][i] for k in ("v100", "v80", "k80")},
+            wcfg,
+        )
+        if y:
+            out[uid] = y["quality_pct"]
+    return pd.Series(out, dtype=float)
+
+
+def _calibrate(det: pd.DataFrame, units: pd.DataFrame, grid, wcfg: dict, declared: dict) -> dict:
+    """Median ratio declared / modelled over turbines that have both."""
+    if not declared:
+        return {"factor": 1.0, "n": 0}
+    u = units.drop_duplicates("unit_id").set_index("unit_id")
+    rows = u.loc[[i for i in declared if i in u.index]]
+    model = _model_quality(rows, grid, wcfg)
+    dec = pd.Series(declared).reindex(model.index)
+    ok = model.notna() & dec.notna()
+    if ok.sum() < 100:
+        return {"factor": 1.0, "n": int(ok.sum())}
+    return {
+        "factor": round(float((dec[ok] / model[ok]).median()), 3),
+        "n": int(ok.sum()),
+        "correlation": round(float(np.corrcoef(model[ok], dec[ok])[0, 1]), 2),
+        "median_declared": round(float(dec[ok].median()), 1),
+        "median_model": round(float(model[ok].median()), 1),
+    }
+
+
+def _success(df, det, units, grid, wcfg, declared, calib, linked) -> dict:
+    """What distinguishes winners: permitted turbines awarded vs not (yet), grid
+    connection, and company volume vs site quality. Winners only are published by
+    BNetzA, so the permitted pool stands in for the competitors."""
+    out: dict = {}
+    if len(det):
+        u = units.drop_duplicates("unit_id").set_index("unit_id")
+        w = det[det["technology"] == "wind_onshore"].join(
+            u[["status", "capacity_kw", "lat", "lon", "hub_height_m", "rotor_diameter_m"]],
+            how="left",
+        )
+        w = w[w["status"].isin(["planned", "operating"]) & w["permit_date"].notna()]
+        w["permit_year"] = pd.to_datetime(w["permit_date"]).dt.year
+        awarded_ids = set(linked["unit_id"]) if "unit_id" in linked.columns else set(linked.index)
+        w["awarded"] = w["award_no"].fillna("").str.upper().str.startswith("WIN") | w.index.isin(
+            awarded_ids
+        )
+        pool = w[(w["permit_year"] >= 2021) & (w["permit_year"] <= 2025)]
+        out["permits_by_year"] = [
+            {
+                "year": int(y),
+                "turbines": int(len(g)),
+                "mw": round(float(g["capacity_kw"].sum()) / 1000),
+                "awarded_share": round(float(g["awarded"].mean()), 3),
+            }
+            for y, g in pool.groupby("permit_year")
+        ]
+        mature = pool[pool["permit_year"] <= 2023].copy()
+        mq = _model_quality(mature, grid, wcfg) * calib["factor"]
+        q = pd.Series({i: declared.get(i, mq.get(i, np.nan)) for i in mature.index}, dtype=float)
+        mature["quality"] = q
+        bands = [0, 65, 75, 85, 95, 1000]
+        labels = ["< 65 %", "65–75 %", "75–85 %", "85–95 %", "≥ 95 %"]
+        mature["band"] = pd.cut(mature["quality"], bands, labels=labels, right=False)
+        out["awarded_by_quality"] = [
+            {
+                "band": str(b),
+                "turbines": int(len(g)),
+                "awarded_share": round(float(g["awarded"].mean()), 3) if len(g) else None,
+            }
+            for b, g in mature.dropna(subset=["band"]).groupby("band", observed=False)
+        ]
+        volt = mature["grid_voltage"].fillna("unknown")
+        out["awarded_by_voltage"] = [
+            {
+                "voltage": v,
+                "turbines": int(len(g)),
+                "awarded_share": round(float(g["awarded"].mean()), 3),
+            }
+            for v, g in mature.groupby(volt)
+            if len(g) >= 30
+        ]
+        out["mature_pool_awarded_share"] = (
+            round(float(mature["awarded"].mean()), 3) if len(mature) else None
+        )
+    # Grid connection of awarded capacity by bidder type (from linked units).
+    if "grid_voltage" in df.columns:
+        g = df.dropna(subset=["grid_voltage"])
+        out["voltage_by_category"] = {
+            c: {v: float(k) for v, k in d.groupby("grid_voltage")["kw"].sum().items()}
+            for c, d in g.groupby("category")
+        }
+    # Company volume vs average site quality (named groups ≥ 100 MW).
+    named = df[df["group"].notna() & (df["rank_group"] == df["group"])]
+    vq = []
+    for grp, d in named.groupby("group"):
+        k = d.dropna(subset=["quality_pct"])
+        if d["kw"].sum() >= 100_000 and len(k):
+            vq.append(
+                {
+                    "group": grp,
+                    "category": d["category"].iloc[0],
+                    "mw": round(float(d["kw"].sum()) / 1000),
+                    "quality_pct": round(
+                        float((k["quality_pct"] * k["kw"]).sum() / k["kw"].sum()), 1
+                    ),
+                }
+            )
+    out["volume_vs_quality"] = vq
+    if len(vq) >= 8:
+        a = pd.DataFrame(vq)
+        out["volume_quality_spearman"] = round(
+            float(a["mw"].rank().corr(a["quality_pct"].rank())), 2
         )
     return out
 

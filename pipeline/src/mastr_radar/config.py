@@ -59,6 +59,8 @@ class Settings:
     monitor: MonitorSettings
     hub: HubSettings
     auction_rounds: tuple[dict, ...] = ()
+    solar_rounds: tuple[dict, ...] = ()
+    innovation_rounds: tuple[dict, ...] = ()
 
     @property
     def raw_dir(self) -> Path:
@@ -107,4 +109,8 @@ def load_settings(path: Path = DEFAULT_CONFIG) -> Settings:
             dwd=dict(hub["dwd"]),
         ),
         auction_rounds=tuple(dict(r) for r in raw.get("auctions", {}).get("onshore_rounds", [])),
+        solar_rounds=tuple(dict(r) for r in raw.get("auctions", {}).get("solar_rounds", [])),
+        innovation_rounds=tuple(
+            dict(r) for r in raw.get("auctions", {}).get("innovation_rounds", [])
+        ),
     )

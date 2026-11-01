@@ -154,3 +154,95 @@ sources:
     technology: hydro
     details:
       hydro_type: ArtDerWasserkraftanlage
+
+# Unit details (contract v1.7): internal station 2 file
+# data/extract/unit_details.parquet for auction analysis; never published.
+unit_details:
+  min_rows: 30000
+  # Which units: all onshore wind; solar that is not on a building or a
+  # balcony unit, or ≥ 100 kW; storage ≥ 100 kW (co-location).
+  solar_min_kw: 100
+  storage_min_kw: 100
+  common:
+    location_id: LokationMaStRNummer
+    permit_id: GenMastrNummer
+  solar:
+    kind: ArtDerSolaranlage
+    orientation: Hauptausrichtung
+    tracker_value: nachgeführt
+    area_ha: GroesseDerInAnspruchGenommenenFlaecheInHektar
+    land_before: UeberwiegendeNutzungsartDerFlaecheVorErrichtung
+    features: ZusaetzlicheMerkmaleDerFlaecheUndDerAktuellenFlaechennutzung  # catalogue list
+    storage_same_site: SpeicherAmGleichenOrt   # 0/1
+    high_voltage: AnschlussAnHoechstOderHochSpannung  # 0/1
+    park_name: NameDesSolarparks
+  eeg:
+    files: [AnlagenEegSolar_*.xml, AnlagenEegWind.xml]
+    records: [AnlageEegSolar, AnlageEegWind]
+    id: EegMaStRNummer
+    award_no: Zuschlagsnummer
+    award_kw: ZugeordneteGebotsmenge
+    yield_ratio: VerhaeltnisErtragsschaetzungReferenzertrag   # wind, %
+  permits:
+    files: EinheitenGenehmigung.xml
+    record: EinheitGenehmigung
+    id: GenMastrNummer
+    date: Datum
+    kind: Art
+  grid:
+    files: Netzanschlusspunkte_*.xml
+    record: Netzanschlusspunkt
+    location_id: LokationMaStRNummer
+    voltage: Spannungsebene
+    capacity_kw: Nettoengpassleistung
+
+# Grid register (contract v1.7, WP71): grid operator, TSO control area and
+# voltage per large unit, grid operator roles, large electricity consumers.
+# Internal station 2 files in data/extract/; only aggregates are published.
+grid_register:
+  connections:
+    files: Netzanschlusspunkte_*.xml
+    record: Netzanschlusspunkt
+    location_id: LokationMaStRNummer
+    grid_operator_id: NetzbetreiberMaStRNummer
+    control_area: RegelzoneNetzanschlusspunkt   # catalogue value
+    voltage: Spannungsebene                      # catalogue value
+    capacity_kw: Nettoengpassleistung
+  roles:
+    files: MarktakteureUndRollen.xml
+    record: MarktakteurUndRolle
+    actor_id: MarktakteurMastrNummer
+    role: Marktrolle
+    tso_value: Übertragungsnetzbetreiber
+    dso_value: Anschlussnetzbetreiber
+    electricity_prefix: SNB
+  consumers:
+    files: EinheitenStromVerbraucher.xml
+    record: EinheitStromVerbraucher
+    id: EinheitMastrNummer
+    status: EinheitBetriebsstatus               # catalogue value
+    state: Bundesland                           # catalogue value
+    district: Landkreis
+    municipality_key: Gemeindeschluessel
+    lat: Breitengrad
+    lon: Laengengrad
+    over_50mw: AnzahlStromverbrauchseinheitenGroesser50Mw
+    commissioning_date: Inbetriebnahmedatum
+    planned_date: GeplantesInbetriebnahmedatum
+    operator_id: AnlagenbetreiberMastrNummer
+    control_area: VorlaeufigeRegelzonenDerEinheit
+  voltage_values:
+    Höchstspannung: extra_high
+    Umspannebene Höchstspannung/Hochspannung: extra_high_to_high
+    Hochspannung: high
+    Umspannebene Hochspannung/Mittelspannung: high_to_medium
+    Mittelspannung: medium
+    Umspannebene Mittelspannung/Niederspannung: medium_to_low
+    Niederspannung (= Hausanschluss/Haushaltsstrom): low
+  status_values:
+    In Betrieb: operating
+    In Planung: planned
+    Endgültig stillgelegt: permanently_shut_down
+    Vorübergehend stillgelegt: temporarily_shut_down
+  min_connections: 20000
+  min_consumers: 500

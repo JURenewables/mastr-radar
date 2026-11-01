@@ -20,7 +20,7 @@ from mastr_radar import __version__
 from mastr_radar.config import PIPELINE_ROOT
 from mastr_radar.extract import ENUMS, UNITS_SCHEMA, export_date_of
 
-CONTRACT_VERSION = "1.6"
+CONTRACT_VERSION = "1.7"
 MAX_TOTAL_BYTES = 50 * 1024 * 1024  # contract v1.4
 MAP_POINT_MIN_KW = 100.0  # D5: units from 100 kW are individual points
 DEFAULT_OPERATOR_NAME_MIN_KW = 1000.0  # operator names only from 1 MW (settings)
@@ -160,6 +160,8 @@ def build(
     monitor_settings=None,
     auction_rounds: tuple[dict, ...] = (),
     auctions_dir: Path | None = None,
+    solar_rounds: tuple[dict, ...] = (),
+    innovation_rounds: tuple[dict, ...] = (),
 ) -> dict:
     """Write all explorer files and manifest.json; return the manifest."""
     units = pq.read_table(units_path)
@@ -194,6 +196,27 @@ def build(
         from mastr_radar import auctions
 
         files += auctions.build(list(auction_rounds), auctions_dir, units_path, out_dir)
+    if solar_rounds and auctions_dir is not None:
+        from mastr_radar import solar_auctions
+
+        files += solar_auctions.build(
+            list(solar_rounds), list(innovation_rounds), auctions_dir / "solar", units_path, out_dir
+        )
+    if auction_rounds:
+        from mastr_radar import company_facts
+
+        files += company_facts.build(out_dir)
+        from mastr_radar import market_risk
+
+        files += market_risk.build(out_dir, as_of)
+        from mastr_radar import players
+
+        files += players.build(out_dir)
+    grid_ready = (units_path.parent / "grid_units.parquet").exists()
+    if grid_ready:
+        from mastr_radar import grid
+
+        files += grid.build(units_path.parent, out_dir, as_of)
 
     manifest = {
         "contract_version": CONTRACT_VERSION,
@@ -225,7 +248,11 @@ def _check_fields(obj: dict, fields: dict, where: str, problems: list[str]) -> N
 
 
 def check_explorer_files(
-    out_dir: Path, units_path: Path, auction_rounds: tuple[dict, ...] = ()
+    out_dir: Path,
+    units_path: Path,
+    auction_rounds: tuple[dict, ...] = (),
+    solar_rounds: tuple[dict, ...] = (),
+    innovation_rounds: tuple[dict, ...] = (),
 ) -> None:
     """Run the station 3 check. Raises ExplorerCheckError listing every problem."""
     problems: list[str] = []
@@ -273,6 +300,44 @@ def check_explorer_files(
         try:
             auctions.check(out_dir, list(auction_rounds))
         except auctions.AuctionCheckError as exc:
+            problems.append(str(exc))
+    if solar_rounds:
+        from mastr_radar import solar_auctions
+
+        expected_files |= {"auctions/solar.json", "auctions/solar_awards.json"}
+        try:
+            solar_auctions.check(out_dir, list(solar_rounds), list(innovation_rounds))
+        except solar_auctions.SolarCheckError as exc:
+            problems.append(str(exc))
+    if auction_rounds:
+        from mastr_radar import company_facts
+
+        expected_files.add(company_facts.FILE)
+        try:
+            company_facts.check(out_dir)
+        except company_facts.FactsCheckError as exc:
+            problems.append(str(exc))
+        from mastr_radar import market_risk
+
+        expected_files.add(market_risk.FILE)
+        try:
+            market_risk.check(out_dir)
+        except market_risk.RiskCheckError as exc:
+            problems.append(str(exc))
+        from mastr_radar import players
+
+        expected_files.add(players.FILE)
+        try:
+            players.check(out_dir)
+        except players.PlayersCheckError as exc:
+            problems.append(str(exc))
+    if (out_dir / "grid").exists():
+        from mastr_radar import grid
+
+        expected_files.add(grid.FILE)
+        try:
+            grid.check(out_dir)
+        except grid.GridCheckError as exc:
             problems.append(str(exc))
     if missing := expected_files - set(listed):
         problems.append(f"manifest: missing files {sorted(missing)}.")

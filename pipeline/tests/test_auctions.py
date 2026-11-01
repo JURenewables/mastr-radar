@@ -317,3 +317,36 @@ def test_office_groups(tmp_path):
     # An exclusion backed by a source switches the rule off for that bidder.
     excl = {"office_exclusions": [{"bidder": "Windpark Heek GmbH & Co. KG"}]}
     assert auctions.office_groups([({"id": "R1"}, {}, awards)], linked, path, CFG, excl) == {}
+
+
+def test_dynamics_status():
+    import pandas as pd
+
+    from mastr_radar.auctions import dynamics
+
+    rounds = [f"R{i}" for i in range(9)]
+    dates = [f"20{19 + i // 3}-0{1 + i % 3}-01" for i in range(9)]
+    rows = []
+    for i, r in enumerate(rounds):
+        y = dates[i][:4]
+        # steady player wins every round with the same size
+        rows.append(("Steady", r, y, dates[i], 200_000))
+        # riser grows over time
+        rows.append(("Riser", r, y, dates[i], 50_000 * (i + 1)))
+        # dropper only wins in the first rounds
+        if i < 2:
+            rows.append(("Dropper", r, y, dates[i], 300_000))
+        # newcomer only wins in the last rounds
+        if i >= 7:
+            rows.append(("Newbie", r, y, dates[i], 300_000))
+    df = pd.DataFrame(rows, columns=["group", "round", "year", "bid_date", "kw"])
+    df["rank_group"] = df["group"]
+    df["category"] = "developer"
+    years = sorted(df["year"].unique())
+    out = dynamics(df, years, rounds, dates, recent=3)
+    st = {g["group"]: g["status"] for g in out["groups"]}
+    assert st["Dropper"] == "dropped"
+    assert st["Newbie"] == "new"
+    assert st["Riser"] == "rising"
+    steady = next(g for g in out["groups"] if g["group"] == "Steady")
+    assert steady["hit_rate"] == 1.0

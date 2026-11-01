@@ -151,6 +151,88 @@ export interface CompanyProfile {
   realised_share: number | null;
   attribution_kw: Record<"reviewed" | "name" | "office", number>;
 }
+export interface DynGroup {
+  group: string;
+  category: AuctionCategory;
+  mw: number;
+  kw_by_year: number[];
+  share_early: number;
+  share_late: number;
+  momentum_pp: number;
+  rounds_won: number;
+  rounds_possible: number;
+  hit_rate: number | null;
+  volatility: number | null;
+  first_bid: string;
+  last_bid: string;
+  status: "new" | "dropped" | "rising" | "fading" | "steady";
+}
+/** Rise and fall of company groups (contract v1.7). */
+export interface Dynamics {
+  years: string[];
+  early: string[];
+  late: string[];
+  recent_rounds: number;
+  groups: DynGroup[];
+}
+export interface CompanyFacts {
+  as_of: string;
+  companies: {
+    group: string;
+    model: "develop_sell" | "ipp" | "mixed" | "investor";
+    finance: "project" | "corporate" | "fund" | "mixed" | null;
+    international?: boolean;
+    note: string;
+    sources: string[];
+  }[];
+  events: {
+    company: string;
+    group: string | null;
+    date: string;
+    kind: "insolvency" | "restructuring" | "sales_halt" | "exit";
+    tech: "wind" | "solar" | "both";
+    issue: string;
+    sources: string[];
+  }[];
+  oems: {
+    source_year: number;
+    scope: string;
+    makers: { maker: string; gw: number; countries?: number }[];
+    notes: string[];
+    sources: string[];
+  } | null;
+}
+export interface RiskRound {
+  id: string;
+  programme: string;
+  bid_date: string;
+  published: string | null;
+  ceiling_ct: number | null;
+  avg_ct: number | null;
+  awarded_kw: number;
+  operating_kw: number;
+  unbuilt_kw: number;
+  expires: string | null;
+  past_deadline: boolean;
+}
+export interface TechRisk {
+  deadline_months: number | null;
+  rounds: RiskRound[];
+  unbuilt_kw: number;
+  unbuilt_expiring_12m_kw: number;
+  past_deadline_unbuilt_kw: number;
+  price_peak: { bid_date: string; avg_ct: number } | null;
+  price_last: { bid_date: string; avg_ct: number } | null;
+  exposure: { company: string; group: string; kind: string; date: string; awarded_kw: number; unbuilt_kw: number; awards_unbuilt: number }[];
+  market: { tech: string; bid_date: string; tender_mw: number; submitted_mw: number; bids?: number; source: string }[];
+  facts: { tech: string; text: string; source: string }[];
+}
+/** Overheating and risk view (contract v1.7). */
+export interface MarketRisk {
+  as_of: string;
+  wind?: TechRisk;
+  solar?: TechRisk;
+}
 export interface Auctions {
   source: string;
   categories: Record<AuctionCategory, string>;
@@ -185,10 +267,85 @@ export interface Auctions {
   kw_by_state_year: Record<string, number[]>;
   company_profiles: CompanyProfile[];
   median_award_mw: number;
+  success?: {
+    permits_by_year: { year: number; turbines: number; mw: number; awarded_share: number }[];
+    awarded_by_quality: { band: string; turbines: number; awarded_share: number | null }[];
+    awarded_by_voltage: { voltage: string; turbines: number; awarded_share: number }[];
+    mature_pool_awarded_share: number | null;
+    voltage_by_category: Record<string, Record<string, number>>;
+    volume_vs_quality: { group: string; category: AuctionCategory; mw: number; quality_pct: number }[];
+    volume_quality_spearman?: number;
+  };
+  dynamics?: Dynamics;
   unattributed_share: number;
-  model: { wind: string; losses: number; power_coefficient: number };
+  model: {
+    wind: string;
+    losses: number;
+    power_coefficient: number;
+    calibration?: { factor: number; n: number; correlation?: number; median_declared?: number; median_model?: number };
+  };
+}
+export interface SolarRound {
+  id: string;
+  programme: "solar" | "innovation";
+  bid_date: string;
+  ceiling_ct: number | null;
+  min_ct: number | null;
+  avg_ct: number | null;
+  max_ct: number | null;
+  awarded_kw: number | null;
+  award_level: boolean;
+  list_awards: number;
+  list_kw: number;
+  max_award_kw: number;
+  kw_by_category: Record<AuctionCategory, number> | null;
+  linked_share: number | null;
+  co_located_share: number | null;
+  co_located_known_kw: number;
+  tracker_share: number | null;
+  special_share: number | null;
+  specific_yield_avg: number | null;
+}
+export interface SolarProfile {
+  group: string;
+  category: AuctionCategory;
+  kw_by_year: number[];
+  awards: number;
+  rounds: number;
+  first_bid: string;
+  median_award_mw: number;
+  kw_by_state: Record<string, number>;
+  states: number;
+  co_located_share: number | null;
+  tracker_share: number | null;
+  specific_yield_avg: number | null;
+  attribution_kw: Record<"reviewed" | "name" | "office", number>;
+}
+export interface SolarAuctions {
+  source: string;
+  categories: Record<AuctionCategory, string>;
+  rounds: SolarRound[];
+  winners_by_year: Record<string, AuctionWinner[]>;
+  race: { years: string[]; groups: string[]; categories: AuctionCategory[]; kw: Record<string, number[]> };
+  kw_by_category_year: Record<AuctionCategory, number[]>;
+  kw_by_state_year: Record<string, number[]>;
+  portfolios: {
+    by_round: { round: string; bid_date: string; share_in_portfolios: number }[];
+    largest: { owner: string | null; round: string; bid_date: string; district: string; state: string; bids: number; kw: number; max_bid_kw: number }[];
+  };
+  company_profiles: SolarProfile[];
+  /** 7 per award: lon×100, lat×100, kW/100, category, group index, kWh/kWp, co-located (1/0/−1). */
+  points: { groups: string[]; rounds: Record<string, number[]> };
+  attribution_kw: Record<"reviewed" | "name" | "office" | "none", number>;
+  unattributed_share: number;
+  grid_voltage_kw: Record<string, number>;
+  dynamics?: Dynamics;
+  cross_tech: { group: string; category: AuctionCategory; wind_kw_since_2023: number; solar_kw_since_2023: number; first_wind: string | null; first_solar: string | null }[];
 }
 export interface MonitorData {
+  solar: SolarAuctions | null;
+  facts: CompanyFacts | null;
+  risk: MarketRisk | null;
   auctions: Auctions | null;
   buildout: Buildout;
   stats: Stats;
@@ -206,7 +363,10 @@ function load(version: string): Promise<MonitorData> {
     get("monitor/points.json"),
     get("boundaries/districts.geojson"),
     get("auctions/onshore.json").catch(() => null),
-  ]).then(([buildout, stats, points, districts, auctions]) => ({ buildout, stats, points, districts, auctions }));
+    get("auctions/solar.json").catch(() => null),
+    get("auctions/company_facts.json").catch(() => null),
+    get("auctions/market_risk.json").catch(() => null),
+  ]).then(([buildout, stats, points, districts, auctions, solar, facts, risk]) => ({ buildout, stats, points, districts, auctions, solar, facts, risk }));
 }
 
 /** All monitor data, or null while loading. `version` is the manifest's as_of. */

@@ -13,6 +13,7 @@ import {
   TargetRace,
   YearRace,
 } from "./Sections";
+import { SOLAR_SECTIONS, SolarStory } from "./SolarStory";
 import { WIND_SECTIONS, WindStory } from "./WindStory";
 import { Loading, Section } from "./ui";
 
@@ -49,7 +50,7 @@ export function SectionNav({ sections }: { sections: readonly (readonly [string,
   );
 }
 
-export function Monitor({ asOf, part = "energy" }: { asOf: string; part?: "energy" | "wind" }) {
+export function Monitor({ asOf, part = "energy" }: { asOf: string; part?: "energy" | "wind" | "solar" }) {
   const data = useMonitorData(asOf);
   const date = formatDate(asOf);
   const s = data?.stats;
@@ -66,7 +67,7 @@ export function Monitor({ asOf, part = "energy" }: { asOf: string; part?: "energ
 
   return (
     <>
-      <SectionNav sections={part === "wind" ? WIND_SECTIONS : ENERGY_SECTIONS} />
+      <SectionNav sections={part === "wind" ? WIND_SECTIONS : part === "solar" ? SOLAR_SECTIONS : ENERGY_SECTIONS} />
       {part === "energy" && (
         <>
           <Section
@@ -167,6 +168,7 @@ export function Monitor({ asOf, part = "energy" }: { asOf: string; part?: "energ
         </>
       )}
       {part === "wind" && <WindStory data={data} asOf={asOf} date={date} />}
+      {part === "solar" && <SolarStory data={data} date={date} />}
     </>
   );
 }

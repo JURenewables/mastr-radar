@@ -99,6 +99,51 @@ auctions:
     - {id: GT01052026, path: 2026/GT01052026/start.html}  # 01.05.2026
     - {id: GT03082026, path: 2026/GT03082026/start.html}  # 01.08.2026
 
+  # Ground-mounted solar (first segment) since 2019 and innovation rounds
+  # (mostly solar + storage). Award-level analysis where the list gives kW.
+  solar_rounds:
+    - {id: SOL_Gebotstermin_01_02_2019, programme: Solaranlagen1, path: 2019/Gebotstermin_01_02_2019/gebotstermin_01_02_2019_node.html}  # 2019-02-01
+    - {id: SOL_Gebotstermin_01_03_2019, programme: Solaranlagen1, path: 2019/Gebotstermin_01_03_2019/gebotstermin_01_03_2019_node.html}  # 2019-03-01
+    - {id: SOL_Gebotstermin_01_06_2019, programme: Solaranlagen1, path: 2019/Gebotstermin_01_06_2019/gebotstermin_01_06_2019_node.html}  # 2019-06-01
+    - {id: SOL_Gebotstermin_01_10_2019, programme: Solaranlagen1, path: 2019/Gebotstermin_01_10_2019/gebotstermin_01_10_2019_node.html}  # 2019-10-01
+    - {id: SOL_Gebotstermin_01_12_2019, programme: Solaranlagen1, path: 2019/Gebotstermin_01_12_2019/gebotstermin_01_12_2019_node.html}  # 2019-12-01
+    - {id: SOL_Gebotstermin_01_02_2020, programme: Solaranlagen1, path: 2020/Gebotstermin_01_02_2020/gebotstermin_01_02_2020_node.html}  # 2020-02-01
+    - {id: SOL_Gebotstermin_01_03_2020, programme: Solaranlagen1, path: 2020/Gebotstermin_01_03_2020/gebotstermin_01_03_2020_node.html}  # 2020-03-01
+    - {id: SOL_Gebotstermin_01_06_2020, programme: Solaranlagen1, path: 2020/Gebotstermin_01_06_2020/gebotstermin_01_06_2020_node.html}  # 2020-06-01
+    - {id: SOL_Gebotstermin_01_07_2020, programme: Solaranlagen1, path: 2020/Gebotstermin_01_07_2020/gebotstermin_01_07_2020_node.html}  # 2020-07-01
+    - {id: SOL_Gebotstermin_01_09_2020, programme: Solaranlagen1, path: 2020/Gebotstermin_01_09_2020/gebotstermin_01_09_2020_node.html}  # 2020-09-01
+    - {id: SOL_Gebotstermin_01_10_2020, programme: Solaranlagen1, path: 2020/Gebotstermin_01_10_2020/gebotstermin_01_10_2020_node.html}  # 2020-10-01
+    - {id: SOL_Gebotstermin_01_12_2020, programme: Solaranlagen1, path: 2020/Gebotstermin_01_12_2020/gebotstermin_01_12_2020_node.html}  # 2020-12-01
+    - {id: SOL_Gebotstermin_01_03_2021, programme: Solaranlagen1, path: 2021/Gebotstermin_01_03_2021/gebotstermin_01_03_2021_node.html}  # 2021-03-01
+    - {id: SOL_Gebotstermin_01_06_2021, programme: Solaranlagen1, path: 2021/Gebotstermin_01_06_2021/start.html}  # 2021-06-01
+    - {id: SOL_Gebotstermin_01_11_2021, programme: Solaranlagen1, path: 2021/Gebotstermin_01_11_2021/start.html}  # 2021-11-01
+    - {id: SOL_Gebotstermin_01_03_2022, programme: Solaranlagen1, path: 2022/Gebotstermin_01_03_2022/start.html}  # 2022-03-01
+    - {id: SOL_Gebotstermin01062022, programme: Solaranlagen1, path: 2022/Gebotstermin01062022/start.html}  # 2022-06-01
+    - {id: SOL_Gebotstermin01032023, programme: Solaranlagen1, path: 2023/Gebotstermin01032023/start.html}  # 2023-03-01
+    - {id: SOL_Gebotstermin01072023, programme: Solaranlagen1, path: 2023/Gebotstermin01072023/start.html}  # 2023-07-01
+    - {id: SOL_Gebotstermin01122023, programme: Solaranlagen1, path: 2023/Gebotstermin01122023/start.html}  # 2023-12-01
+    - {id: SOL_01032024, programme: Solaranlagen1, path: 2024/01032024/start.html}  # 2024-03-01
+    - {id: SOL_01072024, programme: Solaranlagen1, path: 2024/01072024/start.html}  # 2024-07-01
+    - {id: SOL_01122024, programme: Solaranlagen1, path: 2024/01122024/start.html}  # 2024-12-01
+    - {id: SOL_01032025, programme: Solaranlagen1, path: 2025/01032025/start.html}  # 2025-03-01
+    - {id: SOL_01072025, programme: Solaranlagen1, path: 2025/01072025/start.html}  # 2025-07-01
+    - {id: SOL_01122025, programme: Solaranlagen1, path: 2025/01122025/start.html}  # 2025-12-01
+    - {id: SOL_01032026, programme: Solaranlagen1, path: 2026/01032026/start.html}  # 2026-03-01
+    - {id: SOL_01072026, programme: Solaranlagen1, path: 2026/01072026/start.html}  # 2026-07-01
+  innovation_rounds:
+    - {id: INN_Gebotstermin010920, programme: Innovation, path: Gebotstermin010920/Innov_010920_node.html}  # 2020-09-01
+    - {id: INN_Gebotstermin010421, programme: Innovation, path: Gebotstermin010421/Innov_010421_node.html}  # 2021-04-01
+    - {id: INN_Gebortstermin_210801, programme: Innovation, path: Gebortstermin_210801/Innov_010821_node.html}  # 2021-08-01
+    - {id: INN_Gebortstermin_010422, programme: Innovation, path: Gebortstermin_010422/start.html}  # 2022-04-01
+    - {id: INN_Gebotstermin01122022, programme: Innovation, path: Gebotstermin01122022/start.html}  # 2022-12-01
+    - {id: INN_Gebotstermin01052023, programme: Innovation, path: Gebotstermin01052023/start.html}  # 2023-05-01
+    - {id: INN_Gebotstermin01092023, programme: Innovation, path: Gebotstermin01092023/start.html}  # 2023-09-01
+    - {id: INN_GT1052024, programme: Innovation, path: GT1052024/start.html}  # 2024-05-01
+    - {id: INN_GT1092024, programme: Innovation, path: GT1092024/start.html}  # 2024-09-01
+    - {id: INN_GT1052025, programme: Innovation, path: GT1052025/start.html}  # 2025-05-01
+    - {id: INN_GT1092025, programme: Innovation, path: GT1092025/start.html}  # 2025-09-01
+    - {id: INN_GT1052026, programme: Innovation, path: GT1052026/start.html}  # 2026-05-01
+
 # Data hub (contract v1.4): SMARD market data, CC BY 4.0,
 # attribution "Bundesnetzagentur | SMARD.de". Values are MWh per quarter hour.
 hub:

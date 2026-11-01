@@ -1,31 +1,31 @@
 {
-  "contract_version": "1.6",
-  "as_of": "2026-11-01",
-  "generated_at": "2026-11-01T18:13:26+00:00",
+  "contract_version": "1.7",
+  "as_of": "2026-10-30",
+  "generated_at": "2026-11-01T21:14:47+00:00",
   "pipeline_version": "0.1.0",
   "incomplete_after": {
-    "biomass": "2026-06-09",
-    "hydro": "2026-09-02",
-    "solar": "2026-08-29",
-    "storage": "2026-08-20",
-    "wind_offshore": "2026-10-16",
-    "wind_onshore": "2026-10-07"
+    "biomass": "2026-06-07",
+    "hydro": "2026-08-31",
+    "solar": "2026-08-27",
+    "storage": "2026-08-18",
+    "wind_offshore": "2026-10-14",
+    "wind_onshore": "2026-10-05"
   },
   "files": [
     {
       "name": "kpis.json",
       "rows": 6,
-      "bytes": 1146
+      "bytes": 1144
     },
     {
       "name": "units.parquet",
-      "rows": 156718,
-      "bytes": 7858799
+      "rows": 156646,
+      "bytes": 7852287
     },
     {
       "name": "summary.parquet",
-      "rows": 449393,
-      "bytes": 2602687
+      "rows": 449241,
+      "bytes": 2600284
     },
     {
       "name": "boundaries/states.geojson",
@@ -40,27 +40,57 @@
     {
       "name": "monitor/buildout.json",
       "rows": 37,
-      "bytes": 181261
+      "bytes": 181258
     },
     {
       "name": "monitor/points.json",
-      "rows": 37531,
-      "bytes": 718190
+      "rows": 37506,
+      "bytes": 717774
     },
     {
       "name": "monitor/stats.json",
       "rows": 13,
-      "bytes": 21293
+      "bytes": 21268
     },
     {
       "name": "auctions/onshore.json",
       "rows": 34,
-      "bytes": 296637
+      "bytes": 320290
     },
     {
       "name": "auctions/awards.json",
       "rows": 5217,
-      "bytes": 3126215
+      "bytes": 3255544
+    },
+    {
+      "name": "auctions/solar.json",
+      "rows": 40,
+      "bytes": 149174
+    },
+    {
+      "name": "auctions/solar_awards.json",
+      "rows": 2874,
+      "bytes": 1758083
+    },
+    {
+      "name": "auctions/company_facts.json",
+      "rows": 13,
+      "bytes": 10147
+    },
+    {
+      "name": "auctions/market_risk.json",
+      "rows": 51,
+      "bytes": 15387
+    },
+    {
+      "name": "auctions/players.json",
+      "rows": 18,
+      "bytes": 17920
+    },
+    {
+      "name": "grid/grid.json",
+      "rows": 401,
+      "bytes": 34845
     }
   ]
 }
