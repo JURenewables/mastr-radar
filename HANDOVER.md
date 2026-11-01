@@ -1,7 +1,7 @@
-# Handover — 31 Oct 2026
+# Handover — 1 Nov 2026
 
-Branch `claude/blissful-cannon-t3pa07`, last feature commit `c1ea5a5`.
-Live site: https://mastr-radar.vercel.app (from `main`, contract v1.4).
+Branch `claude/blissful-cannon-t3pa07` (restarted from `main` after PR #5).
+Live site: https://mastr-radar.vercel.app (from `main`, contract v1.5).
 Branch preview (Vercel login needed):
 https://mastr-radar-git-claude-blissful-cannon-t3pa07-re-s-ma-str.vercel.app
 
@@ -19,7 +19,7 @@ Sources and licences: `docs/sources.md`.
   24 hours", open data (`/open-data`, `/catalog.json`, `/llms.txt`).
 - Daily hub run on `main` after the last merge: succeeded.
 
-**Contract v1.5 (approved 31 Oct 2026, going live with this merge)**
+**Contract v1.5 (approved and live since 31 Oct 2026, PR #5)**
 - WP49–51 turbine makers: `wind_industry` in `monitor/stats.json`, a bar
   chart race (fleet or yearly additions), market share since 2000, most-built
   models since 2024 with hub height and rotor, sizes per maker.
@@ -31,6 +31,23 @@ Sources and licences: `docs/sources.md`.
   draft is in `docs/contracts.md`, and the daily workflow has an
   auctions-fetch step.
 - Checks: pytest 85 passed, ruff clean, web lint and build clean.
+
+**On the branch only: contract v1.6 draft (waiting for approval)**
+- WP52 all 34 onshore rounds since May 2019 (tolerant parser for the older
+  page wordings and list layouts).
+- WP53 yield estimate per awarded turbine (`wind.py`,
+  `config/wind_yield.yaml`): DWD 200 m wind grid + MaStR coordinates, hub
+  height, rotor, rating → full-load hours, Gütefaktor, Korrekturfaktor,
+  estimated received value; merit order per round.
+- WP54 five bidder types (utilities and Stadtwerke split; Alterric = IPP;
+  enercity = Stadtwerk); winners include "Not attributed" and "Citizen &
+  local (all)" as striped bars; year and type selectable.
+- WP55 winners race (companies or bidder types, since 2019 or per year) and
+  share-of-the-cake chart.
+- WP56 "Players": operating capacity by group (from auctions and whole
+  fleet), data table by bidder type, editorial drivers matrix.
+- Checks: pytest 100 passed, ruff clean, web lint and build clean, station 3
+  check passes.
 
 ## In progress / resolved during this session
 
@@ -62,9 +79,24 @@ Sources and licences: `docs/sources.md`.
 - **Bidders are grouped by company-name keywords** in
   `pipeline/config/auction_groups.yaml` (first match wins). Groups marked
   `bucket` (citizen wind farms, cooperatives, Stadtwerke without a group
-  name, …) count in the category totals but are never ranked as "winners".
-- **JUWI counts as a developer even though MVV owns it; Alterric counts as a
-  utility (EWE joint venture).** This is stated on the page.
+  name, …) are shown as striped bars standing for many companies (v1.6;
+  in v1.5 they were left out of the ranking).
+- **Five bidder types (v1.6, your call):** Alterric counts as an IPP (it
+  develops and finances like one); enercity as a Stadtwerk (Hannover's
+  municipal utility); big utilities (RWE, EnBW, Vattenfall, Uniper, E.ON,
+  EWE, …) separate from Stadtwerke. JUWI counts as a developer although MVV
+  owns it.
+- **Auction rounds start in May 2019:** earlier lists use old register
+  numbers (A…) that our data cannot link to MaStR.
+- **Yield model kept simple and transparent:** DWD grid (1981–2000 climate),
+  generic power curve, 12 % losses, no curtailment. Good for comparing sites
+  and rounds, not a yield report. EEG correction tables live in
+  `config/wind_yield.yaml`; the 50 % step is applied only in BW, BY and SL as
+  an approximation of the southern region.
+- **Received value = round average award × project correction factor,**
+  because single bids are not published.
+- **The "why developers win" matrix is labelled editorial,** separate from
+  the measured figures.
 - **Bidder names without a company legal form are withheld** (privacy rule
   D4). GbR partnerships count as "Citizen & local".
 - **Round prices are taken from the BNetzA round pages, not the award
@@ -79,9 +111,10 @@ Sources and licences: `docs/sources.md`.
 
 ## Known bugs and limits
 
-1. **42% of awarded capacity is "not attributed":** project companies such as
-   "Windpark X GmbH & Co. KG" don't name their owner. Groups that bid this way
-   look smaller than they are (UKA, for example).
+1. **45% of awarded capacity (2019–2026) is "not attributed":** project
+   companies such as "Windpark X GmbH & Co. KG" don't name their owner.
+   Groups that bid this way look smaller than they are (UKA, for example).
+   For the whole operating fleet it is 71%.
 2. **Award list totals differ from published totals** for Nov 2025 (+5%) and
    Aug 2025 (+1.4%). The check tolerates this up to ±10%.
 3. **Nov 2025 `volume_kw` is null:** that page words the tender volume
@@ -100,24 +133,35 @@ Sources and licences: `docs/sources.md`.
      Feb 26, because the ceiling changed from 7.35 to 7.25 ct.
    - Labels in the maker size chart are nudged apart only when they end in
      the same year.
-8. **`auctions/awards.json` is about 730 KB.** That is fine within the 50 MB
-   budget, but it could be trimmed.
+8. **`auctions/awards.json` is about 3 MB** (34 rounds). Fine within the
+   50 MB budget (total data 35 MB), but it could be trimmed.
+9. **Yield estimates are model values:** median site quality ~93–96 % may be
+   a little high, since tall hubs extrapolate the DWD 100 m wind with the
+   80–100 m shear. Correction tables for EEG 2017/2021/2023 should be checked
+   against the law text before anyone relies on single values.
+10. **Realisation shares by type are close to 100 %** because only turbines
+    still in MaStR are counted; projects that were dropped and deregistered
+    are invisible.
 
 ## Open decisions (yours)
 
-1. **OpenStreetMap ODbL** for the WP41 grid map. Recommendation: accept.
-2. **Store the API keys in GitHub Secrets:** `ENTSOE_TOKEN`,
+1. **Approve contract v1.6** (auction yield, five bidder types, winners
+   race, players), then merge and go live.
+2. **OpenStreetMap ODbL** for the WP41 grid map. Recommendation: accept.
+3. **Store the API keys in GitHub Secrets:** `ENTSOE_TOKEN`,
    `NETZTRANSPARENZ_CLIENT_ID` and `NETZTRANSPARENZ_CLIENT_SECRET`. Rotate the
    netztransparenz secret that was pasted in chat.
-3. **Better auction attribution (WP45b):** decide whether we maintain a
+4. **Better auction attribution (WP45b):** decide whether we maintain a
    reviewed list mapping project companies to parent groups.
 
 ## Next steps
 
-1. Check that the daily MaStR and hub runs after the v1.5 merge succeeded
-   (they rewrite all files with contract 1.5 and the newest data).
-2. WP45b: shrink "not attributed". Map project companies to parent groups
-   via MaStR operator data or a reviewed list, and add the 2017–2024 rounds.
+1. After v1.6 approval: bump `CONTRACT_VERSION` (aggregate, hub) and
+   `SUPPORTED_CONTRACTS` to 1.6, merge `main` (keep the branch's consistent
+   data set), open the PR, merge, run the daily update.
+2. WP45b: shrink "not attributed" (reviewed list of project companies →
+   parent groups); optionally link 2017–Feb 2019 rounds via the old register
+   numbers (needs a new station 2 column).
 3. WP41 grid map, once the OSM decision and the API keys are in place.
 4. When a new auction round is published (Nov 2026: awards expected
    Jan 2027), add its id to `settings.yaml → auctions.onshore_rounds`.

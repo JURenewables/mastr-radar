@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: Phase 8 live (turbine makers WP49–51, auctions WP44–45, contract v1.5). Next: WP45b better auction attribution; WP41 grid map waits for OSM licence OK and your ENTSO-E / netztransparenz keys**
+**You are here: Phase 8 extension (WP52–56: auction yield, bidder types, winners race, players) on the branch preview, waiting for your approval of contract v1.6. Phase 7 live except WP41 (grid map: waits for OSM licence OK and your ENTSO-E / netztransparenz keys)**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -223,6 +223,18 @@ real stress signals (line loading itself is not published).
 - [x] **WP45. Rounds overview:** published prices per round (lowest, average,
   highest vs ceiling), top winning groups per year, bidder types, turbine
   makers in the awards.
+- [x] **WP52. Older rounds:** all 34 onshore rounds since May 2019 (earlier
+  lists use unlinkable register numbers).
+- [x] **WP53. Yield estimate:** DWD wind grid + MaStR turbine data →
+  full-load hours, Gütefaktor, Korrekturfaktor, received value; merit order
+  per round.
+- [x] **WP54. Five bidder types:** utilities and Stadtwerke split, Alterric as
+  IPP, enercity as Stadtwerk; winners with "not attributed" and "citizen"
+  bars, selectable by year and type.
+- [x] **WP55. Winners race and share of the cake** since 2019 (companies and
+  bidder types).
+- [x] **WP56. Players:** operating capacity by group (from auctions and whole
+  fleet), data by bidder type, editorial drivers analysis.
 - [ ] **WP45b. Better attribution:** map project companies to their parent
   groups (e.g. from MaStR operator data or a reviewed list) to shrink the
   "not attributed" share. Older rounds (2017–2024).
