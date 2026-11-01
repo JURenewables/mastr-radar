@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.6 approved and live (Phase 8 incl. WP52–61). Next: WP45b better attribution; WP41 grid map waits for OSM licence OK and your ENTSO-E / netztransparenz keys**
+**You are here: v1.6 live; WP62–66 (solar page, unit details, success drivers) on the branch preview, waiting for your approval of contract v1.7. Next: WP67 grid distance (needs OSM decision), WP45b attribution, WP41 grid map**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -251,6 +251,19 @@ real stress signals (line loading itself is not published).
   where, who wins, why) with generated takeaways and caveats per section;
   animated award map (round by round, no company colours); company map
   coloured by year with profile and takeaways; turbine makers per company.
+- [x] **WP62. Unit details (station 2, internal):** grid connection voltage
+  and capacity, award number, declared yield ratio, permit date, solar type,
+  tracker, land use, battery on site.
+- [x] **WP63. Solar auctions:** ground-mounted rounds since 2019 (awards since
+  2023) and innovation rounds; links via award numbers; solar groups added.
+- [x] **WP64. Solar yield, batteries, portfolios** (DWD radiation grid).
+- [x] **WP65. Wind success drivers:** calibration with declared yield ratios;
+  permitted turbines awarded vs not by year, site quality, grid voltage;
+  company volume vs site quality.
+- [x] **WP66. Solar page** (`/solar`, five chapters) and cross-technology
+  view (groups in wind and solar) on both pages; nav Monitor | Solar | Wind.
+- [ ] **WP67. Grid distance:** distance to the nearest substation (needs the
+  OpenStreetMap ODbL decision).
 - [ ] **WP45b. Better attribution (continue):** map project companies to their parent
   groups (e.g. from MaStR operator data or a reviewed list) to shrink the
   "not attributed" share. Older rounds (2017–2024).

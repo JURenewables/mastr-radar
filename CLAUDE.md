@@ -159,14 +159,16 @@ data/                local working dir for downloads (git-ignored)
   checked), `uv run mastr-radar check-download <zip>` (check only)
 - Station 2: `uv run mastr-radar extract` (newest zip → `data/extract/units.parquet`
   and `operators.parquet` (internal company register), then checked; report in
-  `extract_report.json`); `uv run mastr-radar extract-operators` (register only)
+  `extract_report.json`); `uv run mastr-radar extract-operators` (register only),
+  `uv run mastr-radar extract-details` (internal unit details: grid, award, permit, solar)
 - Station 3: `uv run mastr-radar aggregate` (`units.parquet` → `web/public/data/`,
   then checked, then cross-checked against Energy-Charts: warning only,
   report in `data/reports/crosscheck.json`)
 - Hub (contract v1.4 draft): `uv run mastr-radar hub-fetch` (SMARD, cached in
   `data/hub/`), `uv run mastr-radar hub-build` (day files in
   `web/public/data/days/`, then checked). Sources and licences: `docs/sources.md`.
-- Pages: `/` energy-transition monitor, `/wind` wind & auctions, `/explore`.
+- Pages: `/` energy-transition monitor, `/solar` solar & auctions, `/wind` wind &
+  auctions, `/explore`.
 - Auctions: `uv run mastr-radar auctions-fetch` (BNetzA rounds + DWD wind grid,
   cached in `data/auctions/`); hand-checked attributions and company-reported
   totals in `pipeline/config/auction_reviewed.yaml`.

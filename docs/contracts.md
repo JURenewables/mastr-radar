@@ -480,6 +480,59 @@ every reported total has a source and a known round.
 
 ---
 
+## v1.7 draft: solar auctions, unit details, success drivers (waiting for approval)
+
+Additive. Until approved, the files exist only on the branch preview and
+`contract_version` stays `"1.6"`.
+
+**Station 2 adds `data/extract/unit_details.parquet`** (internal, never
+published): all onshore wind units, solar units that are not building or
+balcony units or are ≥ 100 kW, and storage ≥ 100 kW. Columns: `unit_id`,
+`technology`, `location_id`, `grid_voltage` and `grid_capacity_kw` (from
+`Netzanschlusspunkte` via the unit's location), `award_no`, `award_kw`,
+`yield_ratio_pct` (from the EEG plant record; the declared ratio of estimated
+to reference yield for wind), `permit_date`, `permit_kind`
+(`EinheitenGenehmigung`), `solar_kind`, `solar_orientation`, `solar_tracker`,
+`solar_area_ha`, `solar_land_before`, `solar_features`, `storage_same_site`,
+`high_voltage`, `park_name`. Check: contract columns, ≥ 30,000 rows, unique
+ids. Written by `mastr-radar extract` (or `extract-details` on its own).
+
+**Solar auctions** (`settings.yaml → auctions.solar_rounds`,
+`innovation_rounds`; cached in `data/auctions/solar/`; DWD radiation grid in
+`data/auctions/dwd/`). Prices per round since 2019 (innovation since 2021);
+award-level analysis where the list gives kW (ground-mounted solar since
+2023, innovation since Sept 2023). Awards link to MaStR through the award
+number stored in the plant's EEG record (innovation: also register numbers).
+Location: centre of the linked units, else the municipality centre from
+public unit coordinates. Yield = DWD global radiation 1991–2020 × system
+factor (fixed south 1.12, east-west 1.00, tracker 1.30) × performance ratio
+0.85 (`config/solar_yield.yaml`). Battery on site = MaStR flag, a linked
+battery unit, or a battery ≥ 500 kW within 1 km. Portfolio = ≥ 2 awards of
+one group (or one bidder) in the same district and round.
+
+**`auctions/solar.json`**: `rounds[]` (programme, prices, ceiling, awarded
+kW, `award_level`, `max_award_kw`, `kw_by_category`, `linked_share`,
+`co_located_share`, `co_located_known_kw`, `tracker_share`, `special_share`,
+`specific_yield_avg`), `winners_by_year`, `race`, `kw_by_category_year`,
+`kw_by_state_year`, `portfolios` (`by_round`, `largest`), `company_profiles`,
+`points` (7 integers per award: lon×100, lat×100, kW/100, category, group,
+kWh/kWp, battery 1/0/−1), `attribution_kw`, `unattributed_share`,
+`grid_voltage_kw`, `cross_tech` (groups in wind and solar since 2023),
+`model`. **`auctions/solar_awards.json`**: one row per award (bidder only for
+companies, D4).
+
+**Wind additions in `auctions/onshore.json`**: quality factor calibrated with
+the declared MaStR ratios (`model.calibration`: factor, n, correlation;
+declared value used where present); `success` (award rate of permitted
+turbines by permit year, site-quality band and grid voltage; voltage by
+bidder type; company volume vs site quality with Spearman correlation).
+
+**Check:** solar rounds match settings; prices in order; award list within
+±10 % of the published total; average specific yield 850–1,500 kWh/kWp; no
+location for bidders that are not companies; no NaN in published JSON.
+
+---
+
 ## Version history
 
 | Version | Date | Change |

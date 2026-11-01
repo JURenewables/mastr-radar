@@ -49,6 +49,19 @@ Sources and licences: `docs/sources.md`.
 - Checks: pytest 100 passed, ruff clean, web lint and build clean, station 3
   check passes.
 
+**On the branch only: contract v1.7 draft (waiting for approval)**
+- WP62 `data/extract/unit_details.parquet` (internal): grid voltage and
+  capacity, award number, declared wind yield ratio, permit date, solar type,
+  tracker, land use, battery on site (`mastr-radar extract-details`).
+- WP63–64 solar auctions (`solar_auctions.py`): ground-mounted since 2019
+  (awards since 2023), innovation since 2020; yield from the DWD radiation
+  grid; batteries on site; portfolios; solar company groups.
+- WP65 wind success drivers and calibration: model quality × 0.79 (median of
+  4,431 declared MaStR ratios; correlation 0.44); declared value used where
+  present. Findings: 95 % of turbines permitted 2021–23 won regardless of
+  site quality; volume vs site quality rank correlation +0.18.
+- WP66 `/solar` page and wind/solar cross-technology section.
+
 ## In progress / resolved during this session
 
 - **The wind analysis edit that didn't land:** a Python text replacement in
