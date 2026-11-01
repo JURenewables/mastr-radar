@@ -73,6 +73,16 @@ Sources and licences: `docs/sources.md`.
   with insolvent Enerparc (15 % of the solar backlog), 0.5 GW of wind with
   ABO. ABO is in out-of-court restructuring (bank standstill to 30 Nov
   2026), not insolvent, as of the sources found on 1 Nov 2026: re-check.
+- WP71 `/grid`: new station 2 command `extract-grid` (grid operator, TSO
+  control area and voltage per large unit; grid operator roles; 1,058 large
+  consumers) → `grid/grid.json`. 6 grid operators connect half of large
+  wind/solar/storage; 476 large consumers planned. Context (congestion costs,
+  rules incl. Redispatchvorbehalt bill) in `config/grid_facts.yaml`.
+- WP72 `/players`: 18 companies in `config/players.yaml` (sourced), joined
+  with German auction results. Wind/Solar now titled "Germany's …".
+- WP73a AI guide on `/open-data` and `/llms.txt`; plan in
+  `docs/platform-plan.md`. Architecture map:
+  https://claude.ai/artifact/XyzJEANiHVLTQojAnRPMUz
 
 ## In progress / resolved during this session
 
