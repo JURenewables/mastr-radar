@@ -28,7 +28,10 @@ groups:
   # projects like an IPP, so it counts here.
   - {group: Alterric, category: developer, match: "alterric"}
   - {group: wpd, category: developer, match: "\\bwpd\\b"}
-  - {group: UKA, category: developer, match: "\\buka\\b|umweltgerechte kraftanlagen"}
+  # UKA bids through project companies named "UGE … GmbH & Co. KG Umweltgerechte
+  # Energie" (registered in Lohmen / Amtsgericht Rostock like UKA; UKA is the
+  # applicant or builder at UGE award sites such as Papenburg and Schäcksdorf).
+  - {group: UKA, category: developer, match: "\\buka\\b|umweltgerechte kraftanlagen|\\buge\\b|umweltgerechte energie"}
   - {group: ABO Energy, category: developer, match: "\\babo (energy|wind)\\b"}
   - {group: JUWI, category: developer, match: "\\bjuwi\\b"}
   - {group: Prowind, category: developer, match: "\\bprowind\\b"}
@@ -38,7 +41,6 @@ groups:
   - {group: PNE, category: developer, match: "\\bpne\\b|\\bwkn\\b"}
   - {group: ENERTRAG, category: developer, match: "enertrag"}
   - {group: NOTUS energy, category: developer, match: "\\bnotus\\b"}
-  - {group: UGE, category: developer, match: "\\buge\\b|umweltgerechte energie"}
   - {group: Qualitas Energy, category: developer, match: "\\bqe (windpark|niemegk|holding)|qualitas"}
   - {group: NeXtWind, category: developer, match: "nextwind"}
   - {group: ENOVA, category: developer, match: "\\benova\\b"}

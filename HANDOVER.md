@@ -115,6 +115,10 @@ Sources and licences: `docs/sources.md`.
    companies such as "Windpark X GmbH & Co. KG" don't name their owner.
    Groups that bid this way look smaller than they are (UKA, for example).
    For the whole operating fleet it is 71%.
+   Cross-check with company press releases (`docs/auction-crosscheck.md`):
+   exact matches for groups bidding under their own name (RWE, PNE, ABO,
+   EnBW); wpd, Qualitas and Alterric undercounted. "UGE … Umweltgerechte
+   Energie" companies turned out to be UKA and are now merged.
 2. **Award list totals differ from published totals** for Nov 2025 (+5%) and
    Aug 2025 (+1.4%). The check tolerates this up to ±10%.
 3. **Nov 2025 `volume_kw` is null:** that page words the tender volume
