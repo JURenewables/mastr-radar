@@ -34,6 +34,23 @@ assignments:
     evidence: "Qualitas names Sassenberg-Gröblingen (4 × 5.56 MW) as one of its two Aug 2025 awards; with QE Windpark Ingstetten this gives 43.8 MW, as announced."
     source: https://www.renewable-energy-industry.com/news/press-releases/pm-8630-qualitas-energy-secures-43-mw-in-latest-onshore-wind-energy-tender
 
+# addresses: offices reviewed by hand (street, house_number, postcode → group).
+# Awards whose operator company sits there count for that group. Most offices
+# are recognised automatically (see office_groups in auctions.py).
+addresses: []
+
+# office_exclusions: awards the office rule would assign, but a source shows
+# they are not the group's (e.g. the group only manages the company).
+office_exclusions:
+  - bidder: "Windpark Rehringhausen GmbH & Co. KG"
+    round: GT03082026
+    reason: "Registered at ABO Energy's office, but not among the three Aug 2026 projects ABO announced (Bentheim Süd, Rhein-Mosel, Losheim)."
+    source: https://inspenet.com/en/news/abo-energy-wins-wind-power-tender-in-germany/
+  - bidder: "Windpark GmbH & Co. Beckeln KG"
+    round: GT1022025
+    reason: "Registered at Alterric's office, but not among the seven Feb 2025 projects Alterric announced."
+    source: https://www.windtech-international.com/projects-and-contracts/alterric-awarded-contracts-for-178-66-mw-in-german-onshore-wind-auction
+
 # reported: awarded capacity a company announced for a round. `qualifier`:
 # exact (default), about, over. Compared with our figure on the site.
 reported:

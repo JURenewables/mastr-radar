@@ -276,3 +276,44 @@ def test_stale_assignment_fails(tmp_path, reviewed):
     units = write_units(tmp_path / "units.parquet", [unit("X", kw=1)])
     with pytest.raises(auctions.AuctionCheckError, match="match no award"):
         auctions.build([{"id": "R1", "path": "x"}], cache, units, tmp_path / "data")
+
+
+def test_office_groups(tmp_path):
+    """Unknown bidders count for a group when their operator sits at its office."""
+    import pandas as pd
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    from mastr_radar.extract import OPERATOR_REGISTER_SCHEMA
+
+    def op(i, name, street):
+        base = {"house_number": "3", "postcode": "28217", "city": "Bremen"}
+        reg = {"register_court": None, "register_number": None}
+        return {"operator_id": i, "name": name, "street": street, **base, **reg}
+
+    rows = [
+        op("A1", "wpd Windpark Nr. 1 GmbH & Co. KG", "Stephanitorsbollwerk"),
+        op("A2", "wpd Windpark Nr. 2 GmbH & Co. KG", "Stephanitorsbollwerk"),
+        op("A3", "Windpark Heek GmbH & Co. KG", "Stephanitorsbollwerk"),  # the unknown bidder
+        op("B1", "Windpark Mixed GmbH", "Marktplatz"),
+        op("B2", "wpd Windpark Nr. 3 GmbH & Co. KG", "Marktplatz"),
+        op("B3", "RWE Windpark GmbH", "Marktplatz"),  # two groups at one address: no label
+    ]
+    path = tmp_path / "operators.parquet"
+    pq.write_table(pa.Table.from_pylist(rows, OPERATOR_REGISTER_SCHEMA), path)
+    linked = pd.DataFrame(
+        {"operator_id": ["A3", "B1"]}, index=["SEE900000000001", "SEE900000000002"]
+    )
+    awards = [
+        {
+            "bidder": "Windpark Heek GmbH & Co. KG",
+            "award_no": "W1",
+            "turbines": ["SEE900000000001"],
+        },
+        {"bidder": "Windpark Mixed GmbH", "award_no": "W2", "turbines": ["SEE900000000002"]},
+    ]
+    got = auctions.office_groups([({"id": "R1"}, {}, awards)], linked, path, CFG, {})
+    assert {k: v[0] for k, v in got.items()} == {("R1", "W1"): "wpd"}
+    # An exclusion backed by a source switches the rule off for that bidder.
+    excl = {"office_exclusions": [{"bidder": "Windpark Heek GmbH & Co. KG"}]}
+    assert auctions.office_groups([({"id": "R1"}, {}, awards)], linked, path, CFG, excl) == {}

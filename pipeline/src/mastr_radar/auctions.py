@@ -324,7 +324,71 @@ UNIT_COLS = [
     "lon",
     "hub_height_m",
     "rotor_diameter_m",
+    "operator_id",
 ]
+
+
+def address_key(street, house_number, postcode) -> str:
+    """Comparable office address: street + number + postcode, letters and digits only."""
+
+    def norm(x) -> str:
+        t = str(x or "").lower().replace("straße", "str").replace("strasse", "str")
+        return re.sub(r"[^a-z0-9äöü]", "", t)
+
+    return f"{norm(street)}|{norm(house_number)}|{norm(postcode)}"
+
+
+def office_groups(
+    parsed: list, linked: pd.DataFrame, ops_path: Path, cfg: dict, reviewed: dict
+) -> dict[tuple[str, str], tuple[str, str]]:
+    """Unknown awards whose operator company sits at a group's office.
+
+    An office belongs to a group when every named company registered there
+    belongs to it, or when at least 2 do and they make up 60 % of the named
+    companies; reviewed addresses (auction_reviewed.yaml) take precedence.
+    Returns (round, award) → (group, address key). Addresses stay internal.
+    """
+    if not ops_path.exists():
+        return {}
+    buckets = {g["group"] for g in cfg["groups"] if g.get("bucket")}
+    ops = pq.read_table(ops_path).to_pandas()
+    ops["addr"] = [
+        address_key(*v)
+        for v in zip(ops["street"], ops["house_number"], ops["postcode"], strict=True)
+    ]
+    addr_of = dict(zip(ops["operator_id"], ops["addr"], strict=True))
+    by_name = dict(zip(ops["name"].str.lower(), ops["addr"], strict=True))
+    wanted: dict[tuple[str, str], str] = {}
+    for rnd, _, awards in parsed:
+        for a in awards:
+            if (
+                reviewed_group(a["bidder"], rnd["id"], a["award_no"], reviewed)
+                or attribute(a["bidder"], cfg)[0]
+            ):
+                continue
+            if any(
+                e["bidder"] == a["bidder"] and e.get("round", rnd["id"]) == rnd["id"]
+                for e in reviewed.get("office_exclusions", [])
+            ):
+                continue
+            op_ids = [linked.at[r, "operator_id"] for r in a["turbines"] if r in linked.index]
+            op_ids = [o for o in op_ids if isinstance(o, str)]
+            addr = addr_of.get(max(set(op_ids), key=op_ids.count)) if op_ids else None
+            addr = addr or by_name.get(a["bidder"].lower())
+            if addr:
+                wanted[(rnd["id"], a["award_no"])] = addr
+    labels: dict[str, str] = {}
+    for addr, names in ops[ops["addr"].isin(set(wanted.values()))].groupby("addr")["name"]:
+        groups = [g for n in names if (g := attribute(n, cfg)[0]) and g not in buckets]
+        if not groups:
+            continue
+        top = max(set(groups), key=groups.count)
+        n = groups.count(top)
+        if n == len(groups) or (n >= 2 and n / len(groups) >= 0.6):
+            labels[addr] = top
+    for e in reviewed.get("addresses", []):
+        labels[address_key(e["street"], e["house_number"], e["postcode"])] = e["group"]
+    return {k: (labels[a], a) for k, a in wanted.items() if a in labels}
 
 
 def _load_turbines(units_path: Path) -> pd.DataFrame:
@@ -426,6 +490,10 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         if y:
             yields[reg] = y
 
+    offices = office_groups(
+        parsed, linked, units_path.with_name("operators.parquet"), cfg, reviewed
+    )
+
     rows, round_out, merit = [], [], {}
     for rnd, page, awards in parsed:
         year = int(page["bid_date"][:4]) if page["bid_date"] else None
@@ -442,6 +510,9 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
             else:
                 group, cat = attribute(a["bidder"], cfg)
                 how = "name" if group else "none"
+                if not group and (rnd["id"], a["award_no"]) in offices:
+                    group = offices[(rnd["id"], a["award_no"])][0]
+                    cat, how = category_of(group, cfg), "office"
             mine = [r for r in a["turbines"] if r in linked.index]
             lk = linked.loc[mine]
             if a["kw"] is not None:
@@ -657,6 +728,10 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         "drivers_realised_cutoff": cutoff,
         "company_reported": _reported(reviewed, round_out, df),
         "reviewed_awards": int((df["attribution"] == "reviewed").sum()),
+        "attribution_kw": {
+            k: float(df.loc[df["attribution"] == k, "kw"].sum())
+            for k in ("reviewed", "name", "office", "none")
+        },
         "unattributed_share": round(
             float(df.loc[df["category"] == "unattributed", "kw"].sum() / df["kw"].sum()), 4
         ),

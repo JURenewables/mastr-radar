@@ -138,6 +138,33 @@ def extract(
     for w in warnings:
         typer.echo(f"WARNING: {w}")
     typer.echo(f"Check passed: {dict(report.rows)} → {out}")
+    _operator_register(zip_path, cfg)
+
+
+def _operator_register(zip_path: Path, cfg: dict) -> None:
+    from mastr_radar import extract as ex
+
+    out = load_settings().data_dir / "extract" / "operators.parquet"
+    n = ex.write_operator_register(zip_path, out, cfg)
+    try:
+        ex.check_operator_register(out, cfg["operators"]["register_min_rows"])
+    except ex.UnitsCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        out.unlink(missing_ok=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"Check passed: {n:,} organisations → {out}")
+
+
+@app.command("extract-operators")
+def extract_operators(
+    zip_path: Path = typer.Argument(None, help="Export zip. Default: newest in data/raw."),
+) -> None:
+    """Station 2 (part): only the company register (organisations with office address)."""
+    from mastr_radar import extract as ex
+
+    s = load_settings()
+    zip_path = zip_path or sorted(s.raw_dir.glob("Gesamtdatenexport_*.zip"))[-1]
+    _operator_register(zip_path, ex.load_columns_config())
 
 
 @app.command()
