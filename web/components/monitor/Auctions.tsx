@@ -72,7 +72,7 @@ function RoundSelect({ a, value, onChange }: { a: Auctions; value: string; onCha
 }
 
 /** Horizontal bars with a label column; buckets (many companies) are striped. */
-function GroupBars({
+export function GroupBars({
   rows,
   max,
   value,

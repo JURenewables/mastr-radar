@@ -10,7 +10,8 @@ import { mw, type AuctionCategory, type CompanyProfile, type MonitorData } from 
 import { AuctionCake, AuctionCrossCheck, AuctionPlayers, AuctionPrices, AuctionRace, AuctionWinners, AuctionYield, makerShares, roundLabel, TurbinePartners } from "./Auctions";
 import { AuctionMovie, CompanyMap } from "./AuctionMap";
 import { Repowering, TurbineGrowth } from "./Sections";
-import { Chapter, Loading, Section } from "./ui";
+import { Chapter, Loading, Section, Stat } from "./ui";
+import { CrossTech, crossTakeaways, SuccessSection } from "./Strategy";
 import { BrandRace, BrandShares, TurbineModels } from "./WindIndustry";
 
 export const WIND_SECTIONS = [
@@ -246,10 +247,14 @@ function AuctionChapters({ data, date, source }: { data: MonitorData; date: stri
         source={<>Source: Bundesnetzagentur (awards), Marktstammdatenregister as of {date} (turbines), Deutscher Wetterdienst (wind, CC BY 4.0). Data processed.</>}
         takeaways={[
           "The average awarded site barely changes from round to round: what changes is the price, not the wind.",
-          `Average correction factor ${wavg("correction_factor_avg").toFixed(3)}: most winners sit on sites a little below the EEG reference, which the correction is designed to keep competitive.`,
+          `Average correction factor ${wavg("correction_factor_avg").toFixed(2)}: the typical winner sits well below the EEG reference site, and the correction lifts its pay accordingly.`,
+          au.model.calibration?.n ? `Site quality is calibrated with ${au.model.calibration.n.toLocaleString("en-GB")} turbines whose operators declare it in MaStR (median ${au.model.calibration.median_declared}%); the raw wind model read ${Math.round(((1 / au.model.calibration.factor) - 1) * 100)}% too high.` : "",
           "Each round's merit order runs from about 4,000 to 2,000 full-load hours: very different sites win side by side.",
         ]}
-        caveats={["Estimates from a simple model (DWD wind 1981–2000, generic power curve, 12 % losses, no curtailment); compare sites and rounds, not single values."]}
+        caveats={[
+          "Estimates from a simple model (DWD wind 1981–2000, generic power curve, 12 % losses, no curtailment); compare sites and rounds, not single values.",
+          au.model.calibration?.correlation != null ? `Model and declared site quality correlate at ${au.model.calibration.correlation}: good for averages, rough for single projects. Full-load hours are not calibrated and may be 10–20 % high.` : "",
+        ].filter(Boolean)}
       >
         <AuctionYield a={au} />
       </Section>
@@ -307,7 +312,20 @@ function AuctionChapters({ data, date, source }: { data: MonitorData; date: stri
         asOf={date}
         source={source}
       >
-        <CompanyMap a={au} geo={data.districts} takeaways={companyTakeaways} />
+        <CompanyMap
+          a={au}
+          geo={data.districts}
+          profiles={au.company_profiles}
+          years={au.race.years}
+          takeaways={companyTakeaways}
+          stats={(p) => (
+            <>
+              <Stat label="Site quality (est.)" value={p.quality_pct_avg == null ? "–" : `${p.quality_pct_avg}%`} sub={p.full_load_hours_avg ? `≈ ${p.full_load_hours_avg.toLocaleString("en-GB")} full-load hours` : undefined} />
+              <Stat label="Median award" value={`${p.median_award_mw} MW`} sub={`${p.states} states`} />
+              <Stat label="Turbine maker" value={Object.keys(p.kw_by_maker)[0] ?? "–"} sub={(() => { const m = Object.values(p.kw_by_maker); const t = m.reduce((x, y) => x + y, 0); return t ? `${Math.round((m[0] / t) * 100)}% of its turbines` : undefined; })()} />
+            </>
+          )}
+        />
       </Section>
 
       <Section
@@ -328,10 +346,27 @@ function AuctionChapters({ data, date, source }: { data: MonitorData; date: stri
         <TurbinePartners a={au} brands={data.stats.wind_industry.brands} />
       </Section>
 
+      {data.solar && data.solar.cross_tech.length > 0 && (
+        <Section
+          id="wind-and-solar"
+          eyebrow="Wind and solar"
+          title={(() => { const both = data.solar.cross_tech.filter((c) => c.wind_kw_since_2023 > 0 && c.solar_kw_since_2023 > 0); return `${both.length} of the larger groups win in both wind and solar auctions`; })()}
+          subtitle="Awarded capacity since 2023 per company group in onshore wind and ground-mounted solar auctions."
+          asOf={date}
+          source={source}
+          takeaways={crossTakeaways(data)}
+          caveats={["Groups found by name and office address; solar attribution is weaker than wind (more project companies)."]}
+        >
+          <CrossTech data={data} />
+        </Section>
+      )}
+
       <Chapter id="why" n={5} title="Why developers win">
         Lean teams, project finance and fast decisions beat balance sheets. The data shows the
         pattern; the assessment below explains it.
       </Chapter>
+
+      {au.success && <SuccessSection data={data} date={date} source={source} />}
 
       <Section
         id="players"
