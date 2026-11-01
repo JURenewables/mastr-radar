@@ -139,6 +139,33 @@ def extract(
         typer.echo(f"WARNING: {w}")
     typer.echo(f"Check passed: {dict(report.rows)} → {out}")
     _operator_register(zip_path, cfg)
+    _unit_details(zip_path, cfg)
+
+
+def _unit_details(zip_path: Path, cfg: dict) -> None:
+    from mastr_radar import extract as ex
+
+    out = load_settings().data_dir / "extract" / "unit_details.parquet"
+    n = ex.write_unit_details(zip_path, out, cfg)
+    try:
+        ex.check_unit_details(out, cfg["unit_details"]["min_rows"])
+    except ex.UnitsCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        out.unlink(missing_ok=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"Check passed: {n:,} unit details → {out}")
+
+
+@app.command("extract-details")
+def extract_details(
+    zip_path: Path = typer.Argument(None, help="Export zip. Default: newest in data/raw."),
+) -> None:
+    """Station 2 (part): only unit_details.parquet (grid, award, permit, solar details)."""
+    from mastr_radar import extract as ex
+
+    s = load_settings()
+    zip_path = zip_path or sorted(s.raw_dir.glob("Gesamtdatenexport_*.zip"))[-1]
+    _unit_details(zip_path, ex.load_columns_config())
 
 
 def _operator_register(zip_path: Path, cfg: dict) -> None:
@@ -194,9 +221,13 @@ def aggregate() -> None:
         monitor_settings=s.monitor,
         auction_rounds=s.auction_rounds,
         auctions_dir=s.data_dir / "auctions",
+        solar_rounds=s.solar_rounds,
+        innovation_rounds=s.innovation_rounds,
     )
     try:
-        ag.check_explorer_files(s.output_dir, units, s.auction_rounds)
+        ag.check_explorer_files(
+            s.output_dir, units, s.auction_rounds, s.solar_rounds, s.innovation_rounds
+        )
     except ag.ExplorerCheckError as exc:
         typer.echo(f"CHECK FAILED: {exc}", err=True)
         raise typer.Exit(code=1) from exc
@@ -228,7 +259,15 @@ def auctions_fetch() -> None:
     from mastr_radar import auctions
 
     s = load_settings()
+    from mastr_radar import solar_auctions
+
     n = auctions.fetch(list(s.auction_rounds), s.data_dir / "auctions")
+    n += auctions.fetch(
+        list(s.solar_rounds) + list(s.innovation_rounds),
+        s.data_dir / "auctions" / "solar",
+        grids=False,
+    )
+    n += solar_auctions.fetch_radiation(s.data_dir / "auctions" / "dwd")
     typer.echo(
         f"{len(s.auction_rounds)} rounds ready in {s.data_dir / 'auctions'} ({n} new files)."
     )

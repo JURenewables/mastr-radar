@@ -1,0 +1,16 @@
+# Estimated yield of awarded ground-mounted solar (contract v1.7 draft).
+#
+# Radiation: DWD 1 km grid of the mean annual global radiation on the
+# horizontal plane, 1991–2020 (kWh/m²). CC BY 4.0, "Deutscher Wetterdienst".
+dwd:
+  url: https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/radiation_global/grids_germany_multi_annual_radiation_global_1991_2020.zip
+  file: grids_germany_multi_annual_radiation_global_1991_2020.zip
+  crs: "EPSG:31467"
+# Specific yield (kWh per kWp and year) = radiation × system factor × performance ratio.
+# System factor: radiation on the module plane relative to the horizontal plane.
+performance_ratio: 0.85
+system_factor:
+  fixed_south: 1.12   # fixed tilt ~25–30°, facing south (default when unknown)
+  east_west: 1.00     # east-west racks, low tilt
+  tracker: 1.30       # single-axis tracker
+plausible_specific_yield: [800, 1600]

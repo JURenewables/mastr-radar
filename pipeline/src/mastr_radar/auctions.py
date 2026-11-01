@@ -30,7 +30,7 @@ from mastr_radar import monitor, wind
 
 BASE = "https://www.bundesnetzagentur.de"
 ROUND_PAGE = (
-    BASE + "/DE/Fachthemen/ElektrizitaetundGas/Ausschreibungen/Wind_Onshore/"
+    BASE + "/DE/Fachthemen/ElektrizitaetundGas/Ausschreibungen/{programme}/"
     "BeendeteAusschreibungen/{path}"
 )
 GROUPS_CONFIG = Path(__file__).resolve().parents[2] / "config" / "auction_groups.yaml"
@@ -73,6 +73,7 @@ STATES = [
     "Thüringen",
 ]
 SOURCE = "Bundesnetzagentur, Ausschreibungen Wind an Land (www.bundesnetzagentur.de)"
+AWARD_NO = re.compile(r"(WIN|SOL|INN|GEM)\d", re.IGNORECASE)
 REGISTER_ID = re.compile(r"\b(SEE\d{12}|EEG\d{12}|A\d{13})\b")
 TURBINE_KW = re.compile(r"\((SEE\d{12}|EEG\d{12}),\s*([\d.]+(?:,\d+)?) kW\)")
 LIST_TOLERANCE = 0.10  # award list vs published total (late awards, court rulings)
@@ -108,25 +109,29 @@ def _get(url: str, tries: int = 4) -> requests.Response:
     raise AssertionError("unreachable")
 
 
-def fetch(rounds: list[dict], cache_dir: Path) -> int:
+def fetch(rounds: list[dict], cache_dir: Path, grids: bool = True) -> int:
     """Download what is not cached yet: round pages, award lists, DWD wind grid."""
     cache_dir.mkdir(parents=True, exist_ok=True)
     new = 0
     for rnd in rounds:
         page = cache_dir / f"{rnd['id']}.html"
         if not page.exists():  # finished rounds do not change
-            page.write_text(_get(ROUND_PAGE.format(**rnd)).text, encoding="utf-8")
+            url = ROUND_PAGE.format(
+                programme=rnd.get("programme", "Wind_Onshore"), path=rnd["path"]
+            )
+            page.write_text(_get(url).text, encoding="utf-8")
             new += 1
         xlsx = cache_dir / f"{rnd['id']}.xlsx"
         if not xlsx.exists():
-            link = re.search(
-                r'href="([^"]+Zuschlagslisten/[^"]+\.xlsx)[^"]*"', page.read_text("utf-8")
+            text = page.read_text("utf-8")
+            link = re.search(r'href="([^"]+Zuschlagslisten/[^"]+\.xlsx)[^"]*"', text) or re.search(
+                r'href="([^"]*(?:[Zz]uschl|[Ll]iste)[^"]*\.xlsx)[^"]*"', text
             )
             if not link:
                 raise AuctionCheckError(f"{rnd['id']}: no award list linked on the round page.")
             xlsx.write_bytes(_get(BASE + html.unescape(link.group(1))).content)
             new += 1
-    return new + wind.fetch_grids(cache_dir / "dwd")
+    return new + (wind.fetch_grids(cache_dir / "dwd") if grids else 0)
 
 
 # --- Parsing ----------------------------------------------------------------
@@ -231,7 +236,7 @@ def parse_award_list(path: Path) -> list[dict]:
             if _col(h[1], "registernummer") is not None or _col(h[1], "anlagennummer") is not None
         ),
         None,
-    )
+    ) or next(((ws, h) for ws, h in sheets if _col(h[1], "gemeinde") is not None), None)
 
     ws, (start, cols) = compact
     i_bid, i_award = cols["name des bieters"], _col(cols, "zuschlags-nr")
@@ -241,7 +246,7 @@ def parse_award_list(path: Path) -> list[dict]:
         if len(row) <= max(i_bid, i_award, i_site):
             continue
         no = str(row[i_award] or "").strip()
-        if not row[i_bid] or not re.match(r"WIN\d", no):
+        if not row[i_bid] or not AWARD_NO.match(no):
             continue
         site = str(row[i_site] or "").replace("_x000D_", " ")
         kw = row[i_kw] if i_kw is not None and isinstance(row[i_kw], int | float) else None
@@ -259,13 +264,19 @@ def parse_award_list(path: Path) -> list[dict]:
         i_reg = _col(cols, "registernummer")
         i_reg = i_reg if i_reg is not None else _col(cols, "anlagennummer")
         i_state = _col(cols, "bundesland")
+        i_mun, i_dis = _col(cols, "gemeinde"), _col(cols, "landkreis")
         for row in ws.iter_rows(min_row=start + 2, values_only=True):
             a = awards.get(str(row[i_award] or "").strip()) if len(row) > i_award else None
             if a is None:
                 continue
             if i_state is not None and row[i_state] in STATES:
                 a["state"] = a["state"] or row[i_state]
-            reg = str(row[i_reg] or "").strip()
+            if i_mun is not None and row[i_mun] and not a.get("municipality"):
+                a["municipality"] = str(row[i_mun]).strip()
+                a["district"] = (
+                    str(row[i_dis]).strip() if i_dis is not None and row[i_dis] else None
+                )
+            reg = str(row[i_reg] or "").strip() if i_reg is not None else ""
             if REGISTER_ID.fullmatch(reg) and reg not in a["turbines"]:
                 a["turbines"].append(reg)
     return list(awards.values())

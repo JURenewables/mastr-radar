@@ -160,6 +160,8 @@ def build(
     monitor_settings=None,
     auction_rounds: tuple[dict, ...] = (),
     auctions_dir: Path | None = None,
+    solar_rounds: tuple[dict, ...] = (),
+    innovation_rounds: tuple[dict, ...] = (),
 ) -> dict:
     """Write all explorer files and manifest.json; return the manifest."""
     units = pq.read_table(units_path)
@@ -194,6 +196,12 @@ def build(
         from mastr_radar import auctions
 
         files += auctions.build(list(auction_rounds), auctions_dir, units_path, out_dir)
+    if solar_rounds and auctions_dir is not None:
+        from mastr_radar import solar_auctions
+
+        files += solar_auctions.build(
+            list(solar_rounds), list(innovation_rounds), auctions_dir / "solar", units_path, out_dir
+        )
 
     manifest = {
         "contract_version": CONTRACT_VERSION,
@@ -225,7 +233,11 @@ def _check_fields(obj: dict, fields: dict, where: str, problems: list[str]) -> N
 
 
 def check_explorer_files(
-    out_dir: Path, units_path: Path, auction_rounds: tuple[dict, ...] = ()
+    out_dir: Path,
+    units_path: Path,
+    auction_rounds: tuple[dict, ...] = (),
+    solar_rounds: tuple[dict, ...] = (),
+    innovation_rounds: tuple[dict, ...] = (),
 ) -> None:
     """Run the station 3 check. Raises ExplorerCheckError listing every problem."""
     problems: list[str] = []
@@ -273,6 +285,14 @@ def check_explorer_files(
         try:
             auctions.check(out_dir, list(auction_rounds))
         except auctions.AuctionCheckError as exc:
+            problems.append(str(exc))
+    if solar_rounds:
+        from mastr_radar import solar_auctions
+
+        expected_files |= {"auctions/solar.json", "auctions/solar_awards.json"}
+        try:
+            solar_auctions.check(out_dir, list(solar_rounds), list(innovation_rounds))
+        except solar_auctions.SolarCheckError as exc:
             problems.append(str(exc))
     if missing := expected_files - set(listed):
         problems.append(f"manifest: missing files {sorted(missing)}.")

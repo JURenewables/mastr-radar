@@ -96,6 +96,47 @@ groups:
   - {group: Looft-Schmidt, category: developer, match: "looft-schmidt"}
   - {group: Windkraft Simonsfeld, category: developer, match: "simonsfeld"}
 
+  # --- Solar developers and IPPs (WP63) ---
+  - {group: Enerparc, category: developer, match: "\\benerparc\\b"}
+  - {group: Anumar, category: developer, match: "\\banumar\\b"}
+  - {group: EnValue, category: developer, match: "\\benvalue\\b"}
+  - {group: WI Energy, category: developer, match: "^wi energy"}
+  - {group: Faber Solartechnik, category: developer, match: "faber solartechnik"}
+  - {group: Münch Energie, category: developer, match: "^münch (emergy|naturepower|energie)"}
+  - {group: Greeno, category: developer, match: "\\bgreeno\\b"}
+  - {group: Südwerk, category: developer, match: "südwerk"}
+  - {group: Sunnic, category: developer, match: "\\bsunnic\\b"}
+  - {group: Qair, category: developer, match: "\\bqair\\b"}
+  - {group: Goldbeck Solar, category: developer, match: "goldbeck"}
+  - {group: Belectric, category: developer, match: "belectric"}
+  - {group: Wirsol, category: developer, match: "wirsol"}
+  - {group: ILOS, category: developer, match: "\\bilos\\b"}
+  - {group: solarcomplex, category: developer, match: "solarcomplex"}
+  - {group: MaxSolar, category: developer, match: "max ?solar"}
+  - {group: Sunfarming, category: developer, match: "sunfarming"}
+  - {group: VISPIRON, category: developer, match: "vispiron"}
+  - {group: Lightsource bp, category: developer, match: "lightsource"}
+  - {group: ib vogt, category: developer, match: "ib vogt"}
+  - {group: NaGa Solar, category: developer, match: "naga solar"}
+  - {group: greentech, category: developer, match: "^greentech"}
+  - {group: Enertek, category: developer, match: "^enertek"}
+  - {group: Innosun, category: developer, match: "^innosun"}
+  - {group: Suntec, category: developer, match: "^suntec"}
+  - {group: OneSolar, category: developer, match: "onesolar"}
+  - {group: feld.energy, category: developer, match: "feld\\.energy"}
+  - {group: Voltgrün, category: developer, match: "voltgrün"}
+  - {group: nahKRAFT, category: developer, match: "nahkraft"}
+  - {group: EDF Renewables, category: developer, match: "\\bedf\\b"}
+  - {group: Sybac Solar, category: developer, match: "sybac"}
+  - {group: Friesen Elektra, category: developer, match: "friesen elektra"}
+  - {group: FIMA, category: developer, match: "^fima\\b"}
+  - {group: Solarkraftwerk Südeifel, category: developer, match: "solarkraftwerk südeifel"}
+  - {group: SF Energy Invest, category: developer, match: "^sf energy invest"}
+  - {group: Heimatstrom, category: developer, match: "^heimatstrom"}
+  - {group: Sonnenwerk, category: developer, match: "^sonnenwerk"}
+  - {group: Sonnenenergie Osterhof, category: developer, match: "sonnenenergie osterhof"}
+  - {group: BLG Projekt, category: developer, match: "^blg proje"}
+
   # --- Utilities (utility) and Stadtwerke (municipal) ---
   # enercity is Hannover's municipal utility, so it counts as municipal.
   - {group: EnBW, category: utility, match: "\\benbw\\b"}
@@ -131,6 +172,12 @@ groups:
   - {group: Trave Erneuerbare (Stadtwerke Lübeck), category: municipal, match: "^trave erneuerbare"}
   - {group: EAM, category: municipal, match: "^eam natur"}
   - {group: HessenEnergie, category: municipal, match: "^hessenenergie"}
+  - {group: Bayernwerk (E.ON), category: utility, match: "bayernwerk"}
+  - {group: Elektrizitätswerke Schönau, category: utility, match: "elektrizitätswerke schönau|\\bews\\b"}
+  - {group: MIBRAG, category: utility, match: "\\bmibrag\\b"}
+  - {group: TEAG, category: municipal, match: "\\bteag\\b"}
+  - {group: GSW Kamen, category: municipal, match: "^gsw netz"}
+  - {group: Überlandwerk Rhön, category: municipal, match: "^üwr\\b|überlandwerk rhön"}
   - {group: SWM (Stadtwerke München), category: municipal, match: "stadtwerke münchen|\\bswm\\b"}
   - {group: Stadtwerke (other), category: municipal, bucket: true, match: "stadtwerk|gemeindewerk|stadtwerke|energieversorgung|\\bswb\\b|kommunal|versorgungsbetriebe"}
 

@@ -154,3 +154,44 @@ sources:
     technology: hydro
     details:
       hydro_type: ArtDerWasserkraftanlage
+
+# Unit details (contract v1.7 draft): internal station 2 file
+# data/extract/unit_details.parquet for auction analysis; never published.
+unit_details:
+  min_rows: 30000
+  # Which units: all onshore wind; solar that is not on a building or a
+  # balcony unit, or ≥ 100 kW; storage ≥ 100 kW (co-location).
+  solar_min_kw: 100
+  storage_min_kw: 100
+  common:
+    location_id: LokationMaStRNummer
+    permit_id: GenMastrNummer
+  solar:
+    kind: ArtDerSolaranlage
+    orientation: Hauptausrichtung
+    tracker_value: nachgeführt
+    area_ha: GroesseDerInAnspruchGenommenenFlaecheInHektar
+    land_before: UeberwiegendeNutzungsartDerFlaecheVorErrichtung
+    features: ZusaetzlicheMerkmaleDerFlaecheUndDerAktuellenFlaechennutzung  # catalogue list
+    storage_same_site: SpeicherAmGleichenOrt   # 0/1
+    high_voltage: AnschlussAnHoechstOderHochSpannung  # 0/1
+    park_name: NameDesSolarparks
+  eeg:
+    files: [AnlagenEegSolar_*.xml, AnlagenEegWind.xml]
+    records: [AnlageEegSolar, AnlageEegWind]
+    id: EegMaStRNummer
+    award_no: Zuschlagsnummer
+    award_kw: ZugeordneteGebotsmenge
+    yield_ratio: VerhaeltnisErtragsschaetzungReferenzertrag   # wind, %
+  permits:
+    files: EinheitenGenehmigung.xml
+    record: EinheitGenehmigung
+    id: GenMastrNummer
+    date: Datum
+    kind: Art
+  grid:
+    files: Netzanschlusspunkte_*.xml
+    record: Netzanschlusspunkt
+    location_id: LokationMaStRNummer
+    voltage: Spannungsebene
+    capacity_kw: Nettoengpassleistung
