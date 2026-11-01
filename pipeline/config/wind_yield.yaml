@@ -1,0 +1,50 @@
+# Estimated yield of awarded wind turbines (contract v1.6 draft).
+#
+# Wind: DWD 200 m grid of mean annual wind speed (1981–2000) at 80 and 100 m
+# and the Weibull shape parameter at 80 m. CC BY 4.0, "Deutscher Wetterdienst".
+dwd:
+  base_url: https://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/wind_parameters/resol_200x200/
+  files:
+    v100: wind_wdat_geo_100m_BRD_200m.asc.zip   # mean speed, 0.1 m/s
+    v80: wind_wdat_geo_80m_BRD_200m.asc.zip     # mean speed, 0.1 m/s
+    k80: weibull_kdat_geo_80m_BRD_200m.asc.zip  # Weibull k, 1/1000
+  crs: "EPSG:31467"  # Gauss-Krüger zone 3
+
+# Generic power curve from rated power and rotor diameter.
+power_curve:
+  air_density: 1.225   # kg/m³
+  power_coefficient: 0.44
+  cut_in_ms: 3.0
+  cut_out_ms: 25.0
+shear_exponent_range: [0.10, 0.35]  # from the 80 m and 100 m layers, extrapolated to hub height
+losses: 0.12  # wake, availability, electrical: estimated net = gross × (1 − losses)
+
+# Turbines outside these limits are treated as data errors and left out.
+plausible:
+  gross_full_load_hours: [800, 6000]
+  specific_power_w_m2: [120, 700]
+
+# EEG reference site (Anlage 2): 6.45 m/s at 100 m, logarithmic profile with
+# roughness length 0.1 m, Rayleigh distribution (Weibull k = 2).
+reference_site:
+  speed_ms: 6.45
+  height_m: 100
+  roughness_m: 0.1
+  weibull_k: 2.0
+
+# Correction factor (Korrekturfaktor) by quality factor (Gütefaktor, %), § 36h EEG.
+# Linear between points; below the lowest point and above the highest the end
+# values apply. Which table applies follows the year of the bid date.
+correction_tables:
+  eeg2017:  # bid dates up to 2020
+    from_year: 2017
+    points: {70: 1.29, 80: 1.16, 90: 1.07, 100: 1.00, 110: 0.94, 120: 0.89, 130: 0.85, 140: 0.81, 150: 0.79}
+  eeg2021:  # bid dates 2021–2022
+    from_year: 2021
+    points: {60: 1.35, 70: 1.29, 80: 1.16, 90: 1.07, 100: 1.00, 110: 0.94, 120: 0.89, 130: 0.85, 140: 0.81, 150: 0.79}
+  eeg2023:  # bid dates from 2023
+    from_year: 2023
+    points: {50: 1.55, 60: 1.42, 70: 1.29, 80: 1.16, 90: 1.07, 100: 1.00, 110: 0.94, 120: 0.89, 130: 0.85, 140: 0.81, 150: 0.79}
+    # The 50 % step only applies in the southern region; approximated by state.
+    low_step_states: [Baden-Württemberg, Bayern, Saarland]
+    floor_elsewhere: 60
