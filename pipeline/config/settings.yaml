@@ -57,18 +57,47 @@ monitor:
   point_min_kw: 1000        # plants on the animated map
   repowering_age_years: 20  # onshore turbines older than this count as repowering candidates
 
-# Onshore wind auctions (contract v1.5 draft): finished BNetzA rounds, in
-# order. Add each new round once its awards are published (4 a year). The id
-# is the last part of the round page URL.
+# Onshore wind auctions (contracts v1.5/v1.6): finished BNetzA rounds, in
+# order. Add each new round once its awards are published (4 a year). `path`
+# is the part of the round page URL after `BeendeteAusschreibungen/`.
 auctions:
+  # Rounds before May 2019 list old register numbers (A…) that cannot be linked
+  # to MaStR, so they are left out.
   onshore_rounds:
-    - {id: GT1022025, year: 2025}
-    - {id: GT1052025, year: 2025}
-    - {id: GT1082025, year: 2025}
-    - {id: GT1112025, year: 2025}
-    - {id: GT01022026, year: 2026}
-    - {id: GT01052026, year: 2026}
-    - {id: GT03082026, year: 2026}
+    - {id: Gebotstermin_01_05_2019, path: 2019/Gebotstermin_01_05_2019/Gebotstermin_01_05_19_node.html}  # 01.05.2019
+    - {id: Gebotstermin_01_08_2019, path: 2019/Gebotstermin_01_08_2019/Gebotstermin_01_08_19_node.html}  # 01.08.2019
+    - {id: Gebotstermin_01_09_2019, path: 2019/Gebotstermin_01_09_2019/Gebotstermin_01_09_19_node.html}  # 01.09.2019
+    - {id: Gebotstermin_01_10_2019, path: 2019/Gebotstermin_01_10_2019/Gebotstermin_01_10_19_node.html}  # 01.10.2019
+    - {id: Gebotstermin_01_12_2019, path: 2019/Gebotstermin_01_12_2019/Gebotstermin_01_12_19_node.html}  # 01.12.2019
+    - {id: Gebotstermin_01_02_2020, path: 2020/Gebotstermin_01_02_2020/Gebotstermin_01_02_20_node.html}  # 01.02.2020
+    - {id: Gebotstermin_01_03_2020, path: 2020/Gebotstermin_01_03_2020/Gebotstermin_01_03_20_node.html}  # 01.03.2020
+    - {id: Gebotstermin_01_06_2020, path: 2020/Gebotstermin_01_06_2020/Gebotstermin_01_06_20_node.html}  # 01.06.2020
+    - {id: Gebotstermin_01_07_2020, path: 2020/Gebotstermin_01_07_2020/Gebotstermin_01_07_20_node.html}  # 01.07.2020
+    - {id: Gebotstermin_01_09_2020, path: 2020/Gebotstermin_01_09_2020/Gebotstermin_01_09_20_node.html}  # 01.09.2020
+    - {id: Gebotstermin_01_10_2020, path: 2020/Gebotstermin_01_10_2020/Gebotstermin_01_10_20_node.html}  # 01.10.2020
+    - {id: Gebotstermin_01_12_2020, path: 2020/Gebotstermin_01_12_2020/Gebotstermin_01_12_20_node.html}  # 01.12.2020
+    - {id: Gebotstermin_01_02_2021, path: 2021/Gebotstermin_01_02_2021/Gebotstermin_01_02_21_node.html}  # 01.02.2021
+    - {id: Gebotstermin_01_05_2021, path: 2021/Gebotstermin_01_05_2021/Gebotstermin_01_05_21_node.html}  # 01.05.2021
+    - {id: Gebotstermin_01_09_2021, path: 2021/Gebotstermin_01_09_2021/Gebotstermin_01_09_21_node.html}  # 01.09.2021
+    - {id: Gebotstermin01022022, path: 2022/Gebotstermin01022022/start.html}  # 01.02.2022
+    - {id: Gebotstermin01052022, path: 2022/Gebotstermin01052022/start.html}  # 01.05.2022
+    - {id: Gebotstermin010922, path: 2022/Gebotstermin010922/start.html}  # 01.09.2022
+    - {id: Gebotstermin01122022, path: 2022/Gebotstermin01122022/start.html}  # 01.12.2022
+    - {id: Gebotstermin1022023, path: 2023/Gebotstermin1022023/start.html}  # 01.02.2023
+    - {id: Gebotstermin1052023, path: 2023/Gebotstermin1052023/start.html}  # 01.05.2023
+    - {id: Gebotstermin1082023, path: 2023/Gebotstermin1082023/start.html}  # 01.08.2023
+    - {id: Gebotstermin1112023, path: 2023/Gebotstermin1112023/start.html}  # 01.11.2023
+    - {id: Gt1022024, path: 2024/Gt1022024/start.html}  # 01.02.2024
+    - {id: GT1052024, path: 2024/GT1052024/start.html}  # 01.05.2024
+    - {id: GT1082024, path: 2024/GT1082024/start.html}  # 01.08.2024
+    - {id: GT1112024, path: 2024/GT1112024/start.html}  # 01.11.2024
+    - {id: GT1022025, path: 2025/GT1022025/start.html}  # 01.02.2025
+    - {id: GT1052025, path: 2025/GT1052025/start.html}  # 01.05.2025
+    - {id: GT1082025, path: 2025/GT1082025/start.html}  # 01.08.2025
+    - {id: GT1112025, path: 2025/GT1112025/start.html}  # 01.11.2025
+    - {id: GT01022026, path: 2026/GT01022026/start.html}  # 01.02.2026
+    - {id: GT01052026, path: 2026/GT01052026/start.html}  # 01.05.2026
+    - {id: GT03082026, path: 2026/GT03082026/start.html}  # 01.08.2026
 
 # Data hub (contract v1.4): SMARD market data, CC BY 4.0,
 # attribution "Bundesnetzagentur | SMARD.de". Values are MWh per quarter hour.

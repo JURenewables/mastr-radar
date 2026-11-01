@@ -403,6 +403,55 @@ add up; award rows match the rounds. Licence: see `docs/sources.md`.
 
 ---
 
+## v1.6 draft: auction yield, five bidder types, winners over time (waiting for approval)
+
+Changes the v1.5 auction files; nothing else. Until approved, the files exist
+only on the branch preview and `contract_version` stays `"1.5"`.
+
+**Rounds:** every onshore round since May 2019 (34 so far), listed in
+`settings.yaml → auctions.onshore_rounds` with their page `path`. Earlier
+rounds list old register numbers (A…) that cannot be linked to MaStR. Lists
+without a kW column take kW from the site text or, failing that, from the
+linked MaStR turbines (`kw_source: "mastr"`).
+
+**Bidder types (five):** `developer` (Developers & IPPs, incl. Alterric),
+`utility` (RWE, EnBW, Vattenfall, Uniper, E.ON, …), `municipal` (Stadtwerke
+and their associations, incl. enercity, Trianel), `citizen`, `unattributed`.
+
+**Yield estimate (A1 also fetches the DWD wind grid):** for every linked
+turbine with coordinates, hub height, rotor and rating: DWD 200 m grid mean
+wind at 80/100 m and Weibull k at 80 m → speed at hub height (shear from the
+two layers) → generic power curve → gross yield; net full-load hours =
+gross × (1 − 12 %); quality factor = gross yield / yield of the same turbine
+at the EEG reference site; correction factor from the EEG table of the bid
+year. Settings: `pipeline/config/wind_yield.yaml`.
+
+**`auctions/onshore.json` changes**
+
+| Key | Content |
+|---|---|
+| `rounds[]` | adds `kw_source`, `turbines_old_id`, `yield_share`, `full_load_hours_avg`, `quality_pct_avg`, `correction_factor_avg`, `received_ct_est` (= `avg_ct` × correction factor); `min_ct`, `max_ct`, `ceiling_ct`, `published`, `awarded_kw` may be null for older pages |
+| `merit_order[round]` | `[MW, full-load hours, quality %, category index]` per award, best sites first |
+| `winners_by_year[year \| "all"][]` | top 20 incl. buckets (`"Not attributed"`, `"Citizen & local (all)"`, `"Other Stadtwerke"`) with `bucket: true` |
+| `race` | `years`, `groups` (top 15 groups + the three buckets), `categories`, `kw[group][year]` |
+| `kw_by_category_year[category][year]` | awarded kW |
+| `operating_from_awards[]` | MW of awarded turbines now in operation, by group |
+| `fleet` | all onshore wind in operation by operator group (MaStR operator names): `total_mw`, `groups[]`, `mw_by_category` |
+| `drivers[category]` | `awarded_mw`, `awards`, `distinct_bidders`, `median_award_mw`, `quality_pct_avg`, `full_load_hours_avg`, `median_months_to_operation`, `realised_share` (awards before `drivers_realised_cutoff`) |
+| `model` | wind source, losses, power coefficient, reference site, correction tables |
+
+**`auctions/awards.json`** adds per award: `rank_group`, `kw_source`,
+`kw_in_mastr`, `kw_operating`, `months_to_operation`, `hub_height_m`,
+`rotor_diameter_m`, `wind_ms`, `full_load_hours`, `quality_pct`,
+`correction_factor`, `received_ct_est`, `lat`/`lon` (centre of its turbines,
+2 decimals; null unless the bidder is a company, D4).
+
+**Check:** as v1.5, plus ≥ 90 % of turbines with a MaStR id found; yield
+estimate for ≥ 80 % of each round's capacity; average full-load hours
+between 1,500 and 4,500; no location for a bidder without a company name.
+
+---
+
 ## Version history
 
 | Version | Date | Change |
