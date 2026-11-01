@@ -91,7 +91,7 @@ def test_incomplete_day_is_skipped_and_others_written(tmp_path, monkeypatch):
     assert result["written"] == 1 and result["skipped"] == ["2026-10-28"]
     index = json.loads((tmp_path / "days" / "index.json").read_text())
     assert index["dates"] == ["2026-10-27"]
-    assert index["contract_version"] == "1.5"
+    assert index["contract_version"] == "1.6"
     hub.check_days(tmp_path, settings)
 
 

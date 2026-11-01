@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: Phase 8 live (turbine makers WP49–51, auctions WP44–45, contract v1.5). Next: WP45b better auction attribution; WP41 grid map waits for OSM licence OK and your ENTSO-E / netztransparenz keys**
+**You are here: contract v1.6 approved and live (Phase 8 incl. WP52–61). Next: WP45b better attribution; WP41 grid map waits for OSM licence OK and your ENTSO-E / netztransparenz keys**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -223,7 +223,35 @@ real stress signals (line loading itself is not published).
 - [x] **WP45. Rounds overview:** published prices per round (lowest, average,
   highest vs ceiling), top winning groups per year, bidder types, turbine
   makers in the awards.
-- [ ] **WP45b. Better attribution:** map project companies to their parent
+- [x] **WP52. Older rounds:** all 34 onshore rounds since May 2019 (earlier
+  lists use unlinkable register numbers).
+- [x] **WP53. Yield estimate:** DWD wind grid + MaStR turbine data →
+  full-load hours, Gütefaktor, Korrekturfaktor, received value; merit order
+  per round.
+- [x] **WP54. Five bidder types:** utilities and Stadtwerke split, Alterric as
+  IPP, enercity as Stadtwerk; winners with "not attributed" and "citizen"
+  bars, selectable by year and type.
+- [x] **WP55. Winners race and share of the cake** since 2019 (companies and
+  bidder types).
+- [x] **WP56. Players:** operating capacity by group (from auctions and whole
+  fleet), data by bidder type, editorial drivers analysis.
+- [x] **WP57. Reviewed attributions and company cross-check:**
+  `config/auction_reviewed.yaml` (hand assignments with sources, company-
+  reported totals); comparison table on the site. UGE → UKA.
+- [x] **WP58. Office attribution:** station 2 writes `operators.parquet`
+  (organisations with office address, internal); unknown bidders grouped by
+  the office of their operator company. "Not attributed" 45 % → 30 %;
+  13 of 20 company-reported totals match within ~4 %.
+- [x] **WP59. Site split:** start page = energy-transition monitor and maps;
+  new `/wind` page = turbines, makers, models, repowering and all auction
+  sections.
+- [x] **WP60. Auction map:** awarded projects per round (or all), by bidder
+  type and company, with details on tap.
+- [x] **WP61. Wind page as a storyline:** five chapters (machines, price,
+  where, who wins, why) with generated takeaways and caveats per section;
+  animated award map (round by round, no company colours); company map
+  coloured by year with profile and takeaways; turbine makers per company.
+- [ ] **WP45b. Better attribution (continue):** map project companies to their parent
   groups (e.g. from MaStR operator data or a reviewed list) to shrink the
   "not attributed" share. Older rounds (2017–2024).
 - [ ] **WP46. Winners map and time to going online.**

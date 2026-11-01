@@ -36,6 +36,16 @@ operators:
   name: Firmenname
   person_type: Personenart
   person_value_prefix: Natürliche Person
+  # Company register (contract v1.6 draft): addresses of organisations, used
+  # only to group auction bidders by office; never published.
+  register:
+    street: Strasse
+    house_number: Hausnummer
+    postcode: Postleitzahl
+    city: Ort
+    register_court: Registergericht   # catalogue value
+    register_number: Registernummer
+  register_min_rows: 100000
 
 # Columns shared by all unit files.
 common:

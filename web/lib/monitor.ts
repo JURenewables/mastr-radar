@@ -88,32 +88,105 @@ export interface WindIndustry {
   >;
   unattributed_share: number;
 }
-export type AuctionCategory = "developer" | "utility" | "citizen" | "unattributed";
+export type AuctionCategory = "developer" | "utility" | "municipal" | "citizen" | "unattributed";
 export interface AuctionRound {
   id: string;
   bid_date: string;
-  published: string;
-  ceiling_ct: number;
+  published: string | null;
+  ceiling_ct: number | null;
   volume_kw: number | null;
-  min_ct: number;
-  max_ct: number;
+  min_ct: number | null;
+  max_ct: number | null;
   avg_ct: number;
-  awards: number;
-  awarded_kw: number;
+  awards: number | null;
+  awarded_kw: number | null;
   list_kw: number;
   list_awards: number;
+  kw_source: "list" | "mastr";
   kw_by_category: Record<AuctionCategory, number>;
   kw_by_maker: Record<string, number>;
   turbines: number;
+  turbines_old_id: number;
   turbines_in_mastr: number;
   turbines_operating: number;
+  yield_share: number;
+  full_load_hours_avg: number | null;
+  quality_pct_avg: number | null;
+  correction_factor_avg: number | null;
+  received_ct_est: number | null;
+}
+export interface AuctionWinner {
+  group: string;
+  category: AuctionCategory;
+  kw: number;
+  share: number;
+  awards: number;
+  rounds: number;
+  bucket: boolean;
+}
+export interface AuctionDrivers {
+  awarded_mw: number;
+  awards: number;
+  median_award_mw: number | null;
+  full_load_hours_avg: number | null;
+  quality_pct_avg: number | null;
+  realised_share: number | null;
+  median_months_to_operation: number | null;
+  distinct_bidders: number;
+}
+export interface CompanyProfile {
+  group: string;
+  category: AuctionCategory;
+  kw_by_year: number[];
+  awards: number;
+  rounds: number;
+  first_bid: string;
+  last_bid: string;
+  median_award_mw: number;
+  kw_by_state: Record<string, number>;
+  states: number;
+  kw_by_maker: Record<string, number>;
+  full_load_hours_avg: number | null;
+  quality_pct_avg: number | null;
+  realised_share: number | null;
+  attribution_kw: Record<"reviewed" | "name" | "office", number>;
 }
 export interface Auctions {
   source: string;
   categories: Record<AuctionCategory, string>;
   rounds: AuctionRound[];
-  winners_by_year: Record<string, { group: string; category: AuctionCategory; kw: number; share: number; awards: number; rounds: number }[]>;
+  /** Per round: [MW, full-load hours, quality %, category index], best sites first. */
+  merit_order: Record<string, [number, number, number, number][]>;
+  winners_by_year: Record<string, AuctionWinner[]>;
+  race: { years: string[]; groups: string[]; categories: AuctionCategory[]; kw: Record<string, number[]> };
+  kw_by_category_year: Record<AuctionCategory, number[]>;
+  operating_from_awards: { group: string; category: AuctionCategory; mw: number }[];
+  fleet: {
+    total_mw: number;
+    groups: { group: string; category: AuctionCategory; mw: number; share: number; bucket: boolean }[];
+    mw_by_category: Record<AuctionCategory, number>;
+  };
+  drivers: Record<AuctionCategory, AuctionDrivers>;
+  drivers_realised_cutoff: string;
+  company_reported: {
+    group: string;
+    round: string;
+    bid_date: string;
+    reported_mw: number;
+    qualifier: "exact" | "about" | "over";
+    ours_mw: number;
+    note: string | null;
+    source: string;
+  }[];
+  reviewed_awards: number;
+  attribution_kw: Record<"reviewed" | "name" | "office" | "none", number>;
+  /** Award locations: per round flat arrays, 6 per award (lon×100, lat×100, kW/100, category, group index, full-load hours). */
+  points: { groups: string[]; rounds: Record<string, number[]> };
+  kw_by_state_year: Record<string, number[]>;
+  company_profiles: CompanyProfile[];
+  median_award_mw: number;
   unattributed_share: number;
+  model: { wind: string; losses: number; power_coefficient: number };
 }
 export interface MonitorData {
   auctions: Auctions | null;

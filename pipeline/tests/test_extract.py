@@ -319,3 +319,35 @@ def test_check_catches_impossible_dates(full):
     bad = table.set_column(idx, "commissioning_date", pa.array([date(1970, 1, 1)] * table.num_rows))
     with pytest.raises(ex.UnitsCheckError, match=r"solar: commissioning dates before 1983-01-01"):
         ex.check_units(bad, export_date=EXPORT_DATE, min_rows={})
+
+
+def test_operator_register(tmp_path):
+    """The company register keeps organisations with their office, never persons."""
+    from mastr_radar import extract as ex
+
+    zip_path = tmp_path / "export.zip"
+    actors = (
+        "<Marktakteure>"
+        "<Marktakteur><MastrNummer>ABR1</MastrNummer><Personenart>517</Personenart>"
+        "<Firmenname>Windpark Test GmbH</Firmenname><Strasse>Hauptstr.</Strasse>"
+        "<Hausnummer>1</Hausnummer><Postleitzahl>12345</Postleitzahl><Ort>Ort</Ort>"
+        "<Registergericht>900</Registergericht><Registernummer>HRA 1</Registernummer></Marktakteur>"
+        "<Marktakteur><MastrNummer>ABR2</MastrNummer><Personenart>518</Personenart>"
+        "<Strasse>Privatweg</Strasse></Marktakteur>"
+        "</Marktakteure>"
+    )
+    catalog = (
+        "<Katalogwerte><Katalogwert><Id>517</Id><Wert>Organisation</Wert></Katalogwert>"
+        "<Katalogwert><Id>518</Id><Wert>Natürliche Person</Wert></Katalogwert>"
+        "<Katalogwert><Id>900</Id><Wert>Amtsgericht Teststadt</Wert></Katalogwert></Katalogwerte>"
+    )
+    with zipfile.ZipFile(zip_path, "w") as zf:
+        zf.writestr("Marktakteure_1.xml", actors.encode("utf-16"))
+        zf.writestr("Katalogwerte.xml", catalog.encode("utf-16"))
+    out = tmp_path / "operators.parquet"
+    assert ex.write_operator_register(zip_path, out) == 1
+    row = pq.read_table(out).to_pylist()[0]
+    assert row["name"] == "Windpark Test GmbH" and row["register_court"] == "Amtsgericht Teststadt"
+    ex.check_operator_register(out, 1)
+    with pytest.raises(ex.UnitsCheckError):
+        ex.check_operator_register(out, 5)

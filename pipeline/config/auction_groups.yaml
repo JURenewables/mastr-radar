@@ -1,4 +1,4 @@
-# Auction bidders → company groups (contract v1.5 draft).
+# Auction bidders → company groups (contract v1.6 draft).
 #
 # Award lists name the bidding company, often a project company ("wpd Windpark
 # Nr. 440 GmbH & Co. KG"). A bidder belongs to a group when its name matches the
@@ -12,18 +12,26 @@
 #
 # Categories:
 #   developer: independent developers and power producers (IPPs)
-#   utility:   energy utilities, municipal utilities (Stadtwerke) and their joint ventures
+#   utility:   large and regional energy utilities (RWE, EnBW, Vattenfall, Uniper, E.ON, …)
+#   municipal: municipal utilities (Stadtwerke) and their associations (e.g. Trianel, Thüga)
 #   citizen:   citizen wind farms, cooperatives, farmers' and local companies
 categories:
   developer: Developers & IPPs
-  utility: Utilities & Stadtwerke
+  utility: Utilities
+  municipal: Stadtwerke & municipal
   citizen: Citizen & local
   unattributed: Not attributed
 
 groups:
   # --- Developers & IPPs ---
+  # Alterric (EWE / Aloys Wobben Stiftung joint venture) develops and finances
+  # projects like an IPP, so it counts here.
+  - {group: Alterric, category: developer, match: "alterric"}
   - {group: wpd, category: developer, match: "\\bwpd\\b"}
-  - {group: UKA, category: developer, match: "\\buka\\b|umweltgerechte kraftanlagen"}
+  # UKA bids through project companies named "UGE … GmbH & Co. KG Umweltgerechte
+  # Energie" (registered in Lohmen / Amtsgericht Rostock like UKA; UKA is the
+  # applicant or builder at UGE award sites such as Papenburg and Schäcksdorf).
+  - {group: UKA, category: developer, match: "\\buka\\b|umweltgerechte kraftanlagen|\\buge\\b|umweltgerechte energie"}
   - {group: ABO Energy, category: developer, match: "\\babo (energy|wind)\\b"}
   - {group: JUWI, category: developer, match: "\\bjuwi\\b"}
   - {group: Prowind, category: developer, match: "\\bprowind\\b"}
@@ -33,7 +41,6 @@ groups:
   - {group: PNE, category: developer, match: "\\bpne\\b|\\bwkn\\b"}
   - {group: ENERTRAG, category: developer, match: "enertrag"}
   - {group: NOTUS energy, category: developer, match: "\\bnotus\\b"}
-  - {group: UGE, category: developer, match: "\\buge\\b|umweltgerechte energie"}
   - {group: Qualitas Energy, category: developer, match: "\\bqe (windpark|niemegk|holding)|qualitas"}
   - {group: NeXtWind, category: developer, match: "nextwind"}
   - {group: ENOVA, category: developer, match: "\\benova\\b"}
@@ -82,42 +89,50 @@ groups:
   - {group: Encavis, category: developer, match: "encavis"}
   - {group: Iberdrola, category: developer, match: "iberdrola"}
   - {group: TotalEnergies, category: developer, match: "totalenergies|quadra energy"}
+  - {group: WestfalenWIND, category: developer, match: "westfalenwind"}
+  - {group: SAB WindTeam, category: developer, match: "^sab (projektentwicklung|windteam)"}
+  - {group: GETEC, category: developer, match: "^getec\\b"}
+  - {group: Solventus, category: developer, match: "^solventus\\b"}
+  - {group: Looft-Schmidt, category: developer, match: "looft-schmidt"}
   - {group: Windkraft Simonsfeld, category: developer, match: "simonsfeld"}
 
-  # --- Utilities & Stadtwerke ---
+  # --- Utilities (utility) and Stadtwerke (municipal) ---
+  # enercity is Hannover's municipal utility, so it counts as municipal.
   - {group: EnBW, category: utility, match: "\\benbw\\b"}
   - {group: RWE, category: utility, match: "\\brwe\\b"}
   - {group: Vattenfall, category: utility, match: "vattenfall"}
-  - {group: Alterric (EWE), category: utility, match: "alterric"}
   - {group: EWE, category: utility, match: "\\bewe\\b"}
-  - {group: enercity, category: utility, match: "enercity"}
-  - {group: Trianel, category: utility, match: "trianel"}
-  - {group: evm, category: utility, match: "^evm\\b"}
-  - {group: e-regio, category: utility, match: "^e-regio\\b"}
-  - {group: STAWAG, category: utility, match: "stawag"}
-  - {group: Gelsenwasser, category: utility, match: "gelsenwasser"}
-  - {group: HochsauerlandEnergie, category: utility, match: "hochsauerlandenergie"}
-  - {group: Thüga, category: utility, match: "thüga"}
-  - {group: Mainova, category: utility, match: "mainova"}
-  - {group: N-ERGIE, category: utility, match: "n-ergie"}
-  - {group: MVV, category: utility, match: "\\bmvv\\b"}
+  - {group: enercity, category: municipal, match: "enercity"}
+  - {group: Trianel, category: municipal, match: "trianel"}
+  - {group: evm, category: municipal, match: "^evm\\b"}
+  - {group: e-regio, category: municipal, match: "^e-regio\\b"}
+  - {group: STAWAG, category: municipal, match: "stawag"}
+  - {group: Gelsenwasser, category: municipal, match: "gelsenwasser"}
+  - {group: HochsauerlandEnergie, category: municipal, match: "hochsauerlandenergie"}
+  - {group: Thüga, category: municipal, match: "thüga"}
+  - {group: Mainova, category: municipal, match: "mainova"}
+  - {group: N-ERGIE, category: municipal, match: "n-ergie"}
+  - {group: MVV, category: municipal, match: "\\bmvv\\b"}
   - {group: LEAG, category: utility, match: "\\bleag\\b"}
   - {group: Uniper, category: utility, match: "uniper"}
   - {group: Iqony (STEAG), category: utility, match: "iqony|\\bsteag\\b"}
   - {group: ENGIE, category: utility, match: "\\bengie\\b"}
   - {group: E.ON, category: utility, match: "\\be\\.on\\b"}
   - {group: enviaM, category: utility, match: "enviam"}
-  - {group: badenova, category: utility, match: "badenova"}
+  - {group: badenova, category: municipal, match: "badenova"}
   - {group: Süwag, category: utility, match: "süwag"}
-  - {group: ENTEGA, category: utility, match: "entega"}
-  - {group: WEMAG, category: utility, match: "wemag"}
-  - {group: SachsenEnergie, category: utility, match: "sachsenenergie"}
-  - {group: Pfalzwerke, category: utility, match: "pfalzwerke"}
+  - {group: ENTEGA, category: municipal, match: "entega"}
+  - {group: WEMAG, category: municipal, match: "wemag"}
+  - {group: SachsenEnergie, category: municipal, match: "sachsenenergie"}
+  - {group: Pfalzwerke, category: municipal, match: "pfalzwerke"}
   - {group: Lechwerke, category: utility, match: "lechwerke"}
   - {group: Naturstrom, category: utility, match: "naturstrom"}
   - {group: Green Planet Energy, category: utility, match: "green planet energy|greenpeace energy"}
-  - {group: SWM (Stadtwerke München), category: utility, match: "stadtwerke münchen|\\bswm\\b"}
-  - {group: Stadtwerke (other), category: utility, bucket: true, match: "stadtwerk|gemeindewerk|stadtwerke|energieversorgung|\\bswb\\b|kommunal|versorgungsbetriebe"}
+  - {group: Trave Erneuerbare (Stadtwerke Lübeck), category: municipal, match: "^trave erneuerbare"}
+  - {group: EAM, category: municipal, match: "^eam natur"}
+  - {group: HessenEnergie, category: municipal, match: "^hessenenergie"}
+  - {group: SWM (Stadtwerke München), category: municipal, match: "stadtwerke münchen|\\bswm\\b"}
+  - {group: Stadtwerke (other), category: municipal, bucket: true, match: "stadtwerk|gemeindewerk|stadtwerke|energieversorgung|\\bswb\\b|kommunal|versorgungsbetriebe"}
 
   # --- Citizen & local ---
   - {group: Citizen wind farms, category: citizen, bucket: true, match: "bürger|buerger"}

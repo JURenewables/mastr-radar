@@ -80,6 +80,20 @@ export default async function Home() {
 
         <Monitor asOf={manifest.as_of} />
 
+        <Link
+          href="/wind"
+          className="mb-4 block rounded-[20px] bg-surface p-6 transition-colors hover:bg-rule sm:p-8"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Wind &amp; auctions</p>
+          <p className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
+            Turbine makers, models and every onshore wind auction since 2019 →
+          </p>
+          <p className="mt-2 max-w-2xl text-ink-muted">
+            Who builds the turbines, who wins the auctions, at what price, on which sites, and why
+            developers keep beating utilities.
+          </p>
+        </Link>
+
         <section className="border-t border-rule py-12 sm:py-16">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Explore</p>
           <h2 className="mt-3 text-3xl sm:text-[2.6rem]">Dig into every unit</h2>

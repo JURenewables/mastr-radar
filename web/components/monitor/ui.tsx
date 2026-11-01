@@ -11,6 +11,8 @@ export function Section({
   note,
   asOf,
   source,
+  takeaways = [],
+  caveats = [],
   children,
 }: {
   id: string;
@@ -21,6 +23,8 @@ export function Section({
   asOf: string;
   /** Replaces the default MaStR source line. */
   source?: ReactNode;
+  takeaways?: ReactNode[];
+  caveats?: ReactNode[];
   children: ReactNode;
 }) {
   return (
@@ -29,6 +33,7 @@ export function Section({
       <h2 className="mt-3 max-w-3xl text-3xl leading-[1.08] sm:text-[2.6rem]">{title}</h2>
       {subtitle && <p className="mt-3 max-w-2xl text-ink-muted">{subtitle}</p>}
       <div className="mt-7">{children}</div>
+      <Takeaways points={takeaways} caveats={caveats} />
       <p className="mt-5 text-xs text-ink-muted">
         {note && <>{note} </>}
         {source ?? <>Source: Marktstammdatenregister, as of {asOf}.</>}
@@ -96,6 +101,49 @@ export function Loading({ height = 280 }: { height?: number }) {
       className="flex items-center justify-center rounded-[20px] bg-surface text-sm text-ink-muted"
     >
       Loading…
+    </div>
+  );
+}
+
+/** Key takeaways and caveats under a chart. */
+export function Takeaways({ points, caveats = [] }: { points: ReactNode[]; caveats?: ReactNode[] }) {
+  if (!points.length && !caveats.length) return null;
+  return (
+    <div className="mt-6 grid gap-3 sm:grid-cols-[3fr_2fr]">
+      {points.length > 0 && (
+        <div className="rounded-[20px] border border-rule p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Key takeaways</p>
+          <ul className="mt-2 space-y-2 text-sm">
+            {points.map((p, i) => (
+              <li key={i} className="flex gap-2">
+                <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {caveats.length > 0 && (
+        <div className="rounded-[20px] bg-surface p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-muted">Caveats</p>
+          <ul className="mt-2 space-y-2 text-sm text-ink-muted">
+            {caveats.map((c, i) => (
+              <li key={i}>{c}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Chapter opener in a storyline page. */
+export function Chapter({ id, n, title, children }: { id: string; n: number; title: string; children: ReactNode }) {
+  return (
+    <div id={id} className="scroll-mt-28 border-t-4 border-ink pt-10 pb-2 sm:pt-14">
+      <p className="figures text-sm font-bold text-accent">Chapter {n}</p>
+      <h2 className="mt-2 max-w-3xl text-4xl leading-[1.02] sm:text-6xl">{title}</h2>
+      <div className="mt-4 max-w-2xl text-lg text-ink-muted">{children}</div>
     </div>
   );
 }

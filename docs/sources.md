@@ -11,6 +11,7 @@ we access it. A source is only used once it appears in this file.
 | **Marktstammdatenregister** (Bundesnetzagentur) | Every generation and storage unit | DL-DE-BY-2.0 | © Bundesnetzagentur, DL-DE-BY-2.0, data processed | Daily bulk export, no account |
 | **BKG VG2500** | State and district boundaries | dl-de/by-2-0 | © GeoBasis-DE / BKG (2026) | Download, no account |
 | **BNetzA onshore wind auctions** (Ausschreibungen Wind an Land) | Award lists (.xlsx: bidder, award, kW, turbine register numbers) and published round results (volume, ceiling, lowest/average/highest award value) | .xlsx: Datenlizenz Deutschland – Namensnennung (per the BNetzA imprint, "falls nicht anders gekennzeichnet"); round figures are published facts, website text itself CC BY-ND 4.0 (not copied) | "Bundesnetzagentur, Ausschreibungen Wind an Land", data processed | Round pages and list downloads, no account (contract v1.5 draft) |
+| **DWD wind grid** (200 m, mean wind 1981–2000 at 10–100 m, Weibull parameters) | Wind at each awarded turbine for the yield estimate | CC BY 4.0 | "Deutscher Wetterdienst" | opendata.dwd.de, no account (contract v1.6 draft) |
 | **Fraunhofer ISE Energy-Charts** | Cross-check only (installed capacity) | Licence page not machine-readable (JS); not redistributed by us | Named on the methodology page | API, no account |
 
 ## Planned for Phase 7

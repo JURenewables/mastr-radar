@@ -157,14 +157,19 @@ data/                local working dir for downloads (git-ignored)
   `uv run ruff check . && uv run ruff format --check .`
 - Station 1: `uv run mastr-radar download` (newest export, resumable, then
   checked), `uv run mastr-radar check-download <zip>` (check only)
-- Station 2: `uv run mastr-radar extract` (newest zip → `data/extract/units.parquet`,
-  then checked; report in `extract_report.json`)
+- Station 2: `uv run mastr-radar extract` (newest zip → `data/extract/units.parquet`
+  and `operators.parquet` (internal company register), then checked; report in
+  `extract_report.json`); `uv run mastr-radar extract-operators` (register only)
 - Station 3: `uv run mastr-radar aggregate` (`units.parquet` → `web/public/data/`,
   then checked, then cross-checked against Energy-Charts: warning only,
   report in `data/reports/crosscheck.json`)
 - Hub (contract v1.4 draft): `uv run mastr-radar hub-fetch` (SMARD, cached in
   `data/hub/`), `uv run mastr-radar hub-build` (day files in
   `web/public/data/days/`, then checked). Sources and licences: `docs/sources.md`.
+- Pages: `/` energy-transition monitor, `/wind` wind & auctions, `/explore`.
+- Auctions: `uv run mastr-radar auctions-fetch` (BNetzA rounds + DWD wind grid,
+  cached in `data/auctions/`); hand-checked attributions and company-reported
+  totals in `pipeline/config/auction_reviewed.yaml`.
 - Open data: `/open-data` (people), `/catalog.json` and `/llms.txt` (machines,
   built from the manifest in `web/lib/catalog.ts`); CORS open on `/data/*`.
 - Web: `cd web && npm run dev` (local), `npm run lint`, `npm run build`.

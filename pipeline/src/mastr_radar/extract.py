@@ -190,6 +190,68 @@ def read_operators(
     return out
 
 
+OPERATOR_REGISTER_SCHEMA = pa.schema(
+    [
+        ("operator_id", pa.string()),
+        ("name", pa.string()),
+        ("street", pa.string()),
+        ("house_number", pa.string()),
+        ("postcode", pa.string()),
+        ("city", pa.string()),
+        ("register_court", pa.string()),
+        ("register_number", pa.string()),
+    ]
+)
+
+
+def write_operator_register(zip_path: Path, out_path: Path, cfg: dict | None = None) -> int:
+    """Station 2 (v1.6 draft): organisations from Marktakteure with their office
+    address and commercial register entry → operators.parquet. Natural persons
+    are left out entirely (D4). Returns the number of rows."""
+    cfg = cfg or load_columns_config()
+    oc = cfg["operators"]
+    reg = oc["register"]
+    rows = []
+    with zipfile.ZipFile(zip_path) as zf:
+        catalog = read_catalog(zf)
+        for r in iter_records(zf, oc["files"], oc["record"]):
+            kind = catalog.get(r.get(oc["person_type"]) or "", "")
+            if kind.startswith(oc["person_value_prefix"]) or not r.get(oc["name"]):
+                continue
+            court = r.get(reg["register_court"])
+            rows.append(
+                {
+                    "operator_id": r.get(oc["id"]),
+                    "name": _text(r.get(oc["name"])),
+                    "street": _text(r.get(reg["street"])),
+                    "house_number": _text(r.get(reg["house_number"])),
+                    "postcode": _text(r.get(reg["postcode"])),
+                    "city": _text(r.get(reg["city"])),
+                    "register_court": catalog.get(court or "", court),
+                    "register_number": _text(r.get(reg["register_number"])),
+                }
+            )
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    pq.write_table(
+        pa.Table.from_pylist(rows, OPERATOR_REGISTER_SCHEMA), out_path, compression="zstd"
+    )
+    return len(rows)
+
+
+def check_operator_register(path: Path, min_rows: int) -> None:
+    table = pq.read_table(path)
+    problems = []
+    if table.schema.remove_metadata() != OPERATOR_REGISTER_SCHEMA:
+        problems.append("operators.parquet: columns differ from the contract.")
+    if table.num_rows < min_rows:
+        problems.append(f"operators.parquet: {table.num_rows} rows, expected at least {min_rows}.")
+    ids = table.column("operator_id")
+    if ids.null_count or len(set(ids.to_pylist())) != table.num_rows:
+        problems.append("operators.parquet: operator ids missing or not unique.")
+    if problems:
+        raise UnitsCheckError("; ".join(problems))
+
+
 # --- Transforming one record -------------------------------------------------
 
 

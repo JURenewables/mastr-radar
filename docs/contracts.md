@@ -1,4 +1,4 @@
-# Station contracts — v1.5 (locked)
+# Station contracts — v1.6 (locked)
 
 These contracts define exactly what each station of the data chain outputs.
 They are **locked**: changing one is its own work package,
@@ -403,6 +403,83 @@ add up; award rows match the rounds. Licence: see `docs/sources.md`.
 
 ---
 
+## v1.6: auction yield, bidder types, office attribution, maps (approved 1 Nov 2026)
+
+Changes the v1.5 auction files and adds the internal station 2 company
+register. `contract_version` becomes `"1.6"`; the website still accepts older
+files.
+
+**Station 2 adds `data/extract/operators.parquet`** (internal, never
+published): every organisation in `Marktakteure` (natural persons left out,
+D4) with `operator_id`, `name`, `street`, `house_number`, `postcode`, `city`,
+`register_court` (decoded), `register_number`. Check: contract columns,
+≥ 100,000 rows, unique ids. Written by `mastr-radar extract` (or
+`extract-operators` on its own).
+
+**Office attribution:** an unknown bidder counts for a group when the
+operator company of its turbines (or the bidder itself) is registered at an
+office where every named company belongs to that group, or at least 2 do and
+make up ≥ 60 % of the named companies. Reviewed `addresses` take precedence;
+`office_exclusions` (with source) switch the rule off for single bidders.
+
+**Rounds:** every onshore round since May 2019 (34 so far), listed in
+`settings.yaml → auctions.onshore_rounds` with their page `path`. Earlier
+rounds list old register numbers (A…) that cannot be linked to MaStR. Lists
+without a kW column take kW from the site text or, failing that, from the
+linked MaStR turbines (`kw_source: "mastr"`).
+
+**Bidder types (five):** `developer` (Developers & IPPs, incl. Alterric),
+`utility` (RWE, EnBW, Vattenfall, Uniper, E.ON, …), `municipal` (Stadtwerke
+and their associations, incl. enercity, Trianel), `citizen`, `unattributed`.
+
+**Yield estimate (A1 also fetches the DWD wind grid):** for every linked
+turbine with coordinates, hub height, rotor and rating: DWD 200 m grid mean
+wind at 80/100 m and Weibull k at 80 m → speed at hub height (shear from the
+two layers) → generic power curve → gross yield; net full-load hours =
+gross × (1 − 12 %); quality factor = gross yield / yield of the same turbine
+at the EEG reference site; correction factor from the EEG table of the bid
+year. Settings: `pipeline/config/wind_yield.yaml`.
+
+**`auctions/onshore.json` changes**
+
+| Key | Content |
+|---|---|
+| `rounds[]` | adds `kw_source`, `turbines_old_id`, `yield_share`, `full_load_hours_avg`, `quality_pct_avg`, `correction_factor_avg`, `received_ct_est` (= `avg_ct` × correction factor); `min_ct`, `max_ct`, `ceiling_ct`, `published`, `awarded_kw` may be null for older pages |
+| `merit_order[round]` | `[MW, full-load hours, quality %, category index]` per award, best sites first |
+| `winners_by_year[year \| "all"][]` | top 20 incl. buckets (`"Not attributed"`, `"Citizen & local (all)"`, `"Other Stadtwerke"`) with `bucket: true` |
+| `race` | `years`, `groups` (top 15 groups + the three buckets), `categories`, `kw[group][year]` |
+| `kw_by_category_year[category][year]` | awarded kW |
+| `operating_from_awards[]` | MW of awarded turbines now in operation, by group |
+| `fleet` | all onshore wind in operation by operator group (MaStR operator names): `total_mw`, `groups[]`, `mw_by_category` |
+| `drivers[category]` | `awarded_mw`, `awards`, `distinct_bidders`, `median_award_mw`, `quality_pct_avg`, `full_load_hours_avg`, `median_months_to_operation`, `realised_share` (awards before `drivers_realised_cutoff`) |
+| `model` | wind source, losses, power coefficient, reference site, correction tables |
+| `company_reported[]` | company-announced totals per round next to ours: `group`, `round`, `bid_date`, `reported_mw`, `qualifier` (exact/about/over), `ours_mw`, `note`, `source` |
+| `reviewed_awards` | number of awards assigned by hand |
+| `attribution_kw` | awarded kW by method: `reviewed`, `name`, `office`, `none` |
+| `kw_by_state_year[state][year]` | awarded kW per state and year |
+| `company_profiles[]` | named groups with ≥ 50 MW: `kw_by_year`, `awards`, `rounds`, `first_bid`, `last_bid`, `median_award_mw`, `kw_by_state` (top 6), `states`, `kw_by_maker`, `full_load_hours_avg`, `quality_pct_avg`, `realised_share`, `attribution_kw` |
+| `median_award_mw` | median award size over all awards |
+| `points` | map of awards: `groups[]` and `rounds[round]` = flat integers, 6 per award (lon×100, lat×100, kW/100, category index, group index or −1, full-load hours or 0); only awards with a public location (companies, D4) |
+
+**Reviewed attributions:** `pipeline/config/auction_reviewed.yaml` assigns
+awards to groups where a public source names the project (overrides the name
+rules; each entry cites its source) and lists company-reported totals.
+
+**`auctions/awards.json`** adds per award: `attribution` (`reviewed`, `name`,
+`office`, `none`), `rank_group`, `kw_source`,
+`kw_in_mastr`, `kw_operating`, `months_to_operation`, `hub_height_m`,
+`rotor_diameter_m`, `wind_ms`, `full_load_hours`, `quality_pct`,
+`correction_factor`, `received_ct_est`, `lat`/`lon` (centre of its turbines,
+2 decimals; null unless the bidder is a company, D4).
+
+**Check:** as v1.5, plus ≥ 90 % of turbines with a MaStR id found; yield
+estimate for ≥ 80 % of each round's capacity; average full-load hours
+between 1,500 and 4,500; no location for a bidder without a company name;
+every reviewed assignment matches at least one award and names a known group;
+every reported total has a source and a known round.
+
+---
+
 ## Version history
 
 | Version | Date | Change |
@@ -413,3 +490,4 @@ add up; award rows match the rounds. Licence: see `docs/sources.md`.
 | 1.3 | 2026-10-31 | Monitor files `monitor/buildout.json`, `points.json`, `stats.json`; boundaries `area_km2`; series definition D14. Approved by the user. |
 | 1.4 | 2026-10-31 | Data hub chain H1/H2, day files `days/` with SMARD and DWD weather, `stations.json`, population in `states[]`, size budget 50 MB. Approved by the user. |
 | 1.5 | 2026-10-31 | Turbine makers (`wind_industry` in `stats.json`), auctions chain A1/A2 with `auctions/onshore.json` and `auctions/awards.json`. Approved by the user. |
+| 1.6 | 2026-11-01 | Auctions since May 2019 with yield estimate (DWD), five bidder types, reviewed attributions and company-reported totals, office attribution via the new internal `data/extract/operators.parquet`, race, profiles and map points. Approved by the user. |
