@@ -566,6 +566,44 @@ with an insolvency or restructuring event), `market`, `facts`. **Check:**
 0 ≤ operating ≤ awarded; unbuilt = awarded − operating; exposure within
 awarded.
 
+**Players (`auctions/players.json`)** (WP72): built from the hand-checked
+`pipeline/config/players.yaml`. `as_of`; `players` (name, group as in
+auction_groups.yaml or null, type utility / municipal / ipp / investor /
+developer, hq, owner, year, employees {value, unit, note}, currency, revenue,
+ebitda {value, label}, net_debt (negative = net cash), capacity_gw,
+renewables_gw, own_portfolio_gw, capacity_note, markets, mix, turbines,
+momentum forward / steady / transition / stuck, why, sources) plus `germany`
+(wind_awarded_mw, wind_status, solar_awarded_mw, solar_status, wind_fleet_mw,
+joined from the auction files). **Check:** known type and momentum; a reason
+for every momentum; https sources; money needs a currency; employees a
+positive integer with unit; capacities in range.
+
+**Station 2 grid register (internal, never published)** (WP71):
+`data/extract/grid_units.parquet` (unit_id, grid_operator_id, control_area,
+voltage: extra_high / extra_high_to_high / high / high_to_medium / medium /
+medium_to_low / low) for the units in unit_details.parquet, from the grid
+connection point with the largest capacity; `grid_operators.parquet`
+(operator_id, tso, dso) for electricity grid operators;
+`consumers.parquet` (large electricity consumers: unit_id, status, state,
+district, district_key, lat, lon, units_over_50mw, commissioning_date,
+planned_date, operator_id, control_area). Command `mastr-radar extract-grid`
+(also part of `extract`). **Check:** columns; ≥ 20,000 grid units, ≥ 500
+consumers; four TSOs.
+
+**Grid (`grid/grid.json`)** (WP71): `as_of`, `scope`, `coverage_share`
+(share of large-unit capacity with grid data), `control_areas` (four TSOs:
+kW by technology in operation, planned kW, large consumers operating and
+planned), `operators` (registered, tsos, with_large_units, top10_share,
+operators_for_half, top 25 with name, tso, kW by technology, units, share,
+high_voltage_share), `voltage` (kW by technology per level), `areas`,
+`districts` (district key → [area index, wind+solar kW, storage kW]),
+`consumers` (operating, planned, sites_with_units_over_50mw, by_state,
+planned_by_year, points: lon×100, lat×100, status 1/2, over-50-MW flag; no
+names), `context` (from `config/grid_facts.yaml`: congestion costs and
+volumes by year, 2025 cost split, facts, regulation timeline; every item
+sourced). **Check:** the four areas; coverage ≥ 50 %; ≥ 300 districts; points
+in fours; every context item has an https source.
+
 ---
 
 ## Version history

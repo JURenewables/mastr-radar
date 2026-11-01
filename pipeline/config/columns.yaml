@@ -195,3 +195,54 @@ unit_details:
     location_id: LokationMaStRNummer
     voltage: Spannungsebene
     capacity_kw: Nettoengpassleistung
+
+# Grid register (contract v1.7 draft, WP71): grid operator, TSO control area and
+# voltage per large unit, grid operator roles, large electricity consumers.
+# Internal station 2 files in data/extract/; only aggregates are published.
+grid_register:
+  connections:
+    files: Netzanschlusspunkte_*.xml
+    record: Netzanschlusspunkt
+    location_id: LokationMaStRNummer
+    grid_operator_id: NetzbetreiberMaStRNummer
+    control_area: RegelzoneNetzanschlusspunkt   # catalogue value
+    voltage: Spannungsebene                      # catalogue value
+    capacity_kw: Nettoengpassleistung
+  roles:
+    files: MarktakteureUndRollen.xml
+    record: MarktakteurUndRolle
+    actor_id: MarktakteurMastrNummer
+    role: Marktrolle
+    tso_value: Übertragungsnetzbetreiber
+    dso_value: Anschlussnetzbetreiber
+    electricity_prefix: SNB
+  consumers:
+    files: EinheitenStromVerbraucher.xml
+    record: EinheitStromVerbraucher
+    id: EinheitMastrNummer
+    status: EinheitBetriebsstatus               # catalogue value
+    state: Bundesland                           # catalogue value
+    district: Landkreis
+    municipality_key: Gemeindeschluessel
+    lat: Breitengrad
+    lon: Laengengrad
+    over_50mw: AnzahlStromverbrauchseinheitenGroesser50Mw
+    commissioning_date: Inbetriebnahmedatum
+    planned_date: GeplantesInbetriebnahmedatum
+    operator_id: AnlagenbetreiberMastrNummer
+    control_area: VorlaeufigeRegelzonenDerEinheit
+  voltage_values:
+    Höchstspannung: extra_high
+    Umspannebene Höchstspannung/Hochspannung: extra_high_to_high
+    Hochspannung: high
+    Umspannebene Hochspannung/Mittelspannung: high_to_medium
+    Mittelspannung: medium
+    Umspannebene Mittelspannung/Niederspannung: medium_to_low
+    Niederspannung (= Hausanschluss/Haushaltsstrom): low
+  status_values:
+    In Betrieb: operating
+    In Planung: planned
+    Endgültig stillgelegt: permanently_shut_down
+    Vorübergehend stillgelegt: temporarily_shut_down
+  min_connections: 20000
+  min_consumers: 500

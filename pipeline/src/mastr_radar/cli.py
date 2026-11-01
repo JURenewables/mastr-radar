@@ -140,6 +140,35 @@ def extract(
     typer.echo(f"Check passed: {dict(report.rows)} → {out}")
     _operator_register(zip_path, cfg)
     _unit_details(zip_path, cfg)
+    _grid_register(zip_path, cfg)
+
+
+def _grid_register(zip_path: Path, cfg: dict) -> None:
+    from mastr_radar import extract as ex
+
+    folder = load_settings().data_dir / "extract"
+    counts = ex.write_grid_register(zip_path, folder / "unit_details.parquet", folder, cfg)
+    try:
+        ex.check_grid_register(folder, cfg)
+    except ex.UnitsCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        for name in counts:
+            (folder / name).unlink(missing_ok=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"Check passed: {counts} → {folder}")
+
+
+@app.command("extract-grid")
+def extract_grid(
+    zip_path: Path = typer.Argument(None, help="Export zip. Default: newest in data/raw."),
+) -> None:
+    """Station 2 (part): grid operator, control area and voltage per large unit,
+    grid operator roles, large electricity consumers (needs unit_details.parquet)."""
+    from mastr_radar import extract as ex
+
+    s = load_settings()
+    zip_path = zip_path or sorted(s.raw_dir.glob("Gesamtdatenexport_*.zip"))[-1]
+    _grid_register(zip_path, ex.load_columns_config())
 
 
 def _unit_details(zip_path: Path, cfg: dict) -> None:

@@ -212,6 +212,11 @@ def build(
         from mastr_radar import players
 
         files += players.build(out_dir)
+    grid_ready = (units_path.parent / "grid_units.parquet").exists()
+    if grid_ready:
+        from mastr_radar import grid
+
+        files += grid.build(units_path.parent, out_dir, as_of)
 
     manifest = {
         "contract_version": CONTRACT_VERSION,
@@ -325,6 +330,14 @@ def check_explorer_files(
         try:
             players.check(out_dir)
         except players.PlayersCheckError as exc:
+            problems.append(str(exc))
+    if (out_dir / "grid").exists():
+        from mastr_radar import grid
+
+        expected_files.add(grid.FILE)
+        try:
+            grid.check(out_dir)
+        except grid.GridCheckError as exc:
             problems.append(str(exc))
     if missing := expected_files - set(listed):
         problems.append(f"manifest: missing files {sorted(missing)}.")

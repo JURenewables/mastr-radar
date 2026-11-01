@@ -257,6 +257,15 @@ export default async function Methodology() {
             awards. Unbuilt capacity of companies in insolvency or restructuring uses the company facts
             above. The listed dangers are our assessment.
           </p>
+          <p>
+            The grid page uses the register&apos;s grid connection points: each large unit is assigned
+            the grid operator, the TSO control area and the voltage level of its connection point. The
+            control area shown per district is the one most of its large units connect to. Large
+            electricity consumers are those registered in the register (connected at high or extra-high
+            voltage). It is not a load-flow model. Congestion costs, rules and demand facts come from
+            the linked sources. The players page combines company reports (linked per company) with
+            each company&apos;s German auction results; momentum is our assessment.
+          </p>
         </Section>
 
         <Section title="Known limitations">

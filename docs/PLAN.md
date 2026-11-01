@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: v1.6 live; WP62–66 and WP68–70 (solar page, unit details, success drivers, rise and fall, business models and exits, market under strain) on the branch preview, waiting for your approval of contract v1.7. Next: WP67 grid distance (needs OSM decision), WP45b attribution, WP41 grid map**
+**You are here: v1.6 live; WP62–66 and WP68–72 (solar page, unit details, success drivers, rise and fall, business models and exits, market under strain, grid page, players worldwide) on the branch preview, waiting for your approval of contract v1.7. Next: WP67 grid distance (needs OSM decision), WP45b attribution, WP41 grid map**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -274,6 +274,17 @@ real stress signals (line loading itself is not published).
   bids vs volume, awarded-but-unbuilt backlog with the 36-month wind
   deadline, unbuilt awards held by companies in insolvency or restructuring,
   what led up to it and the dangers (new chapter on both pages).
+- [x] **WP71. Grid page** (`/grid`): grid operators and concentration, TSO
+  control areas map, voltage levels, large consumers and the demand wave,
+  congestion costs, connection rules; from new MaStR grid fields (station 2
+  `extract-grid`) plus sourced context. Next: line-level model (needs OSM
+  decision, Netztransparenz and ENTSO-E access).
+- [x] **WP72. Players worldwide** (`/players`): 18 utilities, IPPs,
+  investors and developers with staff, earnings, debt, capacity, markets,
+  mix, momentum; Wind and Solar pages labelled as Germany. Follow-up: add
+  Iberdrola, Engie, Encavis, Trianel/enercity, Nordex/Enercon/Vestas
+  orders by customer.
+- [ ] **WP73. AI-friendly data platform:** see `docs/platform-plan.md`.
 - [ ] **WP67. Grid distance:** distance to the nearest substation (needs the
   OpenStreetMap ODbL decision).
 - [ ] **WP45b. Better attribution (continue):** map project companies to their parent
