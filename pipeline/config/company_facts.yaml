@@ -77,10 +77,15 @@ companies:
     international: true
     note: >-
       Develops and sells wind, solar and storage projects in many countries.
-      Expected a 2025 loss of about €170m; signed a standstill agreement with its
-      banks in Jan 2026 and is restructuring (project sales, bond waiver).
+      Expected a 2025 loss of about €170m, its first; lost half its share
+      capital (Jul 2026). Out-of-court restructuring, not insolvency: banks
+      agreed a standstill in Jan 2026, extended to 30 Nov 2026 while a
+      restructuring financing is negotiated (Rothschild advises the lenders).
+      Keeps bidding and sells projects; plans to become a power producer.
     sources:
       - https://www.aboenergy.com/en/media-center/press/2026/2026-01-26_standstill-agreement-press-release.html
+      - https://www.deraktionaer.de/nachricht/eqs-news-abo-energy-erreicht-meilensteine-auf-dem-sanierungspfad-und-definiert-handlungsfelder-fuer-eine-erfolgreiche-neuausrichtung-deutsch-524299.html
+      - https://www.4investors.de/nachrichten/boerse.php?sektion=stock&ID=191334
   - group: BayWa r.e.
     model: mixed
     finance: mixed
@@ -135,9 +140,11 @@ events:
     tech: both
     issue: >-
       Expected 2025 loss of about €170m; standstill agreement with banks and
-      bondholders; restructuring officer appointed.
+      bondholders, extended to 30 Nov 2026; restructuring officer appointed.
+      Not an insolvency filing so far.
     sources:
       - https://www.aboenergy.com/en/media-center/press/2026/2026-01-26_standstill-agreement-press-release.html
+      - https://www.4investors.de/nachrichten/boerse.php?sektion=stock&ID=191334
   - company: SoWiTec
     group: null
     date: "2026-07"
@@ -156,12 +163,14 @@ events:
     tech: solar
     issue: >-
       Filed at Hamburg court after a key financing for solar-plus-storage
-      projects failed; reported debt about €3bn. Parks keep running; asset sale
-      with more than 100 interested investors.
+      projects failed, about six months after a €1bn financing package;
+      reported debt about €3bn. Parks keep running; asset sale with more than
+      100 interested investors.
     sources:
       - https://taiyangnews.info/business/enerparc-files-for-insolvency
       - https://www.pv-magazine.com/2026/10/05/enerparc-attracts-more-than-100-potential-investors-as-insolvency-sale-moves-forward/
       - https://globalrestructuringreview.com/article/germanys-enerparc-joins-growing-list-of-renewable-energy-insolvencies
+      - https://inspenet.com/en/news/enerparc-declares-insolvency-after-receiving-e1-billion/
 
 # Turbine makers worldwide: GWEC, installations outside China in 2025 (GW) and the
 # number of countries with installations. Germany share from Nordex.
@@ -181,3 +190,32 @@ oems:
     - https://www.gwec.net/news/gwec-records-sharp-rise-in-wind-turbine-installations-as-five-oems-exceed-100-gw
     - https://greentechlead.com/wind/global-wind-turbine-installations-jump-23-in-2025-as-vestas-crosses-200-gw-and-chinese-oems-dominate-market-gwec-53396
     - https://app.boersengefluester.de/en/newswire/DE000A0D6554/nordex-se/in-2025-the-nordex-group-accounted-for-approx-32-of-new-onshore-wind-turbine-installations-mw-in-germany-2260694
+
+# Market context for the "overheating" sections. Submitted bids are only in
+# BNetzA press releases (the round pages give awarded volumes only).
+market:
+  oversubscription:
+    - {tech: wind, bid_date: "2026-02-01", tender_mw: 3445, submitted_mw: 7858, bids: 924, source: "https://www.bundesnetzagentur.de/SharedDocs/Pressemitteilungen/DE/2026/20260331_EE_AusschreibungWind.html"}
+    - {tech: wind, bid_date: "2026-05-01", tender_mw: 2495, submitted_mw: 6409, bids: 628, source: "https://www.solarserver.de/2026/06/26/mai-ausschreibung-fuer-windenergieanlagen-an-land-deutlich-ueberzeichnet/"}
+    - {tech: wind, bid_date: "2026-08-01", tender_mw: 2520, submitted_mw: 5250, bids: 461, source: "https://www.bundesnetzagentur.de/SharedDocs/Pressemitteilungen/DE/2026/20260917_Wind.html"}
+    - {tech: solar, bid_date: "2026-03-01", tender_mw: 2295, submitted_mw: 4622, source: "https://www.iwr.de/news/wettbewerb-bleibt-hoch-ausschreibung-fuer-pv-freiflaechenanlagen-zum-01-maerz-2026-wieder-deutlich-ueberzeichnet-news39683"}
+    - {tech: solar, bid_date: "2026-07-01", tender_mw: 2135, submitted_mw: 3170, bids: 401, source: "https://www.bundesnetzagentur.de/SharedDocs/Pressemitteilungen/DE/2026/20260818_Solar1.html"}
+  facts:
+    - tech: wind
+      text: "The Aug 2026 round was the ninth oversubscribed onshore wind round in a row."
+      source: https://www.bdew.de/energie/ergebnisse-der-augustausschreibung-fuer-windenergieanlagen-an-land-2026/
+    - tech: wind
+      text: "In May 2026 Bavaria won only 4 awards and Baden-Württemberg 8; the wind industry association says enough permitted projects exist."
+      source: https://www.solarserver.de/2026/06/26/mai-ausschreibung-fuer-windenergieanlagen-an-land-deutlich-ueberzeichnet/
+    - tech: wind
+      text: "An onshore wind award lapses 36 months after it is published if the turbines are not running; from 30 months, late commissioning costs 10–30 €/kW, and a lapsed award costs 30 €/kW."
+      source: https://www.buzer.de/55_EEG_2023.htm
+    - tech: solar
+      text: "Solar's market value fell from about 98 % of the average power price in 2022 to about 54 % in 2025 so far, as measured mid-year (capture rate)."
+      source: https://modoenergy.com/research/en/germany-2025-solar-cannibalisation-glut-subsidies-power-prices-bess
+    - tech: solar
+      text: "In April 2026 Germany had 123 hours of negative prices (75 a year earlier); 47 % of solar output fell into negative-price hours."
+      source: https://www.pv-magazine.com/2026/05/13/solar-capture-factors-fall-across-europe-as-negative-price-hours-surge-in-key-markets/
+    - tech: solar
+      text: "A lapsed ground-mounted solar award costs a penalty of 50 €/kW."
+      source: https://www.buzer.de/55_EEG_2023.htm

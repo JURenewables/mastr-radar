@@ -34,6 +34,7 @@ def build(out_dir: Path, facts_path: Path = FACTS_PATH) -> list[dict]:
         "companies": raw.get("companies", []),
         "events": sorted(raw.get("events", []), key=lambda e: e["date"]),
         "oems": raw.get("oems"),
+        "market": raw.get("market"),
     }
     _validate(out)
     path = out_dir / FILE
@@ -82,5 +83,18 @@ def _validate(d: dict) -> None:
         for m in oems.get("makers", []):
             if not isinstance(m.get("gw"), (int, float)) or m["gw"] <= 0:
                 problems.append(f"oems: bad gw for {m.get('maker')!r}.")
+    market = d.get("market") or {}
+    for i, o in enumerate(market.get("oversubscription", [])):
+        where = f"market.oversubscription[{i}]"
+        if o.get("tech") not in {"wind", "solar"}:
+            problems.append(f"{where}: unknown tech.")
+        if not (0 < o.get("tender_mw", 0) <= o.get("submitted_mw", 0)):
+            problems.append(f"{where}: submitted must be ≥ tender > 0.")
+        sources({"sources": [o.get("source")] if o.get("source") else []}, where)
+    for i, f in enumerate(market.get("facts", [])):
+        where = f"market.facts[{i}]"
+        if f.get("tech") not in TECHS or not f.get("text"):
+            problems.append(f"{where}: needs tech and text.")
+        sources({"sources": [f.get("source")] if f.get("source") else []}, where)
     if problems:
         raise FactsCheckError("Company facts check failed:\n- " + "\n- ".join(problems))

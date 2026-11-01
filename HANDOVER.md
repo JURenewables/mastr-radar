@@ -67,6 +67,12 @@ Sources and licences: `docs/sources.md`.
   `auctions/company_facts.json` (every statement sourced). Big news found:
   Enerparc, the top solar auction winner, filed for insolvency in Sept 2026;
   SoWiTec in July 2026; ABO Energy and BayWa r.e. are restructuring.
+- WP70 "A market under strain" (`auctions/market_risk.json`): wind prices
+  −35 % Feb 24 → Aug 26 with 2.1× bids; 29 GW of wind awards not yet
+  running, 3.3 GW due within 12 months; 1.7 GW of unbuilt solar awards sit
+  with insolvent Enerparc (15 % of the solar backlog), 0.5 GW of wind with
+  ABO. ABO is in out-of-court restructuring (bank standstill to 30 Nov
+  2026), not insolvent, as of the sources found on 1 Nov 2026: re-check.
 
 ## In progress / resolved during this session
 

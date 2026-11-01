@@ -11,6 +11,7 @@ import { AuctionCake, AuctionCrossCheck, AuctionPlayers, AuctionPrices, AuctionR
 import { AuctionMovie, CompanyMap } from "./AuctionMap";
 import { Repowering, TurbineGrowth } from "./Sections";
 import { Chapter, Loading, Section, Stat } from "./ui";
+import { OverheatSection } from "./Overheat";
 import { CompanyFactsSection, OemWorldSection, RiseFallSection } from "./Dynamics";
 import { CrossTech, crossTakeaways, SuccessSection } from "./Strategy";
 import { BrandRace, BrandShares, TurbineModels } from "./WindIndustry";
@@ -21,6 +22,7 @@ export const WIND_SECTIONS = [
   ["where", "3 Where"],
   ["who", "4 Who wins"],
   ["why", "5 Why"],
+  ["strain", "6 Strain"],
 ] as const;
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
@@ -391,6 +393,15 @@ function AuctionChapters({ data, date, source }: { data: MonitorData; date: stri
       </Section>
 
       {data.facts && <CompanyFactsSection facts={data.facts} dyn={au.dynamics} tech="wind" date={date} />}
+
+      {data.risk?.wind && (
+        <>
+          <Chapter id="strain" n={6} title="A market under strain">
+            Too many projects chase too little volume. Prices fall faster than costs, and the first winners are failing.
+          </Chapter>
+          <OverheatSection data={data} tech="wind" date={date} />
+        </>
+      )}
     </>
   );
 }

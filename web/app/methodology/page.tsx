@@ -249,6 +249,14 @@ export default async function Methodology() {
             models, financing and exits are hand-collected from company and press sources; each
             statement links its source, and the list is not complete.
           </p>
+          <p>
+            &quot;A market under strain&quot; counts an award as running when its linked units are in
+            operation in the register; late registrations make recent rounds look less built. The wind
+            deadline is the publication date plus 36 months (§ 36e EEG), which BNetzA can extend.
+            Submitted bid volumes come from BNetzA press releases, because the round pages only list the
+            awards. Unbuilt capacity of companies in insolvency or restructuring uses the company facts
+            above. The listed dangers are our assessment.
+          </p>
         </Section>
 
         <Section title="Known limitations">

@@ -202,6 +202,37 @@ export interface CompanyFacts {
     sources: string[];
   } | null;
 }
+export interface RiskRound {
+  id: string;
+  programme: string;
+  bid_date: string;
+  published: string | null;
+  ceiling_ct: number | null;
+  avg_ct: number | null;
+  awarded_kw: number;
+  operating_kw: number;
+  unbuilt_kw: number;
+  expires: string | null;
+  past_deadline: boolean;
+}
+export interface TechRisk {
+  deadline_months: number | null;
+  rounds: RiskRound[];
+  unbuilt_kw: number;
+  unbuilt_expiring_12m_kw: number;
+  past_deadline_unbuilt_kw: number;
+  price_peak: { bid_date: string; avg_ct: number } | null;
+  price_last: { bid_date: string; avg_ct: number } | null;
+  exposure: { company: string; group: string; kind: string; date: string; awarded_kw: number; unbuilt_kw: number; awards_unbuilt: number }[];
+  market: { tech: string; bid_date: string; tender_mw: number; submitted_mw: number; bids?: number; source: string }[];
+  facts: { tech: string; text: string; source: string }[];
+}
+/** Overheating and risk view (contract v1.7 draft). */
+export interface MarketRisk {
+  as_of: string;
+  wind?: TechRisk;
+  solar?: TechRisk;
+}
 export interface Auctions {
   source: string;
   categories: Record<AuctionCategory, string>;
@@ -314,6 +345,7 @@ export interface SolarAuctions {
 export interface MonitorData {
   solar: SolarAuctions | null;
   facts: CompanyFacts | null;
+  risk: MarketRisk | null;
   auctions: Auctions | null;
   buildout: Buildout;
   stats: Stats;
@@ -333,7 +365,8 @@ function load(version: string): Promise<MonitorData> {
     get("auctions/onshore.json").catch(() => null),
     get("auctions/solar.json").catch(() => null),
     get("auctions/company_facts.json").catch(() => null),
-  ]).then(([buildout, stats, points, districts, auctions, solar, facts]) => ({ buildout, stats, points, districts, auctions, solar, facts }));
+    get("auctions/market_risk.json").catch(() => null),
+  ]).then(([buildout, stats, points, districts, auctions, solar, facts, risk]) => ({ buildout, stats, points, districts, auctions, solar, facts, risk }));
 }
 
 /** All monitor data, or null while loading. `version` is the manifest's as_of. */

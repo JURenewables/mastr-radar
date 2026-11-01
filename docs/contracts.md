@@ -549,8 +549,22 @@ investor, `finance` project / corporate / fund / mixed / null,
 YYYY-MM, `kind` insolvency / restructuring / sales_halt / exit, `tech` wind /
 solar / both, `issue`, `sources`), sorted by date; `oems` (GWEC ranking:
 `source_year`, `scope`, `makers` with `gw` and optional `countries`, `notes`,
-`sources`). **Check:** every entry has at least one https source; codes from
-the lists above; dates YYYY-MM; GW > 0.
+`sources`), `market` (`oversubscription`: tech, bid_date, tender_mw,
+submitted_mw, bids, source, from BNetzA press releases; `facts`: tech, text,
+source). **Check:** every entry has at least one https source; codes from
+the lists above; dates YYYY-MM; GW > 0; submitted ≥ tender > 0.
+
+**Market risk (`auctions/market_risk.json`)** (WP70): built from the files
+above. `as_of`; per technology (`wind`, `solar`): `deadline_months` (36 for
+wind, § 36e EEG; null for solar), `rounds` (id, programme, bid_date,
+published, ceiling_ct, avg_ct, awarded_kw, operating_kw = linked units in
+operation, unbuilt_kw, expires = published + deadline, past_deadline),
+`unbuilt_kw` (rounds not past the deadline), `unbuilt_expiring_12m_kw`,
+`past_deadline_unbuilt_kw`, `price_peak` / `price_last` (highest average of
+the last 12 main-programme rounds, latest), `exposure` (unbuilt kW of groups
+with an insolvency or restructuring event), `market`, `facts`. **Check:**
+0 ≤ operating ≤ awarded; unbuilt = awarded − operating; exposure within
+awarded.
 
 ---
 

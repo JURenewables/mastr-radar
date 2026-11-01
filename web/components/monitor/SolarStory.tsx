@@ -2,7 +2,8 @@
 
 // The Solar page as one storyline (contract v1.7 draft): the price of sun,
 // what gets built where (types, yield, batteries), who wins (winners, race,
-// portfolios, companies), strategy (wind and solar players), and rooftops.
+// portfolios, companies), strategy (wind and solar players), a market under
+// strain, and rooftops.
 import * as Plot from "@observablehq/plot";
 import { useMemo, useState, type ReactNode } from "react";
 
@@ -14,6 +15,7 @@ import { CATEGORY_COLOR, CATEGORY_ORDER, GroupBars, roundLabel } from "./Auction
 import { AuctionMovie, CompanyMap, type MapSource } from "./AuctionMap";
 import { BarRace } from "./BarRace";
 import { SolarTypes } from "./Sections";
+import { OverheatSection } from "./Overheat";
 import { CompanyFactsSection, RiseFallSection } from "./Dynamics";
 import { CrossTech, crossTakeaways } from "./Strategy";
 import { Chapter, Loading, Section, Segmented, Stat } from "./ui";
@@ -23,7 +25,8 @@ export const SOLAR_SECTIONS = [
   ["where", "2 What & where"],
   ["who", "3 Who wins"],
   ["strategy", "4 Strategy"],
-  ["rooftops", "5 Rooftops"],
+  ["strain", "5 Strain"],
+  ["rooftops", "6 Rooftops"],
 ] as const;
 
 const SUN = "#f59e0b";
@@ -257,7 +260,16 @@ function Story({ data, so, date }: { data: MonitorData; so: SolarAuctions; date:
 
       {data.facts && <CompanyFactsSection facts={data.facts} dyn={so.dynamics} tech="solar" date={date} />}
 
-      <Chapter id="rooftops" n={5} title="Beyond the auctions: rooftops and balconies">
+      {data.risk?.solar && (
+        <>
+          <Chapter id="strain" n={5} title="A market under strain">
+            The biggest winner is insolvent. Falling prices, cheap noon power and expensive storage squeeze the business.
+          </Chapter>
+          <OverheatSection data={data} tech="solar" date={date} />
+        </>
+      )}
+
+      <Chapter id="rooftops" n={6} title="Beyond the auctions: rooftops and balconies">
         Most solar units sit on roofs and balconies and never enter an auction.
       </Chapter>
 
