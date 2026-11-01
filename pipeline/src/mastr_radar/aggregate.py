@@ -202,6 +202,10 @@ def build(
         files += solar_auctions.build(
             list(solar_rounds), list(innovation_rounds), auctions_dir / "solar", units_path, out_dir
         )
+    if auction_rounds:
+        from mastr_radar import company_facts
+
+        files += company_facts.build(out_dir)
 
     manifest = {
         "contract_version": CONTRACT_VERSION,
@@ -293,6 +297,14 @@ def check_explorer_files(
         try:
             solar_auctions.check(out_dir, list(solar_rounds), list(innovation_rounds))
         except solar_auctions.SolarCheckError as exc:
+            problems.append(str(exc))
+    if auction_rounds:
+        from mastr_radar import company_facts
+
+        expected_files.add(company_facts.FILE)
+        try:
+            company_facts.check(out_dir)
+        except company_facts.FactsCheckError as exc:
             problems.append(str(exc))
     if missing := expected_files - set(listed):
         problems.append(f"manifest: missing files {sorted(missing)}.")
