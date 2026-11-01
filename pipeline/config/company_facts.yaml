@@ -1,4 +1,4 @@
-# Hand-checked company facts shown next to the auction analysis (contract v1.7 draft).
+# Hand-checked company facts shown next to the auction analysis (contract v1.7).
 # Every entry needs at least one source URL. Only state what a source says; leave a
 # field out when no source supports it. `group` must match a group name in
 # auction_groups.yaml so the website can join it to the auction figures.

@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: v1.6 live; WP62–66 and WP68–72 (solar page, unit details, success drivers, rise and fall, business models and exits, market under strain, grid page, players worldwide) on the branch preview, waiting for your approval of contract v1.7. Next: WP67 grid distance (needs OSM decision), WP45b attribution, WP41 grid map**
+**You are here: contract v1.7 live (1 Nov 2026): Monitor, Solar, Wind, Grid, Players, AI guide. Next: WP73 data platform (Netztransparenz, ENTSO-E once keys are in GitHub Secrets), WP67 grid distance and WP41 grid map (need OSM decision), WP45b attribution**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 

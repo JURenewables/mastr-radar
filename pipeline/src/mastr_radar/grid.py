@@ -1,4 +1,4 @@
-"""Grid view (contract v1.7 draft, WP71) → grid/grid.json (station 3).
+"""Grid view (contract v1.7, WP71) → grid/grid.json (station 3).
 
 Reads station 2 outputs: units.parquet, unit_details.parquet (large units),
 grid_units.parquet (grid operator, TSO control area, voltage per unit),

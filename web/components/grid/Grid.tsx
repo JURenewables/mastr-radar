@@ -1,6 +1,6 @@
 "use client";
 
-// Germany's grid (contract v1.7 draft, grid/grid.json): who connects the large
+// Germany's grid (contract v1.7, grid/grid.json): who connects the large
 // renewables, the four TSO control areas, where big demand sits and comes,
 // what congestion costs, and the rules that are changing.
 import * as Plot from "@observablehq/plot";

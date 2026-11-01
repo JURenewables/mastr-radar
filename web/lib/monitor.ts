@@ -167,7 +167,7 @@ export interface DynGroup {
   last_bid: string;
   status: "new" | "dropped" | "rising" | "fading" | "steady";
 }
-/** Rise and fall of company groups (contract v1.7 draft). */
+/** Rise and fall of company groups (contract v1.7). */
 export interface Dynamics {
   years: string[];
   early: string[];
@@ -227,7 +227,7 @@ export interface TechRisk {
   market: { tech: string; bid_date: string; tender_mw: number; submitted_mw: number; bids?: number; source: string }[];
   facts: { tech: string; text: string; source: string }[];
 }
-/** Overheating and risk view (contract v1.7 draft). */
+/** Overheating and risk view (contract v1.7). */
 export interface MarketRisk {
   as_of: string;
   wind?: TechRisk;

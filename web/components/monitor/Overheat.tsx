@@ -1,7 +1,7 @@
 "use client";
 
 // "A market under strain": how the wind and solar auctions overheated, and the
-// risks that follow (contract v1.7 draft, auctions/market_risk.json).
+// risks that follow (contract v1.7, auctions/market_risk.json).
 import * as Plot from "@observablehq/plot";
 import type { ReactNode } from "react";
 

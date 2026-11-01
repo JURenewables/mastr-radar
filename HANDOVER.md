@@ -1,7 +1,7 @@
 # Handover — 1 Nov 2026
 
 Branch `claude/blissful-cannon-t3pa07` (restarted from `main` after PR #5).
-Live site: https://mastr-radar.vercel.app (from `main`, contract v1.5).
+Live site: https://mastr-radar.vercel.app (from `main`, contract v1.7).
 Branch preview (Vercel login needed):
 https://mastr-radar-git-claude-blissful-cannon-t3pa07-re-s-ma-str.vercel.app
 
@@ -49,7 +49,7 @@ Sources and licences: `docs/sources.md`.
 - Checks: pytest 100 passed, ruff clean, web lint and build clean, station 3
   check passes.
 
-**On the branch only: contract v1.7 draft (waiting for approval)**
+**Contract v1.7 (approved 1 Nov 2026, merged to main)**
 - WP62 `data/extract/unit_details.parquet` (internal): grid voltage and
   capacity, award number, declared wind yield ratio, permit date, solar type,
   tracker, land use, battery on site (`mastr-radar extract-details`).

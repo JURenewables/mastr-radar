@@ -155,7 +155,7 @@ sources:
     details:
       hydro_type: ArtDerWasserkraftanlage
 
-# Unit details (contract v1.7 draft): internal station 2 file
+# Unit details (contract v1.7): internal station 2 file
 # data/extract/unit_details.parquet for auction analysis; never published.
 unit_details:
   min_rows: 30000
@@ -196,7 +196,7 @@ unit_details:
     voltage: Spannungsebene
     capacity_kw: Nettoengpassleistung
 
-# Grid register (contract v1.7 draft, WP71): grid operator, TSO control area and
+# Grid register (contract v1.7, WP71): grid operator, TSO control area and
 # voltage per large unit, grid operator roles, large electricity consumers.
 # Internal station 2 files in data/extract/; only aggregates are published.
 grid_register:

@@ -1,4 +1,4 @@
-"""Solar auctions (contract v1.7 draft).
+"""Solar auctions (contract v1.7).
 
 Ground-mounted solar (first segment) and innovation rounds (mostly solar +
 storage): prices per round since 2019; award-level analysis where the award

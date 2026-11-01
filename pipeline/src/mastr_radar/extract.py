@@ -268,7 +268,7 @@ def _flag(v) -> bool | None:
 
 
 def write_unit_details(zip_path: Path, out_path: Path, cfg: dict | None = None) -> int:
-    """Station 2 (v1.7 draft): details for auction analysis, joined from the
+    """Station 2 (v1.7): details for auction analysis, joined from the
     unit, EEG, permit and grid-connection files → unit_details.parquet."""
     cfg = cfg or load_columns_config()
     dc = cfg["unit_details"]
@@ -402,7 +402,7 @@ CONSUMERS_SCHEMA = pa.schema(
 def write_grid_register(
     zip_path: Path, details_path: Path, out_dir: Path, cfg: dict | None = None
 ) -> dict[str, int]:
-    """Station 2 (v1.7 draft, WP71): grid operator, control area and voltage per
+    """Station 2 (v1.7, WP71): grid operator, control area and voltage per
     unit in unit_details.parquet; grid operator roles; large electricity
     consumers. Writes grid_units, grid_operators and consumers parquet files."""
     cfg = cfg or load_columns_config()

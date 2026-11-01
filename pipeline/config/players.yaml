@@ -1,5 +1,5 @@
 # Players in the German wind and solar market: who they are at home and abroad
-# (contract v1.7 draft → auctions/players.json). Hand-checked; every figure
+# (contract v1.7 → auctions/players.json). Hand-checked; every figure
 # needs a source in `sources`. Leave a field out (null) when no source gives it.
 # Money in millions of the company's reporting currency (`currency`).
 # net_debt: positive = net debt, negative = net cash.

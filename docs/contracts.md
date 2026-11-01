@@ -480,7 +480,7 @@ every reported total has a source and a known round.
 
 ---
 
-## v1.7 draft: solar auctions, unit details, success drivers (waiting for approval)
+## v1.7: solar auctions, unit details, success drivers, dynamics, company facts, market risk, players, grid (approved 1 Nov 2026)
 
 Additive. Until approved, the files exist only on the branch preview and
 `contract_version` stays `"1.6"`.
@@ -617,3 +617,4 @@ in fours; every context item has an https source.
 | 1.4 | 2026-10-31 | Data hub chain H1/H2, day files `days/` with SMARD and DWD weather, `stations.json`, population in `states[]`, size budget 50 MB. Approved by the user. |
 | 1.5 | 2026-10-31 | Turbine makers (`wind_industry` in `stats.json`), auctions chain A1/A2 with `auctions/onshore.json` and `auctions/awards.json`. Approved by the user. |
 | 1.6 | 2026-11-01 | Auctions since May 2019 with yield estimate (DWD), five bidder types, reviewed attributions and company-reported totals, office attribution via the new internal `data/extract/operators.parquet`, race, profiles and map points. Approved by the user. |
+| 1.7 | 2026-11-01 | Solar and innovation auctions, internal unit details and grid register, wind calibration and success drivers, rise-and-fall dynamics, company facts, market risk, players worldwide, grid page. Approved by the user. |

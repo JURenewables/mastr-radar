@@ -1,6 +1,6 @@
 "use client";
 
-// The Solar page as one storyline (contract v1.7 draft): the price of sun,
+// The Solar page as one storyline (contract v1.7): the price of sun,
 // what gets built where (types, yield, batteries), who wins (winners, race,
 // portfolios, companies), strategy (wind and solar players), a market under
 // strain, and rooftops.
