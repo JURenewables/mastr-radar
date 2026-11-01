@@ -1,31 +1,31 @@
 {
   "contract_version": "1.5",
-  "as_of": "2026-10-31",
-  "generated_at": "2026-10-31T20:43:16+00:00",
+  "as_of": "2026-11-01",
+  "generated_at": "2026-11-01T12:23:58+00:00",
   "pipeline_version": "0.1.0",
   "incomplete_after": {
-    "biomass": "2026-06-08",
-    "hydro": "2026-09-01",
-    "solar": "2026-08-28",
-    "storage": "2026-08-19",
-    "wind_offshore": "2026-10-15",
-    "wind_onshore": "2026-10-06"
+    "biomass": "2026-06-09",
+    "hydro": "2026-09-02",
+    "solar": "2026-08-29",
+    "storage": "2026-08-20",
+    "wind_offshore": "2026-10-16",
+    "wind_onshore": "2026-10-07"
   },
   "files": [
     {
       "name": "kpis.json",
       "rows": 6,
-      "bytes": 1144
+      "bytes": 1146
     },
     {
       "name": "units.parquet",
-      "rows": 156710,
-      "bytes": 7853783
+      "rows": 156718,
+      "bytes": 7858799
     },
     {
       "name": "summary.parquet",
-      "rows": 449339,
-      "bytes": 2602551
+      "rows": 449393,
+      "bytes": 2602687
     },
     {
       "name": "boundaries/states.geojson",
@@ -44,13 +44,13 @@
     },
     {
       "name": "monitor/points.json",
-      "rows": 37528,
-      "bytes": 718138
+      "rows": 37531,
+      "bytes": 718190
     },
     {
       "name": "monitor/stats.json",
       "rows": 13,
-      "bytes": 21267
+      "bytes": 21293
     },
     {
       "name": "auctions/onshore.json",
