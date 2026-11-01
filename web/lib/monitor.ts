@@ -162,6 +162,9 @@ export interface Auctions {
     source: string;
   }[];
   reviewed_awards: number;
+  attribution_kw: Record<"reviewed" | "name" | "office" | "none", number>;
+  /** Award locations: per round flat arrays, 6 per award (lon×100, lat×100, kW/100, category, group index, full-load hours). */
+  points: { groups: string[]; rounds: Record<string, number[]> };
   unattributed_share: number;
   model: { wind: string; losses: number; power_coefficient: number };
 }
