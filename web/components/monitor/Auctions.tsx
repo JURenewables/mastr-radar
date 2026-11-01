@@ -374,8 +374,6 @@ export function AuctionWinners({ a, brands }: { a: Auctions; brands: string[] })
         </p>
       </div>
 
-      <AuctionCrossCheck a={a} />
-
       <div>
         <p className="text-sm font-semibold">Turbines in these awards, by maker</p>
         <div className="mt-3 flex h-7 overflow-hidden rounded-full" role="img" aria-label={makerRows.map(([b, kw]) => `${b} ${Math.round((kw / makerTotal) * 100)}%`).join(", ")}>
@@ -719,3 +717,73 @@ const DRIVERS: { title: string; text: string; scores: [number, number, number] }
     scores: [2, 1, 3],
   },
 ];
+
+// --- Turbine makers per company ---------------------------------------------
+
+const MAKER_COLS = ["Enercon", "Vestas", "Nordex", "Siemens Gamesa", "GE"];
+
+export function makerShares(p: { kw_by_maker: Record<string, number> }) {
+  const total = Object.values(p.kw_by_maker).reduce((s, v) => s + v, 0) || 1;
+  const row: Record<string, number> = {};
+  for (const m of MAKER_COLS) row[m] = (p.kw_by_maker[m] ?? 0) / total;
+  row.Other = 1 - MAKER_COLS.reduce((s, m) => s + row[m], 0);
+  return row;
+}
+
+export function TurbinePartners({ a, brands }: { a: Auctions; brands: string[] }) {
+  const rows = a.company_profiles.slice(0, 18).map((p) => {
+    const sh = makerShares(p);
+    const top = [...MAKER_COLS, "Other"].reduce((b, m) => (sh[m] > sh[b] ? m : b), "Enercon");
+    return { group: p.group, sh, top, topShare: sh[top], mw: p.kw_by_year.reduce((s, v) => s + v, 0) / 1000 };
+  });
+  const cols = [...MAKER_COLS, "Other"];
+  return (
+    <div>
+      <div className="overflow-x-auto rounded-[20px] border border-rule">
+        <table className="figures w-full min-w-[36rem] text-sm">
+          <thead>
+            <tr className="border-b border-rule text-left text-xs text-ink-muted">
+              <th className="p-3 font-semibold">Company (awarded MW)</th>
+              {cols.map((m) => (
+                <th key={m} className="p-2 text-center font-semibold">
+                  <span className="inline-flex items-center gap-1">
+                    <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: brandColor(brands, m) }} />
+                    {m.replace("Siemens Gamesa", "SGRE")}
+                  </span>
+                </th>
+              ))}
+              <th className="p-2 text-center font-semibold">Style</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.group} className="border-b border-rule last:border-0">
+                <td className="p-3 font-semibold">
+                  {r.group} <span className="font-normal text-ink-muted">{mw(r.mw)}</span>
+                </td>
+                {cols.map((m) => (
+                  <td key={m} className="p-1 text-center">
+                    <span
+                      className="block rounded-lg px-1 py-1.5 text-xs"
+                      style={{
+                        background: r.sh[m] > 0.005 ? `color-mix(in srgb, ${brandColor(brands, m)} ${Math.round(15 + r.sh[m] * 75)}%, transparent)` : undefined,
+                        fontWeight: r.sh[m] >= 0.5 ? 700 : 400,
+                      }}
+                    >
+                      {r.sh[m] > 0.005 ? `${Math.round(r.sh[m] * 100)}%` : "·"}
+                    </span>
+                  </td>
+                ))}
+                <td className="p-2 text-center text-xs text-ink-muted">{r.topShare >= 0.7 ? `${r.top} house` : r.topShare >= 0.5 ? `leans ${r.top}` : "multi-vendor"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 text-xs text-ink-muted">
+        Share of each company&apos;s awarded capacity by the turbine maker registered in MaStR (the most
+        common maker among each award&apos;s turbines). “House”: ≥ 70 % with one maker; “leans”: ≥ 50 %.
+      </p>
+    </div>
+  );
+}

@@ -125,7 +125,10 @@ Sources and licences: `docs/sources.md`.
    WP58 office attribution (MaStR company register addresses, internal file
    `data/extract/operators.parquet`) cut "not attributed" to 30 % and brought
    13 of 20 reported totals within ~4 %. WP59 split the site: `/` energy
-   transition, `/wind` wind & auctions (incl. WP60 auction map).
+   transition, `/wind` wind & auctions (incl. WP60 auction map). WP61 turned
+   `/wind` into a five-chapter storyline (`WindStory.tsx`) with takeaways and
+   caveats computed from the data, an animated award map, a company map by
+   year with profile, and a turbine-maker matrix per company.
 2. **Award list totals differ from published totals** for Nov 2025 (+5%) and
    Aug 2025 (+1.4%). The check tolerates this up to ±10%.
 3. **Nov 2025 `volume_kw` is null:** that page words the tender volume

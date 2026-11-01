@@ -134,6 +134,23 @@ export interface AuctionDrivers {
   median_months_to_operation: number | null;
   distinct_bidders: number;
 }
+export interface CompanyProfile {
+  group: string;
+  category: AuctionCategory;
+  kw_by_year: number[];
+  awards: number;
+  rounds: number;
+  first_bid: string;
+  last_bid: string;
+  median_award_mw: number;
+  kw_by_state: Record<string, number>;
+  states: number;
+  kw_by_maker: Record<string, number>;
+  full_load_hours_avg: number | null;
+  quality_pct_avg: number | null;
+  realised_share: number | null;
+  attribution_kw: Record<"reviewed" | "name" | "office", number>;
+}
 export interface Auctions {
   source: string;
   categories: Record<AuctionCategory, string>;
@@ -165,6 +182,9 @@ export interface Auctions {
   attribution_kw: Record<"reviewed" | "name" | "office" | "none", number>;
   /** Award locations: per round flat arrays, 6 per award (lon×100, lat×100, kW/100, category, group index, full-load hours). */
   points: { groups: string[]; rounds: Record<string, number[]> };
+  kw_by_state_year: Record<string, number[]>;
+  company_profiles: CompanyProfile[];
+  median_award_mw: number;
   unattributed_share: number;
   model: { wind: string; losses: number; power_coefficient: number };
 }

@@ -727,6 +727,12 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         "drivers": drivers,
         "drivers_realised_cutoff": cutoff,
         "points": _points(df, cats),
+        "kw_by_state_year": {
+            st: [float(df.loc[(df["state"] == st) & (df["year"] == y), "kw"].sum()) for y in years]
+            for st in sorted(df["state"].dropna().unique())
+        },
+        "company_profiles": _profiles(df, years, cutoff),
+        "median_award_mw": round(float(df.loc[df["kw"] > 0, "kw"].median()) / 1000, 1),
         "company_reported": _reported(reviewed, round_out, df),
         "reviewed_awards": int((df["attribution"] == "reviewed").sum()),
         "attribution_kw": {
@@ -758,6 +764,52 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         path.write_text(json.dumps(data, separators=(",", ":"), ensure_ascii=False))
         entries.append({"name": f"auctions/{name}", "rows": n, "bytes": path.stat().st_size})
     return entries
+
+
+PROFILE_MIN_KW = 50_000
+
+
+def _profiles(df: pd.DataFrame, years: list[str], cutoff: str) -> list[dict]:
+    """Per named company group: awards by year, regions, turbine makers, sites, delivery."""
+    named = df[df["group"].notna() & (df["rank_group"] == df["group"])]
+    out = []
+    for g, d in named.groupby("group"):
+        if d["kw"].sum() < PROFILE_MIN_KW:
+            continue
+        old = d[d["bid_date"] <= cutoff]
+        makers = (
+            d.dropna(subset=["maker"]).groupby("maker")["kw"].sum().sort_values(ascending=False)
+        )
+        states = (
+            d.dropna(subset=["state"]).groupby("state")["kw"].sum().sort_values(ascending=False)
+        )
+        out.append(
+            {
+                "group": g,
+                "category": d["category"].iloc[0],
+                "kw_by_year": [float(d.loc[d["year"] == y, "kw"].sum()) for y in years],
+                "awards": int(len(d)),
+                "rounds": int(d["round"].nunique()),
+                "first_bid": d.loc[d["kw"] > 0, "bid_date"].min(),
+                "last_bid": d.loc[d["kw"] > 0, "bid_date"].max(),
+                "median_award_mw": round(float(d["kw"].median()) / 1000, 1),
+                "kw_by_state": {k: float(v) for k, v in states.head(6).items()},
+                "states": int(states.size),
+                "kw_by_maker": {k: float(v) for k, v in makers.items()},
+                "full_load_hours_avg": _r(_weighted(d["full_load_hours"].astype(float), d["kw"])),
+                "quality_pct_avg": _r(_weighted(d["quality_pct"].astype(float), d["kw"]), 1),
+                "realised_share": round(
+                    float(old["kw_operating"].sum() / old["kw_in_mastr"].sum()), 3
+                )
+                if old["kw_in_mastr"].sum() > 0
+                else None,
+                "attribution_kw": {
+                    k: float(d.loc[d["attribution"] == k, "kw"].sum())
+                    for k in ("reviewed", "name", "office")
+                },
+            }
+        )
+    return sorted(out, key=lambda p: -sum(p["kw_by_year"]))
 
 
 def _points(df: pd.DataFrame, cats: list[str]) -> dict:

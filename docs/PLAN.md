@@ -247,6 +247,10 @@ real stress signals (line loading itself is not published).
   sections.
 - [x] **WP60. Auction map:** awarded projects per round (or all), by bidder
   type and company, with details on tap.
+- [x] **WP61. Wind page as a storyline:** five chapters (machines, price,
+  where, who wins, why) with generated takeaways and caveats per section;
+  animated award map (round by round, no company colours); company map
+  coloured by year with profile and takeaways; turbine makers per company.
 - [ ] **WP45b. Better attribution (continue):** map project companies to their parent
   groups (e.g. from MaStR operator data or a reviewed list) to shrink the
   "not attributed" share. Older rounds (2017–2024).

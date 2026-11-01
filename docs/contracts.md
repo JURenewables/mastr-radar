@@ -455,6 +455,9 @@ year. Settings: `pipeline/config/wind_yield.yaml`.
 | `company_reported[]` | company-announced totals per round next to ours: `group`, `round`, `bid_date`, `reported_mw`, `qualifier` (exact/about/over), `ours_mw`, `note`, `source` |
 | `reviewed_awards` | number of awards assigned by hand |
 | `attribution_kw` | awarded kW by method: `reviewed`, `name`, `office`, `none` |
+| `kw_by_state_year[state][year]` | awarded kW per state and year |
+| `company_profiles[]` | named groups with ≥ 50 MW: `kw_by_year`, `awards`, `rounds`, `first_bid`, `last_bid`, `median_award_mw`, `kw_by_state` (top 6), `states`, `kw_by_maker`, `full_load_hours_avg`, `quality_pct_avg`, `realised_share`, `attribution_kw` |
+| `median_award_mw` | median award size over all awards |
 | `points` | map of awards: `groups[]` and `rounds[round]` = flat integers, 6 per award (lon×100, lat×100, kW/100, category index, group index or −1, full-load hours or 0); only awards with a public location (companies, D4) |
 
 **Reviewed attributions:** `pipeline/config/auction_reviewed.yaml` assigns
