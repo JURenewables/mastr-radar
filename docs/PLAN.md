@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: v1.6 live; WP62–66 (solar page, unit details, success drivers) on the branch preview, waiting for your approval of contract v1.7. Next: WP67 grid distance (needs OSM decision), WP45b attribution, WP41 grid map**
+**You are here: v1.6 live; WP62–66 and WP68–69 (solar page, unit details, success drivers, rise and fall, business models and exits) on the branch preview, waiting for your approval of contract v1.7. Next: WP67 grid distance (needs OSM decision), WP45b attribution, WP41 grid map**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -262,6 +262,14 @@ real stress signals (line loading itself is not published).
   company volume vs site quality.
 - [x] **WP66. Solar page** (`/solar`, five chapters) and cross-technology
   view (groups in wind and solar) on both pages; nav Monitor | Solar | Wind.
+- [x] **WP68. Rise and fall:** share early vs late, rounds with an award,
+  year-to-year swing and status (new, rising, steady, fading, dropped) per
+  group, on the wind and solar pages.
+- [x] **WP69. Business models and exits:** sourced company facts (develop and
+  sell vs IPP, project vs corporate finance), retreats and insolvencies
+  (Senvion, Siemens Gamesa, BayWa r.e., ABO Energy, SoWiTec, Enerparc) and
+  turbine makers worldwide (GWEC). Follow-up: add JUWI, PNE, Energiekontor,
+  ENERTRAG, Anumar once sources are checked.
 - [ ] **WP67. Grid distance:** distance to the nearest substation (needs the
   OpenStreetMap ODbL decision).
 - [ ] **WP45b. Better attribution (continue):** map project companies to their parent

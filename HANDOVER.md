@@ -61,6 +61,12 @@ Sources and licences: `docs/sources.md`.
   present. Findings: 95 % of turbines permitted 2021–23 won regardless of
   site quality; volume vs site quality rank correlation +0.18.
 - WP66 `/solar` page and wind/solar cross-technology section.
+- WP68 rise and fall (`dynamics` in onshore.json and solar.json): share
+  early vs late, rounds with an award, year-to-year swing, status per group.
+- WP69 business models and exits: `pipeline/config/company_facts.yaml` →
+  `auctions/company_facts.json` (every statement sourced). Big news found:
+  Enerparc, the top solar auction winner, filed for insolvency in Sept 2026;
+  SoWiTec in July 2026; ABO Energy and BayWa r.e. are restructuring.
 
 ## In progress / resolved during this session
 

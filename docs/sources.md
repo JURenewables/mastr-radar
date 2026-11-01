@@ -14,6 +14,7 @@ we access it. A source is only used once it appears in this file.
 | **DWD radiation grid** (1 km, mean annual global radiation 1991–2020) | Solar yield estimate of awarded parks | CC BY 4.0 | "Deutscher Wetterdienst" | opendata.dwd.de, no account (contract v1.7 draft) |
 | **BNetzA solar and innovation auctions** | Award lists and round results (ground-mounted solar since 2019, innovation since 2020) | as for the wind auctions (.xlsx: Datenlizenz Deutschland – Namensnennung) | "Bundesnetzagentur, Ausschreibungen Solaranlagen erstes Segment / Innovationsausschreibungen", data processed | Round pages and list downloads, no account |
 | **DWD wind grid** (200 m, mean wind 1981–2000 at 10–100 m, Weibull parameters) | Wind at each awarded turbine for the yield estimate | CC BY 4.0 | "Deutscher Wetterdienst" | opendata.dwd.de, no account (contract v1.6 draft) |
+| **Company and press sources** (company press releases, pv magazine, pv-tech, TaiyangNews, GWEC, …) | Hand-checked facts on business models, financing, retreats and turbine makers worldwide | Facts only, restated in our own words; no text or images copied | The source URL next to each statement | Read by hand, listed in `pipeline/config/company_facts.yaml` (contract v1.7 draft) |
 | **Fraunhofer ISE Energy-Charts** | Cross-check only (installed capacity) | Licence page not machine-readable (JS); not redistributed by us | Named on the methodology page | API, no account |
 
 ## Planned for Phase 7

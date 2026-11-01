@@ -101,9 +101,9 @@ events:
     kind: insolvency
     tech: wind
     issue: >-
-      Turbine maker (formerly REpower) filed for insolvency after losses and
-      delays; it stopped making onshore turbines. Its share of new German
-      turbines fell to zero.
+      Turbine maker (formerly REpower) filed for insolvency, citing equipment
+      prices under pressure from auctions. Its European service fleet was sold
+      to Siemens Gamesa (Oct 2019) and turbine making in Europe ended.
     sources:
       - https://en.wikipedia.org/wiki/Senvion
   - company: Siemens Gamesa

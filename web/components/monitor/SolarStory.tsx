@@ -14,6 +14,7 @@ import { CATEGORY_COLOR, CATEGORY_ORDER, GroupBars, roundLabel } from "./Auction
 import { AuctionMovie, CompanyMap, type MapSource } from "./AuctionMap";
 import { BarRace } from "./BarRace";
 import { SolarTypes } from "./Sections";
+import { CompanyFactsSection, RiseFallSection } from "./Dynamics";
 import { CrossTech, crossTakeaways } from "./Strategy";
 import { Chapter, Loading, Section, Segmented, Stat } from "./ui";
 
@@ -216,6 +217,8 @@ function Story({ data, so, date }: { data: MonitorData; so: SolarAuctions; date:
         />
       </Section>
 
+      {so.dynamics && <RiseFallSection dyn={so.dynamics} facts={data.facts} tech="solar" date={date} source={source} />}
+
       <Chapter id="strategy" n={4} title="Strategy">
         Wind developers branch into solar, utilities use solar to enter the auctions, and batteries become the edge.
       </Chapter>
@@ -251,6 +254,8 @@ function Story({ data, so, date }: { data: MonitorData; so: SolarAuctions; date:
       >
         <BatteryLeaders so={so} />
       </Section>
+
+      {data.facts && <CompanyFactsSection facts={data.facts} dyn={so.dynamics} tech="solar" date={date} />}
 
       <Chapter id="rooftops" n={5} title="Beyond the auctions: rooftops and balconies">
         Most solar units sit on roofs and balconies and never enter an auction.

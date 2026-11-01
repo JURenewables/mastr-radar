@@ -151,6 +151,57 @@ export interface CompanyProfile {
   realised_share: number | null;
   attribution_kw: Record<"reviewed" | "name" | "office", number>;
 }
+export interface DynGroup {
+  group: string;
+  category: AuctionCategory;
+  mw: number;
+  kw_by_year: number[];
+  share_early: number;
+  share_late: number;
+  momentum_pp: number;
+  rounds_won: number;
+  rounds_possible: number;
+  hit_rate: number | null;
+  volatility: number | null;
+  first_bid: string;
+  last_bid: string;
+  status: "new" | "dropped" | "rising" | "fading" | "steady";
+}
+/** Rise and fall of company groups (contract v1.7 draft). */
+export interface Dynamics {
+  years: string[];
+  early: string[];
+  late: string[];
+  recent_rounds: number;
+  groups: DynGroup[];
+}
+export interface CompanyFacts {
+  as_of: string;
+  companies: {
+    group: string;
+    model: "develop_sell" | "ipp" | "mixed" | "investor";
+    finance: "project" | "corporate" | "fund" | "mixed" | null;
+    international?: boolean;
+    note: string;
+    sources: string[];
+  }[];
+  events: {
+    company: string;
+    group: string | null;
+    date: string;
+    kind: "insolvency" | "restructuring" | "sales_halt" | "exit";
+    tech: "wind" | "solar" | "both";
+    issue: string;
+    sources: string[];
+  }[];
+  oems: {
+    source_year: number;
+    scope: string;
+    makers: { maker: string; gw: number; countries?: number }[];
+    notes: string[];
+    sources: string[];
+  } | null;
+}
 export interface Auctions {
   source: string;
   categories: Record<AuctionCategory, string>;
@@ -194,6 +245,7 @@ export interface Auctions {
     volume_vs_quality: { group: string; category: AuctionCategory; mw: number; quality_pct: number }[];
     volume_quality_spearman?: number;
   };
+  dynamics?: Dynamics;
   unattributed_share: number;
   model: {
     wind: string;
@@ -256,10 +308,12 @@ export interface SolarAuctions {
   attribution_kw: Record<"reviewed" | "name" | "office" | "none", number>;
   unattributed_share: number;
   grid_voltage_kw: Record<string, number>;
+  dynamics?: Dynamics;
   cross_tech: { group: string; category: AuctionCategory; wind_kw_since_2023: number; solar_kw_since_2023: number; first_wind: string | null; first_solar: string | null }[];
 }
 export interface MonitorData {
   solar: SolarAuctions | null;
+  facts: CompanyFacts | null;
   auctions: Auctions | null;
   buildout: Buildout;
   stats: Stats;
@@ -278,7 +332,8 @@ function load(version: string): Promise<MonitorData> {
     get("boundaries/districts.geojson"),
     get("auctions/onshore.json").catch(() => null),
     get("auctions/solar.json").catch(() => null),
-  ]).then(([buildout, stats, points, districts, auctions, solar]) => ({ buildout, stats, points, districts, auctions, solar }));
+    get("auctions/company_facts.json").catch(() => null),
+  ]).then(([buildout, stats, points, districts, auctions, solar, facts]) => ({ buildout, stats, points, districts, auctions, solar, facts }));
 }
 
 /** All monitor data, or null while loading. `version` is the manifest's as_of. */

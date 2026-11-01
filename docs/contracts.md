@@ -531,6 +531,27 @@ bidder type; company volume vs site quality with Spearman correlation).
 ±10 % of the published total; average specific yield 850–1,500 kWh/kWp; no
 location for bidders that are not companies; no NaN in published JSON.
 
+**Rise and fall (`dynamics` in `auctions/onshore.json` and `auctions/solar.json`)**
+(WP68): per company group with ≥ 100 MW awarded (named groups only):
+`kw_by_year`, `share_early` / `share_late` (mean yearly share in the first and
+last third of the years), `momentum_pp`, `rounds_won`, `rounds_possible`
+(rounds since the first award), `hit_rate`, `volatility` (coefficient of
+variation of yearly kW since the first award), `first_bid`, `last_bid`,
+`status`: `new` (first award in the last third of the rounds), `dropped` (no
+award in the last `recent_rounds` rounds: 6 wind, 4 solar), `rising` /
+`fading` (share change ≥ +0.5 / ≤ −0.5 points), else `steady`.
+
+**Company facts (`auctions/company_facts.json`)** (WP69): built from the
+hand-checked `pipeline/config/company_facts.yaml`. `as_of`; `companies`
+(`group` as in auction_groups.yaml, `model` develop_sell / ipp / mixed /
+investor, `finance` project / corporate / fund / mixed / null,
+`international`, `note`, `sources`); `events` (`company`, `group`, `date`
+YYYY-MM, `kind` insolvency / restructuring / sales_halt / exit, `tech` wind /
+solar / both, `issue`, `sources`), sorted by date; `oems` (GWEC ranking:
+`source_year`, `scope`, `makers` with `gw` and optional `countries`, `notes`,
+`sources`). **Check:** every entry has at least one https source; codes from
+the lists above; dates YYYY-MM; GW > 0.
+
 ---
 
 ## Version history

@@ -11,6 +11,7 @@ import { AuctionCake, AuctionCrossCheck, AuctionPlayers, AuctionPrices, AuctionR
 import { AuctionMovie, CompanyMap } from "./AuctionMap";
 import { Repowering, TurbineGrowth } from "./Sections";
 import { Chapter, Loading, Section, Stat } from "./ui";
+import { CompanyFactsSection, OemWorldSection, RiseFallSection } from "./Dynamics";
 import { CrossTech, crossTakeaways, SuccessSection } from "./Strategy";
 import { BrandRace, BrandShares, TurbineModels } from "./WindIndustry";
 
@@ -87,6 +88,8 @@ export function WindStory({ data, asOf, date }: { data: MonitorData | null; asOf
           <BrandShares data={data} />
         </div>
       </Section>
+
+      {data.facts?.oems && <OemWorldSection facts={data.facts} date={date} />}
 
       <Section
         id="models"
@@ -361,6 +364,8 @@ function AuctionChapters({ data, date, source }: { data: MonitorData; date: stri
         </Section>
       )}
 
+      {au.dynamics && <RiseFallSection dyn={au.dynamics} facts={data.facts} tech="wind" date={date} source={source} />}
+
       <Chapter id="why" n={5} title="Why developers win">
         Lean teams, project finance and fast decisions beat balance sheets. The data shows the
         pattern; the assessment below explains it.
@@ -384,6 +389,8 @@ function AuctionChapters({ data, date, source }: { data: MonitorData; date: stri
       >
         <AuctionPlayers a={au} />
       </Section>
+
+      {data.facts && <CompanyFactsSection facts={data.facts} dyn={au.dynamics} tech="wind" date={date} />}
     </>
   );
 }

@@ -241,6 +241,14 @@ export default async function Methodology() {
             compared: BNetzA only publishes winning bids, so turbines without an award may still bid, may
             have lost, or may sell their power without EEG support.
           </p>
+          <p>
+            &quot;Rise and fall&quot; compares each company group&apos;s share of awarded capacity in the
+            first and last third of the years. Because losing bids are not published, &quot;rounds with
+            an award&quot; counts the rounds since a group&apos;s first award, not its bids; the
+            year-to-year swing is the coefficient of variation of its yearly awarded capacity. Business
+            models, financing and exits are hand-collected from company and press sources; each
+            statement links its source, and the list is not complete.
+          </p>
         </Section>
 
         <Section title="Known limitations">
