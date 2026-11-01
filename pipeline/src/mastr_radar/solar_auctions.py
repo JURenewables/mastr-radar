@@ -411,11 +411,27 @@ def build(
         ("solar_awards.json", {"source": SOURCE, "awards": rows}, len(rows)),
     ):
         path = folder / name
-        path.write_text(
-            json.dumps(data, separators=(",", ":"), ensure_ascii=False, default=_json_default)
+        text = json.dumps(
+            _clean(data),
+            separators=(",", ":"),
+            ensure_ascii=False,
+            default=_json_default,
+            allow_nan=False,
         )
+        path.write_text(text)
         entries.append({"name": f"auctions/{name}", "rows": n, "bytes": path.stat().st_size})
     return entries
+
+
+def _clean(o):
+    """NaN → null, recursively (JSON has no NaN)."""
+    if isinstance(o, dict):
+        return {k: _clean(v) for k, v in o.items()}
+    if isinstance(o, list):
+        return [_clean(v) for v in o]
+    if isinstance(o, float) and not math.isfinite(o):
+        return None
+    return o
 
 
 def _json_default(o):
@@ -429,7 +445,11 @@ def _json_default(o):
 
 
 def _wshare(rr: list[dict], key: str) -> float | None:
-    known = [r for r in rr if r[key] is not None]
+    known = [
+        r
+        for r in rr
+        if r[key] is not None and not (isinstance(r[key], float) and math.isnan(r[key]))
+    ]
     kw = sum(r["kw"] for r in known)
     return round(sum(float(r[key]) * r["kw"] for r in known) / kw, 3) if kw else None
 
@@ -458,7 +478,7 @@ def _ranking(g: pd.DataFrame, buckets: set[str]) -> list[dict]:
             "awards": int(r.awards),
             "rounds": int(r.rounds),
             "bucket": r.rank_group in special,
-        }  # fmt: skip
+        }
         for r in agg.itertuples()
     ]
 
@@ -522,7 +542,7 @@ def _portfolios(sol: pd.DataFrame) -> dict:
                 "bids": int(b),
                 "kw": float(k),
                 "max_bid_kw": float(mb),
-            }  # fmt: skip
+            }
             for rid, bd, o, d, k, b, mb, st in top[
                 ["round", "bid_date", "owner", "district", "kw", "bids", "max_bid", "state"]
             ].itertuples(index=False)
@@ -595,7 +615,7 @@ def _points(df: pd.DataFrame, cats: list[str]) -> dict:
                 gi.get(r.rank_group, -1) if isinstance(r.group, str) else -1,
                 0 if pd.isna(r.specific_yield_kwh_kwp) else int(r.specific_yield_kwh_kwp),
                 -1 if r.co_located is None or pd.isna(r.co_located) else int(bool(r.co_located)),
-            ]  # fmt: skip
+            ]
         )
     return {"groups": groups, "rounds": rounds}
 
@@ -632,6 +652,9 @@ def check(out_dir: Path, solar_rounds: list[dict], innovation_rounds: list[dict]
     except (OSError, ValueError, KeyError) as exc:
         raise SolarCheckError(f"solar auction files missing or unreadable: {exc}") from exc
     problems = []
+    for name in ("solar.json", "solar_awards.json"):
+        if "NaN" in (out_dir / "auctions" / name).read_text():
+            problems.append(f"{name}: contains NaN (not valid JSON for browsers).")
     if [r["id"] for r in s["rounds"]] != [r["id"] for r in solar_rounds + innovation_rounds]:
         problems.append("solar.json: rounds differ from settings.")
     for r in s["rounds"]:
