@@ -34,6 +34,7 @@ ROUND_PAGE = (
     "BeendeteAusschreibungen/{path}"
 )
 GROUPS_CONFIG = Path(__file__).resolve().parents[2] / "config" / "auction_groups.yaml"
+REVIEWED_CONFIG = Path(__file__).resolve().parents[2] / "config" / "auction_reviewed.yaml"
 MONTHS = {
     m: i + 1
     for i, m in enumerate(
@@ -279,6 +280,20 @@ def attribute(bidder: str, cfg: dict) -> tuple[str | None, str]:
     return None, "unattributed"
 
 
+def reviewed_group(bidder: str, round_id: str, award_no: str, reviewed: dict) -> dict | None:
+    """The reviewed assignment covering this award, if any."""
+    for a in reviewed.get("assignments", []):
+        if a["bidder"] != bidder or a.get("round", round_id) != round_id:
+            continue
+        if award_no in a.get("award_nos", [award_no]):
+            return a
+    return None
+
+
+def category_of(group: str, cfg: dict) -> str:
+    return next((g["category"] for g in cfg["groups"] if g["group"] == group), "developer")
+
+
 def is_legal_entity(bidder: str, cfg: dict) -> bool:
     return re.search(cfg["legal_entity"], bidder.lower()) is not None
 
@@ -369,6 +384,17 @@ def _fleet(units_path: Path, cfg: dict, buckets: set[str]) -> dict:
 def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) -> list[dict]:
     """Write auctions/onshore.json and auctions/awards.json. Returns manifest entries."""
     cfg = yaml.safe_load(GROUPS_CONFIG.read_text())
+    reviewed = yaml.safe_load(REVIEWED_CONFIG.read_text()) if REVIEWED_CONFIG.exists() else {}
+    used_assignments: set[int] = set()
+    known = {g["group"] for g in cfg["groups"]}
+    if bad := [a["group"] for a in reviewed.get("assignments", []) if a["group"] not in known]:
+        raise AuctionCheckError(f"auction_reviewed.yaml: unknown groups {bad}")
+    if bad := [
+        e["round"]
+        for e in reviewed.get("reported", [])
+        if e["round"] not in {r["id"] for r in rounds}
+    ]:
+        raise AuctionCheckError(f"auction_reviewed.yaml: reported rounds not in settings {bad}")
     brands_cfg = yaml.safe_load(monitor.BRANDS_CONFIG.read_text())
     wcfg = wind.load_config()
     buckets = {g["group"] for g in cfg["groups"] if g.get("bucket")}
@@ -409,7 +435,13 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         kw_sources: dict[str, int] = defaultdict(int)
         merit_rows = []
         for a in awards:
-            group, cat = attribute(a["bidder"], cfg)
+            rev = reviewed_group(a["bidder"], rnd["id"], a["award_no"], reviewed)
+            if rev:
+                group, cat, how = rev["group"], category_of(rev["group"], cfg), "reviewed"
+                used_assignments.add(id(rev))
+            else:
+                group, cat = attribute(a["bidder"], cfg)
+                how = "name" if group else "none"
             mine = [r for r in a["turbines"] if r in linked.index]
             lk = linked.loc[mine]
             if a["kw"] is not None:
@@ -454,6 +486,7 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
                 # Names and places of possible natural persons are never published (D4).
                 "bidder": a["bidder"] if public else None,
                 "group": group,
+                "attribution": how,
                 "rank_group": disp,
                 "category": cat,
                 "kw": kw,
@@ -622,6 +655,8 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         "fleet": _fleet(units_path, cfg, buckets),
         "drivers": drivers,
         "drivers_realised_cutoff": cutoff,
+        "company_reported": _reported(reviewed, round_out, df),
+        "reviewed_awards": int((df["attribution"] == "reviewed").sum()),
         "unattributed_share": round(
             float(df.loc[df["category"] == "unattributed", "kw"].sum() / df["kw"].sum()), 4
         ),
@@ -633,6 +668,9 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
             "correction_tables": {k: v["points"] for k, v in wcfg["correction_tables"].items()},
         },
     }
+    stale = [a["bidder"] for a in reviewed.get("assignments", []) if id(a) not in used_assignments]
+    if stale:
+        raise AuctionCheckError(f"auction_reviewed.yaml: assignments match no award: {stale}")
     folder = out_dir / "auctions"
     folder.mkdir(parents=True, exist_ok=True)
     entries = []
@@ -644,6 +682,33 @@ def build(rounds: list[dict], cache_dir: Path, units_path: Path, out_dir: Path) 
         path.write_text(json.dumps(data, separators=(",", ":"), ensure_ascii=False))
         entries.append({"name": f"auctions/{name}", "rows": n, "bytes": path.stat().st_size})
     return entries
+
+
+def _reported(reviewed: dict, rounds: list[dict], df: pd.DataFrame) -> list[dict]:
+    """Company-announced totals per round next to ours."""
+    by_id = {r["id"]: r for r in rounds}
+    out = []
+    for e in reviewed.get("reported", []):
+        r = by_id.get(e["round"])
+        if r is None:
+            continue
+        ours = (
+            float(df.loc[(df["round"] == e["round"]) & (df["group"] == e["group"]), "kw"].sum())
+            / 1000
+        )
+        out.append(
+            {
+                "group": e["group"],
+                "round": e["round"],
+                "bid_date": r["bid_date"],
+                "reported_mw": float(e["mw"]),
+                "qualifier": e.get("qualifier", "exact"),
+                "ours_mw": round(ours, 1),
+                "note": e.get("note"),
+                "source": e["source"],
+            }
+        )
+    return out
 
 
 def monitor_as_of(units_path: Path) -> date:
@@ -690,6 +755,11 @@ def check(out_dir: Path, rounds: list[dict]) -> None:
             )
         if abs(sum(r["kw_by_category"].values()) - r["list_kw"]) > 1:
             problems.append(f"{r['id']}: categories do not add up.")
+    for e in onshore.get("company_reported", []):
+        if not str(e.get("source", "")).startswith("http"):
+            problems.append(f"company_reported {e['group']} {e['round']}: no source.")
+    if any(a["attribution"] == "reviewed" and not a["group"] for a in awards):
+        problems.append("awards.json: reviewed award without a group.")
     if len(awards) != sum(r["list_awards"] for r in onshore["rounds"]):
         problems.append("awards.json: row count differs from the rounds.")
     if any(a["bidder"] is None and a["lat"] is not None for a in awards):

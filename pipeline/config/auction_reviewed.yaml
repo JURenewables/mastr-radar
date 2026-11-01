@@ -1,0 +1,59 @@
+# Reviewed auction attributions and company-reported totals (contract v1.6 draft).
+#
+# Edit by hand. Every entry needs a public source. See docs/auction-crosscheck.md.
+#
+# assignments: awards whose bidder name does not reveal the company group, but
+# a public source names the project. They override the name rules in
+# auction_groups.yaml. `bidder` is the exact name in the award list. With
+# `round` (and optionally `award_nos`) only those awards are assigned; without,
+# every award of that bidder (use only for single-project companies).
+assignments:
+  - bidder: "AEZ Planungs GmbH & Co. KG"
+    round: GT01052026
+    award_nos: [WIN26-2/088, WIN26-2/089]
+    group: Alterric
+    evidence: "Alterric names Osterfeld among its six May 2026 awards; Alterric 177.3 + Osterfeld 64.8 = 242.1 MW, as announced (242 MW)."
+    source: https://www.power-technology.com/news/alterric-secures-242mw-six-projects/
+  - bidder: "Windpark GmbH & Co. Bornheim KG"
+    round: GT1022025
+    group: Alterric
+    evidence: "Alterric lists Bornheim-Sechtem among its seven Feb 2025 awards (developed with partners); the awards are in Gemarkung Sechtem."
+    source: https://www.windtech-international.com/projects-and-contracts/alterric-awarded-contracts-for-178-66-mw-in-german-onshore-wind-auction
+  - bidder: "Windpark Rastede GmbH & Co.KG"
+    round: GT1022025
+    group: Alterric
+    evidence: "Alterric lists Rastede-Liethe among its seven Feb 2025 awards (developed with partners)."
+    source: https://www.windtech-international.com/projects-and-contracts/alterric-awarded-contracts-for-178-66-mw-in-german-onshore-wind-auction
+  - bidder: "Gewi Windpark GmbH & Co. 17. Beteiligung KG"
+    round: GT1022025
+    group: Alterric
+    evidence: "Alterric lists Lichterfelde among its seven Feb 2025 awards (developed with partners); the award is in Gemarkung Lichterfelde."
+    source: https://www.windtech-international.com/projects-and-contracts/alterric-awarded-contracts-for-178-66-mw-in-german-onshore-wind-auction
+  - bidder: "Windpark Sassenberg-Gröblingen GmbH"
+    group: Qualitas Energy
+    evidence: "Qualitas names Sassenberg-Gröblingen (4 × 5.56 MW) as one of its two Aug 2025 awards; with QE Windpark Ingstetten this gives 43.8 MW, as announced."
+    source: https://www.renewable-energy-industry.com/news/press-releases/pm-8630-qualitas-energy-secures-43-mw-in-latest-onshore-wind-energy-tender
+
+# reported: awarded capacity a company announced for a round. `qualifier`:
+# exact (default), about, over. Compared with our figure on the site.
+reported:
+  - {group: RWE, round: GT03082026, mw: 119, source: "https://www.rwe.com/investor-relations/finanzkalender-und-veroeffentlichungen/news-und-ad-hoc-mitteilungen/news/news-2026-09-18_a/"}
+  - {group: PNE, round: GT01052026, mw: 108, source: "https://www.energyglobal.com/wind/30062026/pne-receives-contracts-from-onshore-wind-energy-tender-in-germany/"}
+  - {group: ABO Energy, round: GT01052026, mw: 61.4, source: "https://goldesel.de/aktien/news/abo-energy-erhalt-windkraft-zuschlage-uber-614-mw-insider-verkauft-aktien"}
+  - {group: ABO Energy, round: GT03082026, mw: 102.2, note: "Rhein-Mosel is 24.8 MW in the award list, 28 MW in ABO's current turbine plan", source: "https://inspenet.com/en/news/abo-energy-wins-wind-power-tender-in-germany/"}
+  - {group: EnBW, round: GT1052025, mw: 92, note: "trade-press summary", source: "https://www.pfie.com/emea/2282928/pfi-help"}
+  - {group: ENERTRAG, round: GT1022025, mw: 180, source: "https://enertrag.com/news-and-press/press-releases/2025/march/enertrag-secures-180-mw-in-the-first-wind-energy-tender-2025-successful-award-for-large-scale-project-malchow-ost"}
+  - {group: Energiekontor, round: GT1022025, mw: 192, qualifier: about, source: "https://www.boerse-online.de/dpa-afx/eqs-news-energiekontor-ag-energiekontor-erhaelt-zuschlaege-fuer-acht-projekte-in-der-februar-ausschreibung-der-bundesnetzagentur-deutsch-436334.html"}
+  - {group: Alterric, round: GT1022025, mw: 178.66, note: "the seven named projects add up to 178.7 MW in the list; one more award (20.2 MW) is under Alterric's own name", source: "https://www.windtech-international.com/projects-and-contracts/alterric-awarded-contracts-for-178-66-mw-in-german-onshore-wind-auction"}
+  - {group: Alterric, round: GT1052025, mw: 340, qualifier: about, note: "eleven wind farms", source: "https://www.windtech-international.com/projects-and-contracts/alterric-awarded-contracts-for-all-submitted-projects-in-german-onshore-wind-auction"}
+  - {group: Alterric, round: GT1082025, mw: 100, qualifier: over, source: "https://www.windtech-international.com/projects-and-contracts/alterric-awarded-over-100-mw-in-german-onshore-wind-tender"}
+  - {group: Alterric, round: GT01052026, mw: 242, source: "https://www.power-technology.com/news/alterric-secures-242mw-six-projects/"}
+  - {group: Qualitas Energy, round: GT1082025, mw: 43, qualifier: over, source: "https://www.renewable-energy-industry.com/news/press-releases/pm-8630-qualitas-energy-secures-43-mw-in-latest-onshore-wind-energy-tender"}
+  - {group: Qualitas Energy, round: GT01022026, mw: 126, source: "https://www.energyglobal.com/wind/17042026/qualitas-energy-secures-126-mw-in-onshore-wind-energy-tender-in-germany/"}
+  - {group: Qualitas Energy, round: GT01052026, mw: 113.2, source: "https://qualitasenergy.com/wp-content/uploads/260630_PR_Qualitas-Energy-secures-113-MW-in-latest-onshore-wind-energy-tender-in-Germany.pdf"}
+  - {group: wpd, round: GT1022025, mw: 414, source: "https://wpd.de/wp-content/uploads/2025/03/20250326_wpd-PM_Erfolgreicher-Jahresstart-2025_D.pdf"}
+  - {group: wpd, round: GT1112025, mw: 587, qualifier: about, source: "https://www.wpd.de/wp-content/uploads/2026/01/20260113_wpd-Pressemitteilung_wpd-startet-mit-Rekordergebnis-ins-Jahr-2026docx-2.pdf"}
+  - {group: wpd, round: GT01022026, mw: 300, qualifier: about, source: "https://www.wpd.de/wp-content/uploads/2026/04/PressemitteilungAusschreibung-Feb2026-HB.pdf"}
+  - {group: wpd, round: GT01052026, mw: 156.9, source: "https://www.wpd.de/wp-content/uploads/2026/07/PM-Maiausschreibung-6.7.2026.pdf"}
+  - {group: UKA, round: GT1082025, mw: 700, qualifier: over, source: "https://www.solarserver.de/2026/01/14/uka-gruppe-will-an-land-jaehrlich-1-gw-windenergie-zubauen/"}
+  - {group: UKA, round: GT01022026, mw: 600, qualifier: over, note: "includes partner projects", source: "https://www.windtech-international.com/projects-and-contracts/uka-group-secures-over-600mw-in-german-onshore-wind-tender"}

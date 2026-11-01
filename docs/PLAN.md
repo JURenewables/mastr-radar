@@ -235,7 +235,10 @@ real stress signals (line loading itself is not published).
   bidder types).
 - [x] **WP56. Players:** operating capacity by group (from auctions and whole
   fleet), data by bidder type, editorial drivers analysis.
-- [ ] **WP45b. Better attribution:** map project companies to their parent
+- [x] **WP57. Reviewed attributions and company cross-check:**
+  `config/auction_reviewed.yaml` (hand assignments with sources, company-
+  reported totals); comparison table on the site. UGE → UKA.
+- [ ] **WP45b. Better attribution (continue):** map project companies to their parent
   groups (e.g. from MaStR operator data or a reviewed list) to shrink the
   "not attributed" share. Older rounds (2017–2024).
 - [ ] **WP46. Winners map and time to going online.**

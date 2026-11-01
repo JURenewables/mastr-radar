@@ -76,6 +76,26 @@ def write_list(path):
     wb.save(path)
 
 
+@pytest.fixture(autouse=True)
+def reviewed(tmp_path, monkeypatch):
+    """A small reviewed file: one hand assignment and one reported total for round R1."""
+    path = tmp_path / "reviewed.yaml"
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "assignments": [
+                    {"bidder": "Stadtwerke Musterstadt GmbH", "round": "R1", "group": "enercity",
+                     "evidence": "test", "source": "https://example.org/a"}
+                ],
+                "reported": [{"group": "wpd", "round": "R1", "mw": 20, "qualifier": "about",
+                              "source": "https://example.org/b"}],
+            }
+        )
+    )  # fmt: skip
+    monkeypatch.setattr(auctions, "REVIEWED_CONFIG", path)
+    return path
+
+
 def write_grid(cache):
     """A one-cell DWD grid covering Germany: 6.5 m/s at 100 m, 6.2 at 80 m, k = 2."""
     (cache / "dwd").mkdir(exist_ok=True)
@@ -205,7 +225,15 @@ def test_build_and_check(tmp_path):
     assert (r["turbines"], r["turbines_in_mastr"], r["turbines_operating"]) == (4, 4, 1)
     # Buckets are ranked too, flagged, under a display name.
     ranked = [(w["group"], w["bucket"]) for w in onshore["winners_by_year"]["2026"]]
-    assert ranked == [("wpd", False), ("Other Stadtwerke", True), ("Not attributed", True)]
+    assert ranked == [("wpd", False), ("enercity", False), ("Not attributed", True)]
+    assert onshore["reviewed_awards"] == 1
+    [rep] = onshore["company_reported"]
+    assert (rep["group"], rep["ours_mw"], rep["reported_mw"], rep["qualifier"]) == (
+        "wpd",
+        12.0,
+        20,
+        "about",
+    )
     assert onshore["race"]["kw"]["wpd"] == [12000]
     # Yield: 6.5 m/s at 100 m on the test grid.
     assert 2000 < r["full_load_hours_avg"] < 4000
@@ -233,3 +261,18 @@ def test_check_fails_on_bad_prices(tmp_path):
     auctions.build(rounds, cache, units, tmp_path / "data")
     with pytest.raises(auctions.AuctionCheckError, match="prices out of order"):
         auctions.check(tmp_path / "data", rounds)
+
+
+def test_stale_assignment_fails(tmp_path, reviewed):
+    """A reviewed assignment that matches no award must fail loudly."""
+    data = yaml.safe_load(reviewed.read_text())
+    data["assignments"][0]["bidder"] = "Gone GmbH"
+    reviewed.write_text(yaml.safe_dump(data))
+    cache = tmp_path / "auctions"
+    cache.mkdir()
+    (cache / "R1.html").write_text(PAGE, encoding="utf-8")
+    write_list(cache / "R1.xlsx")
+    write_grid(cache)
+    units = write_units(tmp_path / "units.parquet", [unit("X", kw=1)])
+    with pytest.raises(auctions.AuctionCheckError, match="match no award"):
+        auctions.build([{"id": "R1", "path": "x"}], cache, units, tmp_path / "data")

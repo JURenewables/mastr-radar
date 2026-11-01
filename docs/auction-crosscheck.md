@@ -45,6 +45,18 @@ undercount it, sometimes by half. One group rule was wrong and is fixed (UGE →
 | AEZ Planungs, Osterfeld (64.8 MW, May 2026) | Alterric names Osterfeld as its project | ⚠️ bidder AEZ, claimed by Alterric (sale or partnership?) |
 | Prowind Wiefelstede, wpd Jatznick, ENERTRAG Alpha II, EnBW Reinsfeld, Alterric Struvenhütten | no public project page found | ❔ consistent with the bidder name, not independently confirmed |
 
+## Built into the pipeline (WP57)
+
+- `pipeline/config/auction_reviewed.yaml`: hand assignments (AEZ Osterfeld →
+  Alterric; Bornheim-Sechtem, Rastede, Lichterfelde → Alterric; Sassenberg-
+  Gröblingen → Qualitas) and 20 company-reported round totals, each with its
+  source. After the assignments, Alterric May 2026 (242.1 vs 242 MW) and
+  Qualitas Aug 2025 (43.8 vs > 43 MW) match exactly; Alterric's seven named
+  Feb 2025 projects add up to 178.7 MW, as announced.
+- The Winners section shows every reported total next to ours.
+- wpd and UKA publish totals only, no project names, so their gaps stay
+  visible rather than being filled by guesswork.
+
 ## What it means for the site
 
 - Rankings of companies that bid under their own name (RWE, EnBW, PNE, ABO,

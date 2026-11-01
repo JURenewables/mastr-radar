@@ -151,6 +151,17 @@ export interface Auctions {
   };
   drivers: Record<AuctionCategory, AuctionDrivers>;
   drivers_realised_cutoff: string;
+  company_reported: {
+    group: string;
+    round: string;
+    bid_date: string;
+    reported_mw: number;
+    qualifier: "exact" | "about" | "over";
+    ours_mw: number;
+    note: string | null;
+    source: string;
+  }[];
+  reviewed_awards: number;
   unattributed_share: number;
   model: { wind: string; losses: number; power_coefficient: number };
 }

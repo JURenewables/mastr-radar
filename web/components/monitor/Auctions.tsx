@@ -363,9 +363,12 @@ export function AuctionWinners({ a, brands }: { a: Auctions; brands: string[] })
           Striped bars stand for many companies, not one competitor. Bidders are grouped by the company
           name in the award list (e.g. “wpd Windpark Nr. 440 GmbH & Co. KG” → wpd). Project companies
           that carry no group name are “not attributed”; groups that bid through them are undercounted.
+          Awards that company sources tie to a group are assigned by hand.
           Alterric (EWE / Aloys Wobben Stiftung) counts as an IPP; enercity as a Stadtwerk.
         </p>
       </div>
+
+      <AuctionCrossCheck a={a} />
 
       <div>
         <p className="text-sm font-semibold">Turbines in these awards, by maker</p>
@@ -382,6 +385,75 @@ export function AuctionWinners({ a, brands }: { a: Auctions; brands: string[] })
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+// --- Cross-check with company announcements ---------------------------------
+
+export function AuctionCrossCheck({ a }: { a: Auctions }) {
+  const rows = [...a.company_reported].sort((x, y) => y.bid_date.localeCompare(x.bid_date) || x.group.localeCompare(y.group));
+  const verdict = (r: (typeof rows)[number]) => {
+    const ratio = r.ours_mw / r.reported_mw;
+    if (r.qualifier === "over") return ratio >= 0.97 ? "match" : "under";
+    if (Math.abs(ratio - 1) <= 0.04) return "match";
+    return ratio < 1 ? "under" : "over";
+  };
+  const matches = rows.filter((r) => verdict(r) === "match").length;
+  const q = { exact: "", about: "≈ ", over: "> " } as const;
+  const max = Math.max(...rows.map((r) => Math.max(r.reported_mw, r.ours_mw)), 1);
+  return (
+    <div>
+      <p className="text-sm font-semibold">Checked against company announcements</p>
+      <p className="mt-1 text-xs text-ink-muted">
+        {matches} of {rows.length} round totals that companies announced match the award list within 4%.
+        Groups that bid through neutrally named project companies show less here than they announce; the
+        gap sits in “Not attributed”. {a.reviewed_awards} awards are assigned by hand from company
+        sources.
+      </p>
+      <div className="mt-3 overflow-x-auto rounded-[20px] border border-rule">
+        <table className="figures w-full min-w-[34rem] text-sm">
+          <thead>
+            <tr className="border-b border-rule text-left text-xs text-ink-muted">
+              <th className="p-3 font-semibold">Company</th>
+              <th className="p-3 font-semibold">Round</th>
+              <th className="p-3 font-semibold">In the award list</th>
+              <th className="p-3 font-semibold">Company says</th>
+              <th className="w-1/3 p-3 font-semibold" />
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => {
+              const v = verdict(r);
+              return (
+                <tr key={`${r.group}-${r.round}`} className="border-b border-rule last:border-0 align-top">
+                  <td className="p-3 font-semibold">{r.group}</td>
+                  <td className="p-3">{roundLabel(r.bid_date)}</td>
+                  <td className="p-3">{mw(r.ours_mw)}</td>
+                  <td className="p-3">
+                    <a href={r.source} className="underline decoration-rule underline-offset-2" target="_blank" rel="noreferrer">
+                      {q[r.qualifier]}
+                      {mw(r.reported_mw)}
+                    </a>
+                    {r.note && <span className="block text-[11px] text-ink-muted">{r.note}</span>}
+                  </td>
+                  <td className="p-3">
+                    <div className="relative h-4 rounded-full bg-surface" aria-label={v === "match" ? "matches" : v === "under" ? "less in the award list" : "more in the award list"}>
+                      <div className="absolute inset-y-0 left-0 rounded-full border-2 border-dashed border-ink-muted" style={{ width: `${(r.reported_mw / max) * 100}%` }} />
+                      <div className="absolute inset-y-0.5 left-0.5 rounded-full" style={{ width: `${(r.ours_mw / max) * 100}%`, background: v === "match" ? CATEGORY_COLOR.citizen : CATEGORY_COLOR.municipal }} />
+                    </div>
+                    <span className="mt-1 block text-[11px] text-ink-muted">{v === "match" ? "✓ matches" : v === "under" ? `${Math.round((1 - r.ours_mw / r.reported_mw) * 100)}% not visible by name` : "more in the list than announced"}</span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 text-xs text-ink-muted">
+        Dashed outline: what the company announced; filled bar: what the award list shows for that group.
+        Linked figures open the company or press source.
+      </p>
     </div>
   );
 }

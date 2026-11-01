@@ -118,7 +118,10 @@ Sources and licences: `docs/sources.md`.
    Cross-check with company press releases (`docs/auction-crosscheck.md`):
    exact matches for groups bidding under their own name (RWE, PNE, ABO,
    EnBW); wpd, Qualitas and Alterric undercounted. "UGE … Umweltgerechte
-   Energie" companies turned out to be UKA and are now merged.
+   Energie" companies turned out to be UKA and are now merged. WP57 added
+   `config/auction_reviewed.yaml` (hand assignments with sources, 20
+   company-reported totals) and a comparison table on the site: 8 of 20
+   reported totals match within 4 %; wpd sees ~50 % by name.
 2. **Award list totals differ from published totals** for Nov 2025 (+5%) and
    Aug 2025 (+1.4%). The check tolerates this up to ±10%.
 3. **Nov 2025 `volume_kw` is null:** that page words the tender volume

@@ -439,8 +439,15 @@ year. Settings: `pipeline/config/wind_yield.yaml`.
 | `fleet` | all onshore wind in operation by operator group (MaStR operator names): `total_mw`, `groups[]`, `mw_by_category` |
 | `drivers[category]` | `awarded_mw`, `awards`, `distinct_bidders`, `median_award_mw`, `quality_pct_avg`, `full_load_hours_avg`, `median_months_to_operation`, `realised_share` (awards before `drivers_realised_cutoff`) |
 | `model` | wind source, losses, power coefficient, reference site, correction tables |
+| `company_reported[]` | company-announced totals per round next to ours: `group`, `round`, `bid_date`, `reported_mw`, `qualifier` (exact/about/over), `ours_mw`, `note`, `source` |
+| `reviewed_awards` | number of awards assigned by hand |
 
-**`auctions/awards.json`** adds per award: `rank_group`, `kw_source`,
+**Reviewed attributions:** `pipeline/config/auction_reviewed.yaml` assigns
+awards to groups where a public source names the project (overrides the name
+rules; each entry cites its source) and lists company-reported totals.
+
+**`auctions/awards.json`** adds per award: `attribution` (`reviewed`, `name`,
+`none`), `rank_group`, `kw_source`,
 `kw_in_mastr`, `kw_operating`, `months_to_operation`, `hub_height_m`,
 `rotor_diameter_m`, `wind_ms`, `full_load_hours`, `quality_pct`,
 `correction_factor`, `received_ct_est`, `lat`/`lon` (centre of its turbines,
@@ -448,7 +455,9 @@ year. Settings: `pipeline/config/wind_yield.yaml`.
 
 **Check:** as v1.5, plus ≥ 90 % of turbines with a MaStR id found; yield
 estimate for ≥ 80 % of each round's capacity; average full-load hours
-between 1,500 and 4,500; no location for a bidder without a company name.
+between 1,500 and 4,500; no location for a bidder without a company name;
+every reviewed assignment matches at least one award and names a known group;
+every reported total has a source and a known round.
 
 ---
 

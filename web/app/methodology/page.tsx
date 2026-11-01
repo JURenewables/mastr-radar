@@ -199,7 +199,10 @@ export default async function Methodology() {
           <p>
             Bidders are sorted into company groups and types (developers and IPPs, utilities and
             Stadtwerke, citizen and local) by keywords in their company name. Many bidders are project
-            companies whose name does not reveal their owner; they stay “not attributed”. Names of
+            companies whose name does not reveal their owner; they stay “not attributed”, unless a
+            company announcement names the project, in which case the award is assigned by hand
+            (each assignment cites its source). Company-announced round totals are shown next to
+            ours as a cross-check. Names of
             bidders that are not companies are never shown. Types: developers and IPPs (including
             Alterric), utilities (RWE, EnBW, Vattenfall, Uniper, …), Stadtwerke and municipal companies
             (including enercity and Trianel), citizen and local, not attributed.
