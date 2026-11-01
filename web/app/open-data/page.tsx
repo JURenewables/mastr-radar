@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Header } from "@/components/layout/Header";
+import { AI_PROMPT, QUESTIONS, SOURCES } from "@/lib/aiGuide";
 import { buildCatalog } from "@/lib/catalog";
 import { formatDate } from "@/lib/format";
 
@@ -41,6 +42,32 @@ export default async function OpenData() {
             <p className="font-bold">Data contract v{c.contract}</p>
             <p className="text-sm text-ink-muted">Every field, unit and rule</p>
           </a>
+        </div>
+
+        <h2 className="mt-14 text-3xl">Point your AI here</h2>
+        <p className="mt-3 max-w-2xl text-ink-muted">Paste this into ChatGPT, Claude or any agent that can browse:</p>
+        <pre className="mt-3 whitespace-pre-wrap rounded-[20px] bg-surface p-5 text-sm">{AI_PROMPT}</pre>
+
+        <h2 className="mt-14 text-3xl">Which file answers which question</h2>
+        <div className="mt-5 divide-y divide-rule border-y border-rule">
+          {QUESTIONS.map((q) => (
+            <div key={q.q} className="py-4">
+              <p className="font-semibold">{q.q}</p>
+              <p className="mt-1 text-sm text-ink-muted"><code className="rounded bg-surface px-1.5">{q.files.join(", ")}</code> · {q.how}</p>
+            </div>
+          ))}
+        </div>
+
+        <h2 className="mt-14 text-3xl">Primary sources</h2>
+        <p className="mt-3 max-w-2xl text-ink-muted">Where the data comes from, and how to go deeper yourself.</p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {SOURCES.map((x) => (
+            <a key={x.name} href={x.url} target="_blank" rel="noreferrer" className="rounded-[20px] border border-rule p-5 hover:bg-surface">
+              <p className="font-bold">{x.name}{x.key && <span className="ml-2 rounded-full bg-surface px-2 py-0.5 text-[11px] font-semibold">API key</span>}</p>
+              <p className="mt-1 text-sm">{x.what}</p>
+              <p className="mt-1 text-xs text-ink-muted">{x.access} Licence: {x.licence}.</p>
+            </a>
+          ))}
         </div>
 
         <h2 className="mt-14 text-3xl">Datasets</h2>

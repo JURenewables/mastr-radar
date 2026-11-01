@@ -1,3 +1,4 @@
+import { QUESTIONS, SOURCES } from "@/lib/aiGuide";
 import { buildCatalog } from "@/lib/catalog";
 
 export const dynamic = "force-static";
@@ -21,6 +22,18 @@ export async function GET() {
         `- [${d.title}](${d.url}): ${d.description} Format: ${d.format}.${d.rows != null ? ` Rows: ${d.rows}.` : ""} Licence: ${d.licence.id}. Attribution: ${d.attribution}.`,
     ),
     `- Day files: ${c.day_files.url_template} for ${c.day_files.first} to ${c.day_files.last} (${c.day_files.count} days): quarter-hourly generation per technology and demand (MW) for Germany and the 4 grid areas (SMARD), hourly radiation and wind per DWD station. Licence: CC-BY-4.0. Attribution: Bundesnetzagentur | SMARD.de; Deutscher Wetterdienst.`,
+    "",
+    "## Which file answers which question",
+    "",
+    ...QUESTIONS.map((q) => `- ${q.q} → ${q.files.join(", ")}. ${q.how}`),
+    "",
+    "## Pages (human-readable, same data)",
+    "",
+    `- ${c.site}/ energy-transition monitor · ${c.site}/wind and ${c.site}/solar Germany's auctions · ${c.site}/grid Germany's grid · ${c.site}/players companies worldwide · ${c.site}/explore filter and download · ${c.site}/methodology definitions and limits`,
+    "",
+    "## Primary sources (to go deeper yourself)",
+    "",
+    ...SOURCES.map((s) => `- ${s.name}: ${s.what}. Access: ${s.access} Licence: ${s.licence}.${s.key ? " Needs your own API credentials." : ""}`),
     "",
     "## Notes",
     "",
