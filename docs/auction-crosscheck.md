@@ -57,6 +57,21 @@ undercount it, sometimes by half. One group rule was wrong and is fixed (UGE →
 - wpd and UKA publish totals only, no project names, so their gaps stay
   visible rather than being filled by guesswork.
 
+## Office attribution (WP58)
+
+Station 2 now keeps each organisation's office address from the MaStR
+company register. An unknown bidder counts for a group when the operator
+company of its turbines sits at an office where the named companies belong to
+that group (e.g. wpd's head office, Stephanitorsbollwerk 3, Bremen, hosts the
+operators of ~1.2 GW of awards that carry no wpd name).
+
+Result: "not attributed" 45 % → 30 % of capacity; 13 of 20 company-reported
+round totals now match within ~4 % (new exact or near-exact: Qualitas Feb and
+May 2026, Alterric May 2025, Energiekontor Feb 2025; wpd Feb and Nov 2025 at
+91–94 %). Two false positives (ABO Aug 2026, Alterric Feb 2025: companies
+only managed from their office) are excluded with sources in
+`office_exclusions`. Still short: wpd 2026 rounds (~62 %), UKA (62–81 %).
+
 ## What it means for the site
 
 - Rankings of companies that bid under their own name (RWE, EnBW, PNE, ABO,

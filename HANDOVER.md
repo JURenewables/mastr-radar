@@ -122,6 +122,10 @@ Sources and licences: `docs/sources.md`.
    `config/auction_reviewed.yaml` (hand assignments with sources, 20
    company-reported totals) and a comparison table on the site: 8 of 20
    reported totals match within 4 %; wpd sees ~50 % by name.
+   WP58 office attribution (MaStR company register addresses, internal file
+   `data/extract/operators.parquet`) cut "not attributed" to 30 % and brought
+   13 of 20 reported totals within ~4 %. WP59 split the site: `/` energy
+   transition, `/wind` wind & auctions (incl. WP60 auction map).
 2. **Award list totals differ from published totals** for Nov 2025 (+5%) and
    Aug 2025 (+1.4%). The check tolerates this up to ±10%.
 3. **Nov 2025 `volume_kw` is null:** that page words the tender volume

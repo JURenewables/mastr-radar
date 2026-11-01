@@ -408,6 +408,19 @@ add up; award rows match the rounds. Licence: see `docs/sources.md`.
 Changes the v1.5 auction files; nothing else. Until approved, the files exist
 only on the branch preview and `contract_version` stays `"1.5"`.
 
+**Station 2 adds `data/extract/operators.parquet`** (internal, never
+published): every organisation in `Marktakteure` (natural persons left out,
+D4) with `operator_id`, `name`, `street`, `house_number`, `postcode`, `city`,
+`register_court` (decoded), `register_number`. Check: contract columns,
+≥ 100,000 rows, unique ids. Written by `mastr-radar extract` (or
+`extract-operators` on its own).
+
+**Office attribution:** an unknown bidder counts for a group when the
+operator company of its turbines (or the bidder itself) is registered at an
+office where every named company belongs to that group, or at least 2 do and
+make up ≥ 60 % of the named companies. Reviewed `addresses` take precedence;
+`office_exclusions` (with source) switch the rule off for single bidders.
+
 **Rounds:** every onshore round since May 2019 (34 so far), listed in
 `settings.yaml → auctions.onshore_rounds` with their page `path`. Earlier
 rounds list old register numbers (A…) that cannot be linked to MaStR. Lists
@@ -441,13 +454,15 @@ year. Settings: `pipeline/config/wind_yield.yaml`.
 | `model` | wind source, losses, power coefficient, reference site, correction tables |
 | `company_reported[]` | company-announced totals per round next to ours: `group`, `round`, `bid_date`, `reported_mw`, `qualifier` (exact/about/over), `ours_mw`, `note`, `source` |
 | `reviewed_awards` | number of awards assigned by hand |
+| `attribution_kw` | awarded kW by method: `reviewed`, `name`, `office`, `none` |
+| `points` | map of awards: `groups[]` and `rounds[round]` = flat integers, 6 per award (lon×100, lat×100, kW/100, category index, group index or −1, full-load hours or 0); only awards with a public location (companies, D4) |
 
 **Reviewed attributions:** `pipeline/config/auction_reviewed.yaml` assigns
 awards to groups where a public source names the project (overrides the name
 rules; each entry cites its source) and lists company-reported totals.
 
 **`auctions/awards.json`** adds per award: `attribution` (`reviewed`, `name`,
-`none`), `rank_group`, `kw_source`,
+`office`, `none`), `rank_group`, `kw_source`,
 `kw_in_mastr`, `kw_operating`, `months_to_operation`, `hub_height_m`,
 `rotor_diameter_m`, `wind_ms`, `full_load_hours`, `quality_pct`,
 `correction_factor`, `received_ct_est`, `lat`/`lon` (centre of its turbines,

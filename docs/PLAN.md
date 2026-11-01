@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: Phase 8 extension (WP52–56: auction yield, bidder types, winners race, players) on the branch preview, waiting for your approval of contract v1.6. Phase 7 live except WP41 (grid map: waits for OSM licence OK and your ENTSO-E / netztransparenz keys)**
+**You are here: Phase 8 extension (WP52–60: auction yield, bidder types, winners race, players, office attribution, /wind page, auction map) on the branch preview, waiting for your approval of contract v1.6. Phase 7 live except WP41 (grid map: waits for OSM licence OK and your ENTSO-E / netztransparenz keys)**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -238,6 +238,15 @@ real stress signals (line loading itself is not published).
 - [x] **WP57. Reviewed attributions and company cross-check:**
   `config/auction_reviewed.yaml` (hand assignments with sources, company-
   reported totals); comparison table on the site. UGE → UKA.
+- [x] **WP58. Office attribution:** station 2 writes `operators.parquet`
+  (organisations with office address, internal); unknown bidders grouped by
+  the office of their operator company. "Not attributed" 45 % → 30 %;
+  13 of 20 company-reported totals match within ~4 %.
+- [x] **WP59. Site split:** start page = energy-transition monitor and maps;
+  new `/wind` page = turbines, makers, models, repowering and all auction
+  sections.
+- [x] **WP60. Auction map:** awarded projects per round (or all), by bidder
+  type and company, with details on tap.
 - [ ] **WP45b. Better attribution (continue):** map project companies to their parent
   groups (e.g. from MaStR operator data or a reviewed list) to shrink the
   "not attributed" share. Older rounds (2017–2024).
