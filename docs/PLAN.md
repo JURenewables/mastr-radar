@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.7 live (1 Nov 2026): Monitor, Solar, Wind, Grid, Players, AI guide. Next: WP73 data platform (Netztransparenz, ENTSO-E once keys are in GitHub Secrets), WP67 grid distance and WP41 grid map (need OSM decision), WP45b attribution**
+**You are here: contract v1.8 live (2 Nov 2026): Monitor, Solar, Wind, Grid (incl. TSO redispatch and cross-border flows), Players, AI guide. Next: WP67 grid distance and WP41 grid map (need OSM decision), WP45b attribution, WP73 query endpoint**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -284,6 +284,10 @@ real stress signals (line loading itself is not published).
   mix, momentum; Wind and Solar pages labelled as Germany. Follow-up: add
   Iberdrola, Engie, Encavis, Trianel/enercity, Nordex/Enercon/Vestas
   orders by customer.
+- [x] **WP74. Grid APIs** (contract v1.8): Netztransparenz redispatch
+  since 2021 and ENTSO-E cross-border flows, fetched with GitHub Secrets by a
+  separate daily workflow; Grid page sections "Redispatch by the TSOs" and
+  "Cross-border flows". Open: written permission from the TSOs (optional).
 - [ ] **WP73. AI-friendly data platform:** see `docs/platform-plan.md`.
 - [ ] **WP67. Grid distance:** distance to the nearest substation (needs the
   OpenStreetMap ODbL decision).

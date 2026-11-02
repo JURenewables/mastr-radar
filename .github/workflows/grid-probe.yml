@@ -1,0 +1,68 @@
+# Grid APIs (contract v1.8): daily on main and on pushes to work branches.
+# Checks access with the repository secrets, fetches Netztransparenz redispatch
+# and ENTSO-E flows, builds the two aggregate files and commits only those.
+# Prints summaries only, never secrets. Independent of the MaStR update: if one
+# fails, the other still runs, and the site keeps the last good files.
+name: Grid API update
+
+on:
+  schedule:
+    - cron: "41 7 * * *"  # daily on main, after the hub update
+  workflow_dispatch:
+  push:
+    branches: ["claude/**"]
+    paths:
+      - pipeline/src/mastr_radar/gridapis.py
+      - pipeline/src/mastr_radar/gridextract.py
+      - pipeline/src/mastr_radar/redispatch.py
+      - .github/workflows/grid-probe.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: grid-branch-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NETZTRANSPARENZ_CLIENT_ID: ${{ secrets.NETZTRANSPARENZ_CLIENT_ID }}
+      NETZTRANSPARENZ_CLIENT_SECRET: ${{ secrets.NETZTRANSPARENZ_CLIENT_SECRET }}
+      ENTSOE_TOKEN: ${{ secrets.ENTSOE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install pipeline
+        working-directory: pipeline
+        run: uv sync --python 3.12
+      - uses: actions/cache@v4
+        with:
+          path: data/grid
+          key: grid-apis-${{ github.run_id }}
+          restore-keys: grid-apis-
+      - name: Probe
+        working-directory: pipeline
+        run: uv run mastr-radar grid-fetch --probe
+      - name: "G1: fetch"
+        working-directory: pipeline
+        run: uv run mastr-radar grid-fetch
+      - name: "G2: extract and check"
+        working-directory: pipeline
+        run: uv run mastr-radar grid-extract
+      - name: "G3: build and check"
+        working-directory: pipeline
+        run: uv run mastr-radar grid-build
+      - name: Commit the aggregate files to the branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/public/data/grid/redispatch.json web/public/data/grid/flows.json web/public/data/manifest.json
+          if git diff --cached --quiet; then echo "No change."; exit 0; fi
+          git commit -m "Update grid redispatch and flow files"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

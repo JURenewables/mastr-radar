@@ -10,6 +10,7 @@ export const QUESTIONS: { q: string; files: string[]; how: string }[] = [
   { q: "How do the players compare worldwide (staff, EBITDA, debt, markets, mix)?", files: ["auctions/players.json", "auctions/company_facts.json"], how: "players.json: one record per company with sources and German results; company_facts.json: business model, financing, exits, turbine makers worldwide." },
   { q: "Is the market overheating? What is awarded but not built?", files: ["auctions/market_risk.json"], how: "Per round: average award vs ceiling, awarded vs running capacity, wind deadline; exposure of companies in trouble; submitted bids vs volume." },
   { q: "Which grid operators and TSO areas carry the renewables? Where is big demand?", files: ["grid/grid.json"], how: "Operators (top 25, concentration), control areas, voltage levels, district map data, large consumers with locations, congestion costs and rules with sources." },
+  { q: "Where and how much do the TSOs curtail renewables (redispatch), and which plants replace them? How much does Germany import and export?", files: ["grid/redispatch.json", "grid/flows.json"], how: "redispatch.json: monthly TSO redispatch since 2021 by energy and direction, per TSO, top substations and plants (aggregates of Netztransparenz data); flows.json: physical flows with 11 neighbours (ENTSO-E)." },
   { q: "How did generation and demand look on a given day?", files: ["days/YYYY-MM-DD.json"], how: "Quarter-hourly generation per technology and demand for Germany and the four TSO areas (SMARD), plus DWD station weather." },
 ];
 
