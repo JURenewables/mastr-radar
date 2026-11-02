@@ -316,6 +316,32 @@ def hub_fetch() -> None:
     typer.echo(f"DWD: {m} files downloaded.")
 
 
+@app.command("grid-fetch")
+def grid_fetch(
+    probe: bool = typer.Option(False, help="Only test access and print summaries."),
+) -> None:
+    """Grid G1 (v1.8 draft): Netztransparenz redispatch and ENTSO-E flows into data/grid/.
+    Needs NETZTRANSPARENZ_CLIENT_ID/_SECRET and ENTSOE_TOKEN in the environment."""
+    from datetime import date
+
+    from mastr_radar import gridapis as ga
+
+    s = load_settings()
+    if probe:
+        for line in ga.probe(date.today()):
+            typer.echo(line)
+        return
+    folder = s.data_dir / "grid"
+    try:
+        typer.echo(
+            f"Redispatch: {ga.fetch_redispatch(folder / 'nt', date.today())} months downloaded."
+        )
+        typer.echo(f"Flows: {ga.fetch_flows(folder / 'entsoe', date.today())} files downloaded.")
+    except ga.ApiError as exc:
+        typer.echo(f"FETCH FAILED: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+
 @app.command("hub-build")
 def hub_build() -> None:
     """Hub H2: build day files in web/public/data/days/, then check them."""
