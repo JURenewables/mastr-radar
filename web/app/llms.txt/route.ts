@@ -29,7 +29,7 @@ export async function GET() {
     "",
     "## Pages (human-readable, same data)",
     "",
-    `- ${c.site}/ energy-transition monitor · ${c.site}/wind and ${c.site}/solar Germany's auctions · ${c.site}/grid Germany's grid · ${c.site}/players companies worldwide · ${c.site}/explore filter and download · ${c.site}/methodology definitions and limits`,
+    `- ${c.site}/ start page · ${c.site}/monitor energy-transition monitor · ${c.site}/wind and ${c.site}/solar Germany's auctions · ${c.site}/grid Germany's grid · ${c.site}/players companies worldwide · ${c.site}/explore filter and download · ${c.site}/methodology definitions and limits`,
     "",
     "## Primary sources (to go deeper yourself)",
     "",

@@ -135,8 +135,8 @@ auctions:
     - {id: INN_Gebotstermin010421, programme: Innovation, path: Gebotstermin010421/Innov_010421_node.html}  # 2021-04-01
     - {id: INN_Gebortstermin_210801, programme: Innovation, path: Gebortstermin_210801/Innov_010821_node.html}  # 2021-08-01
     - {id: INN_Gebortstermin_010422, programme: Innovation, path: Gebortstermin_010422/start.html}  # 2022-04-01
-    - {id: INN_Gebotstermin01122022, programme: Innovation, path: Gebotstermin01122022/start.html}  # 2022-12-01
-    - {id: INN_Gebotstermin01052023, programme: Innovation, path: Gebotstermin01052023/start.html}  # 2023-05-01
+    - {id: INN_Gebotstermin01122022, programme: Innovation, path: Gebotstermin01122022/start.html, no_list: true}  # 2022-12-01
+    - {id: INN_Gebotstermin01052023, programme: Innovation, path: Gebotstermin01052023/start.html, no_list: true}  # 2023-05-01
     - {id: INN_Gebotstermin01092023, programme: Innovation, path: Gebotstermin01092023/start.html}  # 2023-09-01
     - {id: INN_GT1052024, programme: Innovation, path: GT1052024/start.html}  # 2024-05-01
     - {id: INN_GT1092024, programme: Innovation, path: GT1092024/start.html}  # 2024-09-01

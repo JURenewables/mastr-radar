@@ -1,7 +1,8 @@
 "use client";
 
-// The Wind & auctions page as one storyline: the machines, the price, where
-// the wind farms go, who wins, and why. Every section ends with takeaways and
+// The Wind & auctions page as one storyline: key findings first, then who
+// wins, the price, where the wind farms go, why developers win, the strain on
+// the market, and the machines behind it. Every section ends with takeaways and
 // caveats computed from the data.
 import type { ReactNode } from "react";
 
@@ -17,12 +18,13 @@ import { CrossTech, crossTakeaways, SuccessSection } from "./Strategy";
 import { BrandRace, BrandShares, TurbineModels } from "./WindIndustry";
 
 export const WIND_SECTIONS = [
-  ["machines", "1 Machines"],
+  ["glance", "At a glance"],
+  ["who", "1 Who wins"],
   ["price", "2 Price"],
   ["where", "3 Where"],
-  ["who", "4 Who wins"],
-  ["why", "5 Why"],
-  ["strain", "6 Strain"],
+  ["why", "4 Why"],
+  ["strain", "5 Strain"],
+  ["machines", "6 Machines"],
 ] as const;
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
@@ -49,9 +51,9 @@ export function WindStory({ data, asOf, date }: { data: MonitorData | null; asOf
 
   const source = au ? <>Source: Bundesnetzagentur, onshore wind auctions, linked to the Marktstammdatenregister as of {date}. Data processed.</> : undefined;
 
-  return (
+  const machines = (
     <>
-      <Chapter id="machines" n={1} title="The machines">
+      <Chapter id="machines" n={au ? 6 : 1} title="The machines">
         Germany runs {mw(fleet)} of onshore wind. Three makers build almost all of it, and every
         new turbine is a giant compared with the ones it replaces.
       </Chapter>
@@ -119,12 +121,12 @@ export function WindStory({ data, asOf, date }: { data: MonitorData | null; asOf
         <Repowering data={data} />
       </Section>
 
-      {au && <AuctionChapters data={data} date={date} source={source} />}
     </>
   );
+  return au ? <AuctionChapters data={data} date={date} source={source} machines={machines} /> : machines;
 }
 
-function AuctionChapters({ data, date, source }: { data: MonitorData; date: string; source: ReactNode }) {
+function AuctionChapters({ data, date, source, machines }: { data: MonitorData; date: string; source: ReactNode; machines: ReactNode }) {
   const au = data.auctions!;
   const rounds = au.rounds;
   const first = rounds[0];
@@ -198,6 +200,112 @@ function AuctionChapters({ data, date, source }: { data: MonitorData; date: stri
 
   return (
     <>
+      <Glance data={data} />
+
+      <Chapter id="who" n={1} title="Who wins">
+        Developers and independent power producers win most of the capacity; utilities and Stadtwerke
+        play a small part. Pick a year, follow the race, then zoom into a single company.
+      </Chapter>
+
+      <Section
+        id="winners"
+        eyebrow={`Auction winners ${lastYear}`}
+        title={`So far in ${lastYear}, ${topNow.map((x) => x.group).join(", ")} lead the named winners`}
+        subtitle="Awarded capacity by company group, with citizen wind farms and unknown owners as their own bars. Checked against what the companies announce."
+        asOf={date}
+        source={source}
+        takeaways={[
+          `${topNow[0]?.group} won ${mw((topNow[0]?.kw ?? 0) / 1000)} in ${lastYear} so far, ${pct(topNow[0]?.share ?? 0)} of the year's capacity.`,
+          `Owners are found by company name (${pct(att.name / attT)}), office address (${pct(att.office / attT)}) and by hand (${pct(att.reviewed / attT)}); ${pct(att.none / attT)} stays unknown.`,
+          `Where a company bids under its own name, our totals match its announcements to the MW.`,
+        ]}
+        caveats={["Groups that bid through neutral project companies are still undercounted; see the comparison table."]}
+      >
+        <div className="space-y-10">
+          <AuctionWinners a={au} brands={data.stats.wind_industry.brands} />
+          <AuctionCrossCheck a={au} />
+        </div>
+      </Section>
+
+      <Section
+        id="auction-race"
+        eyebrow="Since 2019"
+        title={`Among known bidders, developers and IPPs won ${pct(devKnown(yi))} of the capacity in ${lastYear}, after ${pct(devKnown(0))} in ${years[0]}`}
+        subtitle="Press play: who won the most auction capacity, year by year, and how the cake is shared."
+        note={`The ${lastYear} figures cover the rounds awarded so far.`}
+        asOf={date}
+        source={source}
+        takeaways={[
+          `Since ${years[0]}: developers & IPPs at least ${pct(catAll("developer"))}, citizen & local ${pct(catAll("citizen"))}, utilities ${pct(catAll("utility"))}, Stadtwerke ${pct(catAll("municipal"))} of all awarded capacity.`,
+          `The largest named winners since ${years[0]}: ${au.winners_by_year.all.filter((x) => !x.bucket).slice(0, 3).map((x) => `${x.group} (${mw(x.kw / 1000)})`).join(", ")}.`,
+        ]}
+        caveats={[`${pct(au.unattributed_share)} of the capacity has no known owner; most of it likely belongs to developers' project companies.`]}
+      >
+        <div className="space-y-12">
+          <AuctionRace a={au} />
+          <AuctionCake a={au} />
+        </div>
+      </Section>
+
+      {au.dynamics && <RiseFallSection dyn={au.dynamics} facts={data.facts} tech="wind" date={date} source={source} />}
+
+      <Section
+        id="company"
+        eyebrow="Company deep dive"
+        title="Pick a company: where it has won, year by year"
+        subtitle="Each dot is one award, coloured by year (the running year in orange). Key figures and takeaways update with the company."
+        asOf={date}
+        source={source}
+      >
+        <CompanyMap
+          a={au}
+          geo={data.districts}
+          profiles={au.company_profiles}
+          years={au.race.years}
+          takeaways={companyTakeaways}
+          stats={(p) => (
+            <>
+              <Stat label="Site quality (est.)" value={p.quality_pct_avg == null ? "–" : `${p.quality_pct_avg}%`} sub={p.full_load_hours_avg ? `≈ ${p.full_load_hours_avg.toLocaleString("en-GB")} full-load hours` : undefined} />
+              <Stat label="Median award" value={`${p.median_award_mw} MW`} sub={`${p.states} states`} />
+              <Stat label="Turbine maker" value={Object.keys(p.kw_by_maker)[0] ?? "–"} sub={(() => { const m = Object.values(p.kw_by_maker); const t = m.reduce((x, y) => x + y, 0); return t ? `${Math.round((m[0] / t) * 100)}% of its turbines` : undefined; })()} />
+            </>
+          )}
+        />
+      </Section>
+
+      <Section
+        id="partners"
+        eyebrow="Turbines and partners"
+        title={houses.length ? `${houses.slice(0, 3).map((h) => `${h.g} builds ${h.m}`).join(", ")}: many developers stick to one maker` : "Which turbines the winners choose"}
+        subtitle="Turbine makers in each company's awarded projects, as registered in MaStR."
+        asOf={date}
+        source={source}
+        takeaways={[
+          houses.length ? `Single-maker houses (≥ 70 %): ${houses.map((h) => `${h.g} (${h.m} ${pct(h.s)})`).join(", ")}.` : "",
+          multi.length ? `Multi-vendor buyers: ${multi.map((m) => m.g).join(", ")}.` : "",
+          "Alterric's Enercon preference has a reason: the Aloys Wobben Stiftung, Enercon's owner, co-owns Alterric.",
+          "Framework agreements and repeat orders lower prices and planning risk, which matters when every tenth of a cent counts.",
+        ].filter(Boolean)}
+        caveats={["The maker is what the developer registered for the planned turbines; it can change before construction."]}
+      >
+        <TurbinePartners a={au} brands={data.stats.wind_industry.brands} />
+      </Section>
+
+      {data.solar && data.solar.cross_tech.length > 0 && (
+        <Section
+          id="wind-and-solar"
+          eyebrow="Wind and solar"
+          title={(() => { const both = data.solar.cross_tech.filter((c) => c.wind_kw_since_2023 > 0 && c.solar_kw_since_2023 > 0); return `${both.length} of the larger groups win in both wind and solar auctions`; })()}
+          subtitle="Awarded capacity since 2023 per company group in onshore wind and ground-mounted solar auctions."
+          asOf={date}
+          source={source}
+          takeaways={crossTakeaways(data)}
+          caveats={["Groups found by name and office address; solar attribution is weaker than wind (more project companies)."]}
+        >
+          <CrossTech data={data} />
+        </Section>
+      )}
+
       <Chapter id="price" n={2} title="The price of wind">
         Since 2019, {rounds.length} onshore auction rounds awarded {mw(totalKw / 1000)}. Prices rose to the
         legal ceiling in 2023, then competition came back and pushed them to their lowest level since 2018.
@@ -264,111 +372,7 @@ function AuctionChapters({ data, date, source }: { data: MonitorData; date: stri
         <AuctionYield a={au} />
       </Section>
 
-      <Chapter id="who" n={4} title="Who wins">
-        Developers and independent power producers win most of the capacity; utilities and Stadtwerke
-        play a small part. Pick a year, follow the race, then zoom into a single company.
-      </Chapter>
-
-      <Section
-        id="winners"
-        eyebrow={`Auction winners ${lastYear}`}
-        title={`So far in ${lastYear}, ${topNow.map((x) => x.group).join(", ")} lead the named winners`}
-        subtitle="Awarded capacity by company group, with citizen wind farms and unknown owners as their own bars. Checked against what the companies announce."
-        asOf={date}
-        source={source}
-        takeaways={[
-          `${topNow[0]?.group} won ${mw((topNow[0]?.kw ?? 0) / 1000)} in ${lastYear} so far, ${pct(topNow[0]?.share ?? 0)} of the year's capacity.`,
-          `Owners are found by company name (${pct(att.name / attT)}), office address (${pct(att.office / attT)}) and by hand (${pct(att.reviewed / attT)}); ${pct(att.none / attT)} stays unknown.`,
-          `Where a company bids under its own name, our totals match its announcements to the MW.`,
-        ]}
-        caveats={["Groups that bid through neutral project companies are still undercounted; see the comparison table."]}
-      >
-        <div className="space-y-10">
-          <AuctionWinners a={au} brands={data.stats.wind_industry.brands} />
-          <AuctionCrossCheck a={au} />
-        </div>
-      </Section>
-
-      <Section
-        id="auction-race"
-        eyebrow="Since 2019"
-        title={`Among known bidders, developers and IPPs won ${pct(devKnown(yi))} of the capacity in ${lastYear}, after ${pct(devKnown(0))} in ${years[0]}`}
-        subtitle="Press play: who won the most auction capacity, year by year, and how the cake is shared."
-        note={`The ${lastYear} figures cover the rounds awarded so far.`}
-        asOf={date}
-        source={source}
-        takeaways={[
-          `Since ${years[0]}: developers & IPPs at least ${pct(catAll("developer"))}, citizen & local ${pct(catAll("citizen"))}, utilities ${pct(catAll("utility"))}, Stadtwerke ${pct(catAll("municipal"))} of all awarded capacity.`,
-          `The largest named winners since ${years[0]}: ${au.winners_by_year.all.filter((x) => !x.bucket).slice(0, 3).map((x) => `${x.group} (${mw(x.kw / 1000)})`).join(", ")}.`,
-        ]}
-        caveats={[`${pct(au.unattributed_share)} of the capacity has no known owner; most of it likely belongs to developers' project companies.`]}
-      >
-        <div className="space-y-12">
-          <AuctionRace a={au} />
-          <AuctionCake a={au} />
-        </div>
-      </Section>
-
-      <Section
-        id="company"
-        eyebrow="Company deep dive"
-        title="Pick a company: where it has won, year by year"
-        subtitle="Each dot is one award, coloured by year (the running year in orange). Key figures and takeaways update with the company."
-        asOf={date}
-        source={source}
-      >
-        <CompanyMap
-          a={au}
-          geo={data.districts}
-          profiles={au.company_profiles}
-          years={au.race.years}
-          takeaways={companyTakeaways}
-          stats={(p) => (
-            <>
-              <Stat label="Site quality (est.)" value={p.quality_pct_avg == null ? "–" : `${p.quality_pct_avg}%`} sub={p.full_load_hours_avg ? `≈ ${p.full_load_hours_avg.toLocaleString("en-GB")} full-load hours` : undefined} />
-              <Stat label="Median award" value={`${p.median_award_mw} MW`} sub={`${p.states} states`} />
-              <Stat label="Turbine maker" value={Object.keys(p.kw_by_maker)[0] ?? "–"} sub={(() => { const m = Object.values(p.kw_by_maker); const t = m.reduce((x, y) => x + y, 0); return t ? `${Math.round((m[0] / t) * 100)}% of its turbines` : undefined; })()} />
-            </>
-          )}
-        />
-      </Section>
-
-      <Section
-        id="partners"
-        eyebrow="Turbines and partners"
-        title={houses.length ? `${houses.slice(0, 3).map((h) => `${h.g} builds ${h.m}`).join(", ")}: many developers stick to one maker` : "Which turbines the winners choose"}
-        subtitle="Turbine makers in each company's awarded projects, as registered in MaStR."
-        asOf={date}
-        source={source}
-        takeaways={[
-          houses.length ? `Single-maker houses (≥ 70 %): ${houses.map((h) => `${h.g} (${h.m} ${pct(h.s)})`).join(", ")}.` : "",
-          multi.length ? `Multi-vendor buyers: ${multi.map((m) => m.g).join(", ")}.` : "",
-          "Alterric's Enercon preference has a reason: the Aloys Wobben Stiftung, Enercon's owner, co-owns Alterric.",
-          "Framework agreements and repeat orders lower prices and planning risk, which matters when every tenth of a cent counts.",
-        ].filter(Boolean)}
-        caveats={["The maker is what the developer registered for the planned turbines; it can change before construction."]}
-      >
-        <TurbinePartners a={au} brands={data.stats.wind_industry.brands} />
-      </Section>
-
-      {data.solar && data.solar.cross_tech.length > 0 && (
-        <Section
-          id="wind-and-solar"
-          eyebrow="Wind and solar"
-          title={(() => { const both = data.solar.cross_tech.filter((c) => c.wind_kw_since_2023 > 0 && c.solar_kw_since_2023 > 0); return `${both.length} of the larger groups win in both wind and solar auctions`; })()}
-          subtitle="Awarded capacity since 2023 per company group in onshore wind and ground-mounted solar auctions."
-          asOf={date}
-          source={source}
-          takeaways={crossTakeaways(data)}
-          caveats={["Groups found by name and office address; solar attribution is weaker than wind (more project companies)."]}
-        >
-          <CrossTech data={data} />
-        </Section>
-      )}
-
-      {au.dynamics && <RiseFallSection dyn={au.dynamics} facts={data.facts} tech="wind" date={date} source={source} />}
-
-      <Chapter id="why" n={5} title="Why developers win">
+      <Chapter id="why" n={4} title="Why developers win">
         Lean teams, project finance and fast decisions beat balance sheets. The data shows the
         pattern; the assessment below explains it.
       </Chapter>
@@ -396,12 +400,53 @@ function AuctionChapters({ data, date, source }: { data: MonitorData; date: stri
 
       {data.risk?.wind && (
         <>
-          <Chapter id="strain" n={6} title="A market under strain">
+          <Chapter id="strain" n={5} title="A market under strain">
             Too many projects chase too little volume. Prices fall faster than costs, and the first winners are failing.
           </Chapter>
           <OverheatSection data={data} tech="wind" date={date} />
         </>
       )}
+      {machines}
     </>
+  );
+}
+
+
+/** Key findings at the top of the page, each linking to its chapter. */
+function Glance({ data }: { data: MonitorData }) {
+  const au = data.auctions!;
+  const r = au.rounds;
+  const last = r.at(-1)!;
+  const peak = r.slice(-12).reduce((m, x) => (x.avg_ct > m.avg_ct ? x : m), r.at(-12) ?? r[0]);
+  const risk = data.risk?.wind;
+  const bid = risk?.market.at(-1);
+  const g = [...(au.dynamics?.groups ?? [])].sort((a, b) => b.mw - a.mw);
+  const rising = (au.dynamics?.groups ?? []).filter((x) => x.status === "rising").sort((a, b) => b.momentum_pp - a.momentum_pp);
+  const fading = (au.dynamics?.groups ?? []).filter((x) => x.status === "fading").sort((a, b) => a.momentum_pp - b.momentum_pp);
+  const years = au.race.years;
+  const tot = sum(years.map((_, i) => sum(Object.values(au.kw_by_category_year).map((v) => v[i]))));
+  const share = (c: AuctionCategory) => sum(au.kw_by_category_year[c]) / (tot || 1);
+  const items: { href: string; label: string; value: string; text: string }[] = [
+    { href: "#auctions", label: "Price", value: `${last.avg_ct.toFixed(2)} ct`, text: `Average award in ${roundLabel(last.bid_date)}, ${pct(1 - last.avg_ct / peak.avg_ct)} below ${roundLabel(peak.bid_date)}.` },
+    ...(bid ? [{ href: "#overheating", label: "Competition", value: `${(bid.submitted_mw / bid.tender_mw).toFixed(1)}×`, text: `${mw(bid.submitted_mw)} bid for ${mw(bid.tender_mw)} in ${roundLabel(bid.bid_date)}.` }] : []),
+    { href: "#auction-race", label: "Top winners since 2019", value: g[0] ? `${g[0].group}` : "–", text: g.slice(0, 3).map((x) => `${x.group} ${mw(x.mw)}`).join(", ") + "." },
+    ...(rising.length ? [{ href: "#rise-and-fall", label: "Rising and fading", value: rising[0].group, text: `Gaining: ${rising.slice(0, 3).map((x) => x.group).join(", ")}. Losing share: ${fading.slice(0, 3).map((x) => x.group).join(", ")}.` }] : []),
+    { href: "#players", label: "Developers vs utilities", value: `${pct(share("developer"))}`, text: `of capacity went to developers and IPPs (at least); utilities and Stadtwerke ${pct(share("utility") + share("municipal"))}.` },
+    ...(risk ? [{ href: "#overheating", label: "Not yet built", value: mw(risk.unbuilt_kw / 1000), text: `of awarded wind is not running yet; ${mw(risk.unbuilt_expiring_12m_kw / 1000)} must be within 12 months.` }] : []),
+  ];
+  return (
+    <section id="glance" className="scroll-mt-28 border-t-4 border-ink pt-10 pb-4 sm:pt-14">
+      <p className="figures text-sm font-bold text-accent">At a glance</p>
+      <h2 className="mt-2 max-w-3xl text-4xl leading-[1.02] sm:text-6xl">The German onshore wind market in six numbers</h2>
+      <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((it) => (
+          <a key={it.label} href={it.href} className="group rounded-[20px] bg-surface p-5 transition-colors hover:bg-rule">
+            <p className="text-sm text-ink-muted">{it.label}</p>
+            <p className="figures mt-1 text-3xl font-extrabold tracking-tight">{it.value}</p>
+            <p className="mt-1 text-sm">{it.text} <span aria-hidden className="text-accent">→</span></p>
+          </a>
+        ))}
+      </div>
+    </section>
   );
 }

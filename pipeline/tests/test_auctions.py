@@ -350,3 +350,14 @@ def test_dynamics_status():
     assert st["Riser"] == "rising"
     steady = next(g for g in out["groups"] if g["group"] == "Steady")
     assert steady["hit_rate"] == 1.0
+
+
+def test_fetch_skips_rounds_without_published_list(tmp_path):
+    import pytest
+
+    from mastr_radar import auctions
+
+    (tmp_path / "R1.html").write_text("<html>no list here</html>", encoding="utf-8")
+    assert auctions.fetch([{"id": "R1", "path": "x", "no_list": True}], tmp_path, grids=False) == 0
+    with pytest.raises(auctions.AuctionCheckError, match="no award list"):
+        auctions.fetch([{"id": "R1", "path": "x"}], tmp_path, grids=False)
