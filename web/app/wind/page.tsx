@@ -33,9 +33,9 @@ export default async function WindPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Germany · Onshore wind</p>
           <h1 className="mt-4 max-w-4xl text-[2.4rem] leading-[1.04] sm:text-6xl">Germany&rsquo;s wind &amp; auctions</h1>
           <p className="mt-5 max-w-2xl text-lg text-ink-muted">
-            Who builds Germany&rsquo;s wind turbines, which models go up, and who wins the onshore
-            wind auctions: prices, winners, where the awarded projects are, how windy their sites
-            are, and why developers keep winning.
+            Germany&rsquo;s onshore wind auctions: what prices were awarded and on how windy sites,
+            who wins, which turbines they build, where the projects go, why developers keep winning,
+            and the strain on an overheating market.
           </p>
           <p className="mt-3 max-w-2xl text-sm text-ink-muted">
             Everything on this page covers Germany only. For the same companies worldwide (size,
