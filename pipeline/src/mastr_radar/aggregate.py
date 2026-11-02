@@ -212,6 +212,21 @@ def build(
         from mastr_radar import players
 
         files += players.build(out_dir)
+    from mastr_radar import redispatch as rdp
+
+    # Grid API files (v1.8 draft) are built from data/grid when present (grid run);
+    # otherwise the last good files stay and keep their manifest entries.
+    built = (
+        rdp.build(units_path.parent, out_dir, as_of)
+        if (units_path.parent / "redispatch.parquet").exists()
+        else []
+    )
+    files += built
+    for name in (rdp.REDISPATCH_FILE, rdp.FLOWS_FILE):
+        if (out_dir / name).exists() and name not in {f["name"] for f in built}:
+            data = json.loads((out_dir / name).read_text())
+            rows = len(data.get("monthly", data.get("monthly_net_import_gwh", [])))
+            files.append(_file_entry(out_dir, name, rows))
     grid_ready = (units_path.parent / "grid_units.parquet").exists()
     if grid_ready:
         from mastr_radar import grid
@@ -331,6 +346,15 @@ def check_explorer_files(
             players.check(out_dir)
         except players.PlayersCheckError as exc:
             problems.append(str(exc))
+    from mastr_radar import redispatch as rdp
+
+    for name in (rdp.REDISPATCH_FILE, rdp.FLOWS_FILE):
+        if (out_dir / name).exists():
+            expected_files.add(name)
+    try:
+        rdp.check(out_dir)
+    except rdp.RedispatchCheckError as exc:
+        problems.append(str(exc))
     if (out_dir / "grid").exists():
         from mastr_radar import grid
 

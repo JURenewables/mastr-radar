@@ -284,6 +284,10 @@ real stress signals (line loading itself is not published).
   mix, momentum; Wind and Solar pages labelled as Germany. Follow-up: add
   Iberdrola, Engie, Encavis, Trianel/enercity, Nordex/Enercon/Vestas
   orders by customer.
+- [x] **WP74. Grid APIs** (contract v1.8 draft): Netztransparenz redispatch
+  since 2021 and ENTSO-E cross-border flows, fetched with GitHub Secrets by a
+  separate daily workflow; Grid page sections "Redispatch by the TSOs" and
+  "Cross-border flows". Open: written permission from the TSOs (optional).
 - [ ] **WP73. AI-friendly data platform:** see `docs/platform-plan.md`.
 - [ ] **WP67. Grid distance:** distance to the nearest substation (needs the
   OpenStreetMap ODbL decision).

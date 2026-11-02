@@ -12,6 +12,8 @@ import { Loading, Section, Stat } from "@/components/monitor/ui";
 import { mw } from "@/lib/monitor";
 import { cssVar } from "@/lib/theme";
 
+import { FlowsSection, RedispatchSection, type FlowsFile, type RedispatchFile } from "./Redispatch";
+
 type Tech = "wind_onshore" | "solar" | "storage";
 type KW = Record<Tech, number>;
 interface Src { source: string }
@@ -156,6 +158,8 @@ export function Grid({ version }: { version: string }) {
   const [g, setG] = useState<GridFile | null>(null);
   const [geo, setGeo] = useState<GeoJSON.FeatureCollection | null>(null);
   const [failed, setFailed] = useState(false);
+  const [rd, setRd] = useState<RedispatchFile | null>(null);
+  const [fl, setFl] = useState<FlowsFile | null>(null);
   useEffect(() => {
     Promise.all([
       fetch(`/data/grid/grid.json?v=${version}`).then((r) => r.json()),
@@ -163,6 +167,8 @@ export function Grid({ version }: { version: string }) {
     ])
       .then(([a, b]) => { setG(a); setGeo(b); })
       .catch(() => setFailed(true));
+    fetch(`/data/grid/redispatch.json?v=${version}`).then((r) => (r.ok ? r.json() : null)).then(setRd).catch(() => null);
+    fetch(`/data/grid/flows.json?v=${version}`).then((r) => (r.ok ? r.json() : null)).then(setFl).catch(() => null);
   }, [version]);
   if (failed) return <p className="py-10 text-ink-muted">Grid data is not available.</p>;
   if (!g || !geo) return <Loading height={500} />;
@@ -262,7 +268,7 @@ export function Grid({ version }: { version: string }) {
           ...facts("congestion").map((f) => <>{f.text} <SrcLink href={f.source} /></>),
           "Curtailed power is not thrown away: other plants south of the bottleneck ramp up instead. The cost is mainly paying conventional plants and keeping a reserve.",
         ]}
-        caveats={["2025 figures are preliminary.", "Netztransparenz and ENTSO-E publish redispatch measures by grid element; once the API access is set up, this section can show which lines and areas are congested."]}
+        caveats={["2025 figures are preliminary.", "The measures behind these costs, plant by plant, follow in the redispatch section below."]}
       >
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="min-w-0">
@@ -296,6 +302,9 @@ export function Grid({ version }: { version: string }) {
           </div>
         </div>
       </Section>
+
+      {rd && <RedispatchSection r={rd} date={asOf} />}
+      {fl && <FlowsSection f={fl} date={asOf} />}
 
       <Section
         id="demand"
@@ -383,8 +392,8 @@ export function Grid({ version }: { version: string }) {
         <ul className="grid gap-3 sm:grid-cols-3">
           {[
             ["Grid topology", "Lines and substations from OpenStreetMap (ODbL licence; decision pending). Lets us draw the transmission grid and assign plants to substations."],
-            ["Redispatch by grid element", "Netztransparenz.de publishes each redispatch measure with the network element and the plants involved (API access with your credentials, stored as GitHub secrets)."],
-            ["Flows and prices", "ENTSO-E Transparency: cross-border flows, load and generation per hour (API token as a GitHub secret)."],
+            ["Line loading", "Which line or transformer was overloaded is not published per measure; the TSOs' grid models are not public. Substation names in the redispatch data are the closest open signal."],
+            ["Prices and generation", "ENTSO-E also offers day-ahead prices, load and generation per hour; they can be added to the flows view."],
           ].map(([h, t]) => (
             <li key={h} className="rounded-[20px] border border-rule p-4"><p className="font-semibold">{h}</p><p className="mt-1 text-sm text-ink-muted">{t}</p></li>
           ))}
