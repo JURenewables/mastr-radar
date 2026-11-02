@@ -1,8 +1,8 @@
 "use client";
 
-// The Wind & auctions page as one storyline: key findings first, then who
-// wins, the price, where the wind farms go, why developers win, the strain on
-// the market, and the machines behind it. Every section ends with takeaways and
+// The Wind & auctions page as one storyline: auction results first (prices,
+// key numbers, site quality and yield), then who wins, the turbines they use,
+// where the wind farms go, why developers win, and the strain on the market. Every section ends with takeaways and
 // caveats computed from the data.
 import type { ReactNode } from "react";
 
@@ -18,13 +18,12 @@ import { CrossTech, crossTakeaways, SuccessSection } from "./Strategy";
 import { BrandRace, BrandShares, TurbineModels } from "./WindIndustry";
 
 export const WIND_SECTIONS = [
-  ["glance", "At a glance"],
-  ["who", "1 Who wins"],
-  ["price", "2 Price"],
-  ["where", "3 Where"],
-  ["why", "4 Why"],
-  ["strain", "5 Strain"],
-  ["machines", "6 Machines"],
+  ["price", "1 Auction results"],
+  ["who", "2 Who wins"],
+  ["machines", "3 Turbines"],
+  ["where", "4 Where"],
+  ["why", "5 Why"],
+  ["strain", "6 Strain"],
 ] as const;
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
@@ -51,12 +50,14 @@ export function WindStory({ data, asOf, date }: { data: MonitorData | null; asOf
 
   const source = au ? <>Source: Bundesnetzagentur, onshore wind auctions, linked to the Marktstammdatenregister as of {date}. Data processed.</> : undefined;
 
+  const fleetText = (
+    <>
+      Germany runs {mw(fleet)} of onshore wind. Three makers build almost all of it, and every
+      new turbine is a giant compared with the ones it replaces.
+    </>
+  );
   const machines = (
     <>
-      <Chapter id="machines" n={au ? 6 : 1} title="The machines">
-        Germany runs {mw(fleet)} of onshore wind. Three makers build almost all of it, and every
-        new turbine is a giant compared with the ones it replaces.
-      </Chapter>
 
       <Section
         id="turbines"
@@ -123,10 +124,17 @@ export function WindStory({ data, asOf, date }: { data: MonitorData | null; asOf
 
     </>
   );
-  return au ? <AuctionChapters data={data} date={date} source={source} machines={machines} /> : machines;
+  return au ? (
+    <AuctionChapters data={data} date={date} source={source} machines={machines} fleetText={fleetText} />
+  ) : (
+    <>
+      <Chapter id="machines" n={1} title="The machines">{fleetText}</Chapter>
+      {machines}
+    </>
+  );
 }
 
-function AuctionChapters({ data, date, source, machines }: { data: MonitorData; date: string; source: ReactNode; machines: ReactNode }) {
+function AuctionChapters({ data, date, source, machines, fleetText }: { data: MonitorData; date: string; source: ReactNode; machines: ReactNode; fleetText: ReactNode }) {
   const au = data.auctions!;
   const rounds = au.rounds;
   const first = rounds[0];
@@ -200,9 +208,53 @@ function AuctionChapters({ data, date, source, machines }: { data: MonitorData; 
 
   return (
     <>
+      <Chapter id="price" n={1} title="Auction results">
+        Since 2019, {rounds.length} onshore auction rounds awarded {mw(totalKw / 1000)}. Prices rose to the
+        legal ceiling in 2023, then competition came back and pushed them to their lowest level since 2018.
+      </Chapter>
+
       <Glance data={data} />
 
-      <Chapter id="who" n={1} title="Who wins">
+      <Section
+        id="auctions"
+        eyebrow="Onshore wind auctions"
+        title={`Award prices peaked at ${peak.avg_ct.toFixed(2)} ct/kWh in ${peak.bid_date.slice(0, 4)} and fell to ${last.avg_ct.toFixed(2)} ct; after the site correction projects receive about ${last.received_ct_est?.toFixed(2) ?? "–"} ct`}
+        subtitle="Every round since May 2019: what projects bid, the legal ceiling, and the estimated value they receive once the EEG corrects it for their site."
+        asOf={date}
+        source={source}
+        takeaways={[
+          `From the ${roundLabel(peak.bid_date)} peak to ${roundLabel(last.bid_date)}, the average award fell by ${pct(1 - last.avg_ct / peak.avg_ct)}, to ${(last.avg_ct - first.avg_ct > 0 ? "above" : "below")} the level of ${first.bid_date.slice(0, 4)} (${first.avg_ct.toFixed(2)} ct).`,
+          last.min_ct != null && last.max_ct != null ? `The latest round spanned only ${(last.max_ct - last.min_ct).toFixed(2)} ct from lowest to highest award, far below the ${last.ceiling_ct?.toFixed(2)} ct ceiling: prices are now set by competition, not the cap.` : "",
+          `The EEG correction adds about ${pct((last.correction_factor_avg ?? 1) - 1)} on top: the average awarded site is weaker than the reference site.`,
+        ].filter(Boolean)}
+        caveats={["Single bids are not published; the received value is the round average times the estimated correction factor."]}
+      >
+        <AuctionPrices a={au} />
+      </Section>
+
+      <Section
+        id="site-quality"
+        eyebrow="Merit order by wind"
+        title={`Awarded projects average about ${Math.round(wavg("full_load_hours_avg")).toLocaleString("en-GB")} full-load hours at ${wavg("quality_pct_avg").toFixed(0)}% site quality`}
+        subtitle="Every awarded project, rated with DWD wind data: which sites win, how good they are, and the correction factor they earn."
+        note="Full-load hours, site quality and correction factors are model estimates."
+        asOf={date}
+        source={<>Source: Bundesnetzagentur (awards), Marktstammdatenregister as of {date} (turbines), Deutscher Wetterdienst (wind, CC BY 4.0). Data processed.</>}
+        takeaways={[
+          "The average awarded site barely changes from round to round: what changes is the price, not the wind.",
+          `Average correction factor ${wavg("correction_factor_avg").toFixed(2)}: the typical winner sits well below the EEG reference site, and the correction lifts its pay accordingly.`,
+          au.model.calibration?.n ? `Site quality is calibrated with ${au.model.calibration.n.toLocaleString("en-GB")} turbines whose operators declare it in MaStR (median ${au.model.calibration.median_declared}%); the raw wind model read ${Math.round(((1 / au.model.calibration.factor) - 1) * 100)}% too high.` : "",
+          "Each round's merit order runs from about 4,000 to 2,000 full-load hours: very different sites win side by side.",
+        ]}
+        caveats={[
+          "Estimates from a simple model (DWD wind 1981–2000, generic power curve, 12 % losses, no curtailment); compare sites and rounds, not single values.",
+          au.model.calibration?.correlation != null ? `Model and declared site quality correlate at ${au.model.calibration.correlation}: good for averages, rough for single projects. Full-load hours are not calibrated and may be 10–20 % high.` : "",
+        ].filter(Boolean)}
+      >
+        <AuctionYield a={au} />
+      </Section>
+
+      <Chapter id="who" n={2} title="Who wins">
         Developers and independent power producers win most of the capacity; utilities and Stadtwerke
         play a small part. Pick a year, follow the race, then zoom into a single company.
       </Chapter>
@@ -273,6 +325,26 @@ function AuctionChapters({ data, date, source, machines }: { data: MonitorData; 
         />
       </Section>
 
+
+      {data.solar && data.solar.cross_tech.length > 0 && (
+        <Section
+          id="wind-and-solar"
+          eyebrow="Wind and solar"
+          title={(() => { const both = data.solar.cross_tech.filter((c) => c.wind_kw_since_2023 > 0 && c.solar_kw_since_2023 > 0); return `${both.length} of the larger groups win in both wind and solar auctions`; })()}
+          subtitle="Awarded capacity since 2023 per company group in onshore wind and ground-mounted solar auctions."
+          asOf={date}
+          source={source}
+          takeaways={crossTakeaways(data)}
+          caveats={["Groups found by name and office address; solar attribution is weaker than wind (more project companies)."]}
+        >
+          <CrossTech data={data} />
+        </Section>
+      )}
+
+      <Chapter id="machines" n={3} title="The turbines behind the awards">
+        Which turbines the winners choose, and the industry behind them. {fleetText}
+      </Chapter>
+
       <Section
         id="partners"
         eyebrow="Turbines and partners"
@@ -291,44 +363,9 @@ function AuctionChapters({ data, date, source, machines }: { data: MonitorData; 
         <TurbinePartners a={au} brands={data.stats.wind_industry.brands} />
       </Section>
 
-      {data.solar && data.solar.cross_tech.length > 0 && (
-        <Section
-          id="wind-and-solar"
-          eyebrow="Wind and solar"
-          title={(() => { const both = data.solar.cross_tech.filter((c) => c.wind_kw_since_2023 > 0 && c.solar_kw_since_2023 > 0); return `${both.length} of the larger groups win in both wind and solar auctions`; })()}
-          subtitle="Awarded capacity since 2023 per company group in onshore wind and ground-mounted solar auctions."
-          asOf={date}
-          source={source}
-          takeaways={crossTakeaways(data)}
-          caveats={["Groups found by name and office address; solar attribution is weaker than wind (more project companies)."]}
-        >
-          <CrossTech data={data} />
-        </Section>
-      )}
+      {machines}
 
-      <Chapter id="price" n={2} title="The price of wind">
-        Since 2019, {rounds.length} onshore auction rounds awarded {mw(totalKw / 1000)}. Prices rose to the
-        legal ceiling in 2023, then competition came back and pushed them to their lowest level since 2018.
-      </Chapter>
-
-      <Section
-        id="auctions"
-        eyebrow="Onshore wind auctions"
-        title={`Award prices peaked at ${peak.avg_ct.toFixed(2)} ct/kWh in ${peak.bid_date.slice(0, 4)} and fell to ${last.avg_ct.toFixed(2)} ct; after the site correction projects receive about ${last.received_ct_est?.toFixed(2) ?? "–"} ct`}
-        subtitle="Every round since May 2019: what projects bid, the legal ceiling, and the estimated value they receive once the EEG corrects it for their site."
-        asOf={date}
-        source={source}
-        takeaways={[
-          `From the ${roundLabel(peak.bid_date)} peak to ${roundLabel(last.bid_date)}, the average award fell by ${pct(1 - last.avg_ct / peak.avg_ct)}, to ${(last.avg_ct - first.avg_ct > 0 ? "above" : "below")} the level of ${first.bid_date.slice(0, 4)} (${first.avg_ct.toFixed(2)} ct).`,
-          last.min_ct != null && last.max_ct != null ? `The latest round spanned only ${(last.max_ct - last.min_ct).toFixed(2)} ct from lowest to highest award, far below the ${last.ceiling_ct?.toFixed(2)} ct ceiling: prices are now set by competition, not the cap.` : "",
-          `The EEG correction adds about ${pct((last.correction_factor_avg ?? 1) - 1)} on top: the average awarded site is weaker than the reference site.`,
-        ].filter(Boolean)}
-        caveats={["Single bids are not published; the received value is the round average times the estimated correction factor."]}
-      >
-        <AuctionPrices a={au} />
-      </Section>
-
-      <Chapter id="where" n={3} title="Where the wind farms go">
+      <Chapter id="where" n={4} title="Where the wind farms go">
         Awards follow permits, and permits follow land. Watch the map move as the south and west
         catch up with the windy north and east.
       </Chapter>
@@ -350,29 +387,7 @@ function AuctionChapters({ data, date, source, machines }: { data: MonitorData; 
         <AuctionMovie a={au} geo={data.districts} />
       </Section>
 
-      <Section
-        id="site-quality"
-        eyebrow="Merit order by wind"
-        title={`Awarded projects average about ${Math.round(wavg("full_load_hours_avg")).toLocaleString("en-GB")} full-load hours at ${wavg("quality_pct_avg").toFixed(0)}% site quality`}
-        subtitle="Every awarded project, rated with DWD wind data: which sites win, how good they are, and the correction factor they earn."
-        note="Full-load hours, site quality and correction factors are model estimates."
-        asOf={date}
-        source={<>Source: Bundesnetzagentur (awards), Marktstammdatenregister as of {date} (turbines), Deutscher Wetterdienst (wind, CC BY 4.0). Data processed.</>}
-        takeaways={[
-          "The average awarded site barely changes from round to round: what changes is the price, not the wind.",
-          `Average correction factor ${wavg("correction_factor_avg").toFixed(2)}: the typical winner sits well below the EEG reference site, and the correction lifts its pay accordingly.`,
-          au.model.calibration?.n ? `Site quality is calibrated with ${au.model.calibration.n.toLocaleString("en-GB")} turbines whose operators declare it in MaStR (median ${au.model.calibration.median_declared}%); the raw wind model read ${Math.round(((1 / au.model.calibration.factor) - 1) * 100)}% too high.` : "",
-          "Each round's merit order runs from about 4,000 to 2,000 full-load hours: very different sites win side by side.",
-        ]}
-        caveats={[
-          "Estimates from a simple model (DWD wind 1981–2000, generic power curve, 12 % losses, no curtailment); compare sites and rounds, not single values.",
-          au.model.calibration?.correlation != null ? `Model and declared site quality correlate at ${au.model.calibration.correlation}: good for averages, rough for single projects. Full-load hours are not calibrated and may be 10–20 % high.` : "",
-        ].filter(Boolean)}
-      >
-        <AuctionYield a={au} />
-      </Section>
-
-      <Chapter id="why" n={4} title="Why developers win">
+      <Chapter id="why" n={5} title="Why developers win">
         Lean teams, project finance and fast decisions beat balance sheets. The data shows the
         pattern; the assessment below explains it.
       </Chapter>
@@ -400,13 +415,12 @@ function AuctionChapters({ data, date, source, machines }: { data: MonitorData; 
 
       {data.risk?.wind && (
         <>
-          <Chapter id="strain" n={5} title="A market under strain">
+          <Chapter id="strain" n={6} title="A market under strain">
             Too many projects chase too little volume. Prices fall faster than costs, and the first winners are failing.
           </Chapter>
           <OverheatSection data={data} tech="wind" date={date} />
         </>
       )}
-      {machines}
     </>
   );
 }
@@ -435,10 +449,9 @@ function Glance({ data }: { data: MonitorData }) {
     ...(risk ? [{ href: "#overheating", label: "Not yet built", value: mw(risk.unbuilt_kw / 1000), text: `of awarded wind is not running yet; ${mw(risk.unbuilt_expiring_12m_kw / 1000)} must be within 12 months.` }] : []),
   ];
   return (
-    <section id="glance" className="scroll-mt-28 border-t-4 border-ink pt-10 pb-4 sm:pt-14">
-      <p className="figures text-sm font-bold text-accent">At a glance</p>
-      <h2 className="mt-2 max-w-3xl text-4xl leading-[1.02] sm:text-6xl">The German onshore wind market in six numbers</h2>
-      <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <section id="glance" className="scroll-mt-28 pt-8 pb-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Key numbers</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((it) => (
           <a key={it.label} href={it.href} className="group rounded-[20px] bg-surface p-5 transition-colors hover:bg-rule">
             <p className="text-sm text-ink-muted">{it.label}</p>
