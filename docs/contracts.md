@@ -606,6 +606,41 @@ in fours; every context item has an https source.
 
 ---
 
+## v1.8 draft: grid APIs (Netztransparenz redispatch, ENTSO-E flows) (waiting for approval)
+
+New sources need credentials, read only from the environment (GitHub
+Secrets `NETZTRANSPARENZ_CLIENT_ID`, `NETZTRANSPARENZ_CLIENT_SECRET`,
+`ENTSOE_TOKEN`); never logged or stored.
+
+**G1 fetch** (`mastr-radar grid-fetch`): Netztransparenz `data/redispatch`
+(TSO redispatch and countertrade measures since Jan 2021), one CSV per month
+in `data/grid/nt/`; ENTSO-E physical flows (documentType A11) between DE-LU
+and each neighbouring bidding zone (AT, BE, CH, CZ, DK1, DK2, FR, NL, NO2, PL,
+SE4) for about 13 months, one JSON per month and neighbour in
+`data/grid/entsoe/`. The last two months are fetched again on every run.
+
+**G2 extract (internal)** (`mastr-radar grid-extract`):
+`data/extract/redispatch.parquet` (start, end UTC; reason; category current /
+voltage / countertrade / test / other; direction down / up; mw_avg, mw_max,
+mwh; tso; requesting_tso; asset; asset_is_substation; energy conventional /
+renewable / other) and `data/extract/flows.parquet` (time UTC hourly,
+neighbour, import_mw, export_mw). German names are mapped in
+`config/columns.yaml`. **Check:** columns; ≥ 1,000 measures; ≤ 1 % unknown
+direction, ≤ 5 % unknown energy; no negative MWh; ≥ 8 neighbours; no
+negative flows.
+
+**G3 build** (`mastr-radar grid-build`, also part of `aggregate` when the
+extracts exist): `grid/redispatch.json` (first, last; `monthly` with down and
+up MWh by energy, excluding test runs and countertrade, plus countertrade MWh;
+`by_tso_down_mwh` per year; `category_mwh`; `last_12m`: down/up MWh by
+energy, countertrade, measures, top 15 renewable substations by curtailed
+MWh, top 15 conventional plants reduced and increased) and `grid/flows.json`
+(first, last, neighbours, `monthly_net_import_gwh` per neighbour,
+`last_12m` import and export GWh per neighbour, `net_import_by_hour_utc_mw`
+average over the last 12 months). Only aggregates are published; raw
+Netztransparenz rows are not redistributed. **Check:** ≥ 12 months in order;
+no negative values; reductions present; ≥ 8 neighbours; 24 hourly values.
+
 ## Version history
 
 | Version | Date | Change |
