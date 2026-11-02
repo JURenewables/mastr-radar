@@ -606,7 +606,7 @@ in fours; every context item has an https source.
 
 ---
 
-## v1.8 draft: grid APIs (Netztransparenz redispatch, ENTSO-E flows) (waiting for approval)
+## v1.8: grid APIs (Netztransparenz redispatch, ENTSO-E flows) (approved 2 Nov 2026)
 
 New sources need credentials, read only from the environment (GitHub
 Secrets `NETZTRANSPARENZ_CLIENT_ID`, `NETZTRANSPARENZ_CLIENT_SECRET`,
@@ -653,3 +653,4 @@ no negative values; reductions present; ≥ 8 neighbours; 24 hourly values.
 | 1.5 | 2026-10-31 | Turbine makers (`wind_industry` in `stats.json`), auctions chain A1/A2 with `auctions/onshore.json` and `auctions/awards.json`. Approved by the user. |
 | 1.6 | 2026-11-01 | Auctions since May 2019 with yield estimate (DWD), five bidder types, reviewed attributions and company-reported totals, office attribution via the new internal `data/extract/operators.parquet`, race, profiles and map points. Approved by the user. |
 | 1.7 | 2026-11-01 | Solar and innovation auctions, internal unit details and grid register, wind calibration and success drivers, rise-and-fall dynamics, company facts, market risk, players worldwide, grid page. Approved by the user. |
+| 1.8 | 2026-11-02 | Netztransparenz TSO redispatch since 2021 and ENTSO-E cross-border flows (internal extracts, `grid/redispatch.json`, `grid/flows.json`, aggregates only), fetched with GitHub Secrets by a separate daily workflow. Approved by the user. |

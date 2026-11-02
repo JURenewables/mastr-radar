@@ -1,5 +1,5 @@
 """Grid data from Netztransparenz (TSO redispatch) and ENTSO-E (cross-border
-flows): station 1 downloads into data/grid/ (contract v1.8 draft).
+flows): station 1 downloads into data/grid/ (contract v1.8).
 
 Credentials come only from the environment (GitHub Secrets in the daily run):
 NETZTRANSPARENZ_CLIENT_ID, NETZTRANSPARENZ_CLIENT_SECRET, ENTSOE_TOKEN.

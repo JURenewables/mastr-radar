@@ -320,7 +320,7 @@ def hub_fetch() -> None:
 def grid_fetch(
     probe: bool = typer.Option(False, help="Only test access and print summaries."),
 ) -> None:
-    """Grid G1 (v1.8 draft): Netztransparenz redispatch and ENTSO-E flows into data/grid/.
+    """Grid G1 (v1.8): Netztransparenz redispatch and ENTSO-E flows into data/grid/.
     Needs NETZTRANSPARENZ_CLIENT_ID/_SECRET and ENTSOE_TOKEN in the environment."""
     from datetime import date
 
@@ -344,7 +344,7 @@ def grid_fetch(
 
 @app.command("grid-extract")
 def grid_extract() -> None:
-    """Grid G2 (v1.8 draft): cached API data → data/extract/redispatch.parquet, flows.parquet."""
+    """Grid G2 (v1.8): cached API data → data/extract/redispatch.parquet, flows.parquet."""
     from mastr_radar import gridextract as gx
 
     s = load_settings()
@@ -365,7 +365,7 @@ def grid_extract() -> None:
 
 @app.command("grid-build")
 def grid_build() -> None:
-    """Grid G3 (v1.8 draft): build grid/redispatch.json and grid/flows.json, check them,
+    """Grid G3 (v1.8): build grid/redispatch.json and grid/flows.json, check them,
     and update their entries in manifest.json."""
     import json
 

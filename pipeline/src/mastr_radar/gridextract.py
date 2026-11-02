@@ -1,4 +1,4 @@
-"""Station 2 for the grid APIs (contract v1.8 draft): Netztransparenz redispatch
+"""Station 2 for the grid APIs (contract v1.8): Netztransparenz redispatch
 CSVs → data/extract/redispatch.parquet; ENTSO-E flow JSON → flows.parquet.
 German column names and values are mapped to English here (config/columns.yaml)."""
 

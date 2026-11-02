@@ -1,7 +1,7 @@
 "use client";
 
 // Redispatch by the four TSOs (Netztransparenz) and cross-border flows
-// (ENTSO-E) on the Grid page (contract v1.8 draft).
+// (ENTSO-E) on the Grid page (contract v1.8).
 import * as Plot from "@observablehq/plot";
 
 import { PlotFigure } from "@/components/explorer/PlotFigure";

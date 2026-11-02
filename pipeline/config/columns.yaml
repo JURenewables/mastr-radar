@@ -247,7 +247,7 @@ grid_register:
   min_connections: 20000
   min_consumers: 500
 
-# Grid APIs (contract v1.8 draft): Netztransparenz redispatch measures and
+# Grid APIs (contract v1.8): Netztransparenz redispatch measures and
 # ENTSO-E physical flows, cached by `grid-fetch`, normalised by `grid-extract`.
 redispatch:
   columns:

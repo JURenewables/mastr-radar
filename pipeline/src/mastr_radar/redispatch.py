@@ -1,4 +1,4 @@
-"""Station 3 for the grid APIs (contract v1.8 draft): redispatch.parquet →
+"""Station 3 for the grid APIs (contract v1.8): redispatch.parquet →
 grid/redispatch.json; flows.parquet → grid/flows.json. Only aggregates are
 published (Netztransparenz data is not redistributed row by row)."""
 
