@@ -122,7 +122,7 @@ def fetch(rounds: list[dict], cache_dir: Path, grids: bool = True) -> int:
             page.write_text(_get(url).text, encoding="utf-8")
             new += 1
         xlsx = cache_dir / f"{rnd['id']}.xlsx"
-        if not xlsx.exists():
+        if not xlsx.exists() and not rnd.get("no_list"):  # no_list: BNetzA publishes none
             text = page.read_text("utf-8")
             link = re.search(r'href="([^"]+Zuschlagslisten/[^"]+\.xlsx)[^"]*"', text) or re.search(
                 r'href="([^"]*(?:[Zz]uschl|[Ll]iste)[^"]*\.xlsx)[^"]*"', text

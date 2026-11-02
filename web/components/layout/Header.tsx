@@ -11,7 +11,7 @@ export function Header({ asOf, wide = false }: { asOf?: string; wide?: boolean }
             MaStR Radar
           </Link>
           <nav className="scroll-row flex min-w-0 gap-4 overflow-x-auto whitespace-nowrap text-sm text-ink-muted">
-            <Link href="/" className="hover:text-ink">
+            <Link href="/monitor" className="hover:text-ink">
               Monitor
             </Link>
             <Link href="/solar" className="hover:text-ink">

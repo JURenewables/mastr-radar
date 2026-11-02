@@ -7,7 +7,6 @@ import { Day24 } from "./Day24";
 import { LightUpMap } from "./LightUpMap";
 import {
   PipelineMap,
-  SolarTypes,
   StatesRank,
   StorageBoom,
   TargetRace,
@@ -15,6 +14,7 @@ import {
 } from "./Sections";
 import { SOLAR_SECTIONS, SolarStory } from "./SolarStory";
 import { WIND_SECTIONS, WindStory } from "./WindStory";
+import { StorageColocation } from "./Storage";
 import { Loading, Section } from "./ui";
 
 export const ENERGY_SECTIONS = [
@@ -22,9 +22,9 @@ export const ENERGY_SECTIONS = [
   ["day", "24 hours"],
   ["targets", "Race to 2030"],
   ["this-year", "This year"],
-  ["balcony", "Balcony boom"],
-  ["where", "Where"],
   ["storage", "Storage"],
+  ["colocation", "Co-location"],
+  ["where", "Where"],
   ["pipeline", "Next wave"],
 ] as const;
 
@@ -57,10 +57,10 @@ export function Monitor({ asOf, part = "energy" }: { asOf: string; part?: "energ
   const b = data?.buildout;
   const y = Number(asOf.slice(0, 4));
 
-  const solarPeakYear =
-    b && b.years[b.national.solar.added.slice(0, -1).indexOf(Math.max(...b.national.solar.added.slice(0, -1)))];
-  const balcony = s ? s.solar_by_type.units.balcony.at(-2) ?? 0 : 0;
   const large = s?.battery_storage.buckets.large.mw ?? [];
+  const topWind = s?.states
+    .filter((x) => x.area_km2)
+    .sort((a, c) => c.operating_mw.wind_onshore / (c.area_km2 || 1) - a.operating_mw.wind_onshore / (a.area_km2 || 1))[0];
   const topState = s?.states
     .filter((x) => x.area_km2)
     .sort((a, c) => c.operating_mw.solar / (c.area_km2 || 1) - a.operating_mw.solar / (a.area_km2 || 1))[0];
@@ -109,36 +109,11 @@ export function Monitor({ asOf, part = "energy" }: { asOf: string; part?: "energ
           <Section
             id="this-year"
             eyebrow={`${y} so far`}
-            title={s ? `${mw(s.ytd_cumulative_mw.solar[String(y)].at(-1) ?? 0)} of solar went online in ${y} so far` : `${y} so far`}
-            subtitle="Capacity added since January, month by month, compared with the three years before."
+            title={s ? `${y} so far: ${mw(s.ytd_cumulative_mw.solar[String(y)].at(-1) ?? 0)} of solar, ${mw(s.ytd_cumulative_mw.wind_onshore[String(y)].at(-1) ?? 0)} of onshore wind and ${mw(s.ytd_cumulative_mw.storage[String(y)].at(-1) ?? 0)} of storage went online` : `${y} so far`}
+            subtitle="Capacity added since January, month by month, compared with the three years before. Switch technologies."
             asOf={date}
           >
             {data ? <YearRace data={data} /> : <Loading />}
-          </Section>
-
-          <Section
-            id="balcony"
-            eyebrow="Solar"
-            title={s ? `${balcony.toLocaleString("en-GB")} balcony power plants were registered in ${y - 1}` : "The balcony boom"}
-            subtitle={
-              solarPeakYear
-                ? `Plug-in balcony systems now outnumber every other kind of new solar unit. In capacity, rooftops and solar parks still dominate; the record year was ${solarPeakYear}.`
-                : undefined
-            }
-            asOf={date}
-          >
-            {data ? <SolarTypes data={data} /> : <Loading />}
-          </Section>
-
-          <Section
-            id="where"
-            eyebrow="Regions"
-            title={topState ? `${topState.name} has the most solar per km² of any state` : "Where it is built"}
-            subtitle="Capacity in operation per km² of land, per resident (watts), or in total, by state. Offshore wind is not part of any state."
-            note="Population and areas: © GeoBasis-DE / BKG (2026), Statistische Ämter des Bundes und der Länder."
-            asOf={date}
-          >
-            {data ? <StatesRank data={data} /> : <Loading />}
           </Section>
 
           <Section
@@ -156,10 +131,23 @@ export function Monitor({ asOf, part = "energy" }: { asOf: string; part?: "energ
             {data ? <StorageBoom data={data} /> : <Loading />}
           </Section>
 
+          {data && <StorageColocation data={data} date={date} />}
+
+          <Section
+            id="where"
+            eyebrow="Regions"
+            title={topState && topWind ? `${topWind.name} leads in wind per km², ${topState.name} in solar` : "Where it is built"}
+            subtitle="Capacity in operation per km² of land, per resident (watts), or in total, by state. Offshore wind is not part of any state."
+            note="Population and areas: © GeoBasis-DE / BKG (2026), Statistische Ämter des Bundes und der Länder."
+            asOf={date}
+          >
+            {data ? <StatesRank data={data} /> : <Loading />}
+          </Section>
+
           <Section
             id="pipeline"
             eyebrow="Pipeline"
-            title={s ? `${mw(s.planned_mw.wind_onshore)} of onshore wind are registered as planned` : "The next wave"}
+            title={s ? `${mw(s.planned_mw.wind_onshore)} of onshore wind and ${mw(s.planned_mw.storage ?? 0)} of storage are registered as planned` : "The next wave"}
             subtitle="Planned turbines with a public location, against the turbines already turning. Planned capacity by state."
             asOf={date}
           >
