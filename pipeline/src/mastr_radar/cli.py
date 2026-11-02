@@ -342,6 +342,58 @@ def grid_fetch(
         raise typer.Exit(code=1) from exc
 
 
+@app.command("grid-extract")
+def grid_extract() -> None:
+    """Grid G2 (v1.8 draft): cached API data → data/extract/redispatch.parquet, flows.parquet."""
+    from mastr_radar import gridextract as gx
+
+    s = load_settings()
+    src, out = s.data_dir / "grid", s.data_dir / "extract"
+    n = gx.extract_redispatch(src / "nt", out / "redispatch.parquet")
+    m = (
+        gx.extract_flows(src / "entsoe", out / "flows.parquet")
+        if any((src / "entsoe").glob("*.json"))
+        else 0
+    )
+    try:
+        gx.check(out / "redispatch.parquet", out / "flows.parquet" if m else None)
+    except gx.GridExtractError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"Check passed: {n:,} redispatch measures, {m:,} hourly flow rows.")
+
+
+@app.command("grid-build")
+def grid_build() -> None:
+    """Grid G3 (v1.8 draft): build grid/redispatch.json and grid/flows.json, check them,
+    and update their entries in manifest.json."""
+    import json
+
+    from mastr_radar import redispatch as rdp
+    from mastr_radar.aggregate import export_date_of
+
+    s = load_settings()
+    ex = s.data_dir / "extract"
+    files = rdp.build(
+        ex,
+        s.output_dir,
+        export_date_of(ex / "units.parquet")
+        if (ex / "units.parquet").exists()
+        else __import__("datetime").date.today(),
+    )
+    try:
+        rdp.check(s.output_dir)
+    except rdp.RedispatchCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    mpath = s.output_dir / "manifest.json"
+    manifest = json.loads(mpath.read_text())
+    names = {f["name"] for f in files}
+    manifest["files"] = [f for f in manifest["files"] if f["name"] not in names] + files
+    mpath.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+    typer.echo(f"Check passed: {', '.join(sorted(names))}")
+
+
 @app.command("hub-build")
 def hub_build() -> None:
     """Hub H2: build day files in web/public/data/days/, then check them."""

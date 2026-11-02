@@ -246,3 +246,35 @@ grid_register:
     Vorübergehend stillgelegt: temporarily_shut_down
   min_connections: 20000
   min_consumers: 500
+
+# Grid APIs (contract v1.8 draft): Netztransparenz redispatch measures and
+# ENTSO-E physical flows, cached by `grid-fetch`, normalised by `grid-extract`.
+redispatch:
+  columns:
+    BEGINN_DATUM: start_date
+    BEGINN_UHRZEIT: start_time
+    ENDE_DATUM: end_date
+    ENDE_UHRZEIT: end_time
+    GRUND_DER_MASSNAHME: reason
+    RICHTUNG: direction
+    MITTLERE_LEISTUNG_MW: mw_avg
+    MAXIMALE_LEISTUNG_MW: mw_max
+    GESAMTE_ARBEIT_MWH: mwh
+    ANWEISENDER_UENB: tso
+    ANFORDERNDER_UENB: requesting_tso
+    BETROFFENE_ANLAGE: asset
+    PRIMAERENERGIEART: energy
+  direction_values:
+    Wirkleistungseinspeisung reduzieren: down
+    Wirkleistungseinspeisung erhöhen: up
+  energy_values:
+    Konventionell: conventional
+    Erneuerbar: renewable
+    Sonstiges: other
+  # reason → category, first matching substring wins
+  reason_categories:
+    - {match: Countertrade, category: countertrade}
+    - {match: Probefahrt, category: test}
+    - {match: Spannung, category: voltage}
+    - {match: Strombedingt, category: current}
+  substation_prefix: "UW "
