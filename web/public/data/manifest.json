@@ -1,31 +1,31 @@
 {
   "contract_version": "1.8",
-  "as_of": "2026-11-02",
-  "generated_at": "2026-11-02T14:09:00+00:00",
+  "as_of": "2026-11-03",
+  "generated_at": "2026-11-03T14:06:37+00:00",
   "pipeline_version": "0.1.0",
   "incomplete_after": {
-    "biomass": "2026-06-10",
-    "hydro": "2026-09-03",
-    "solar": "2026-08-30",
-    "storage": "2026-08-21",
-    "wind_offshore": "2026-10-17",
-    "wind_onshore": "2026-10-08"
+    "biomass": "2026-06-11",
+    "hydro": "2026-09-04",
+    "solar": "2026-08-31",
+    "storage": "2026-08-22",
+    "wind_offshore": "2026-10-18",
+    "wind_onshore": "2026-10-09"
   },
   "files": [
     {
       "name": "kpis.json",
       "rows": 6,
-      "bytes": 1145
+      "bytes": 1144
     },
     {
       "name": "units.parquet",
-      "rows": 156717,
-      "bytes": 7854957
+      "rows": 156770,
+      "bytes": 7858896
     },
     {
       "name": "summary.parquet",
-      "rows": 450022,
-      "bytes": 2604044
+      "rows": 450684,
+      "bytes": 2608825
     },
     {
       "name": "boundaries/states.geojson",
@@ -44,33 +44,33 @@
     },
     {
       "name": "monitor/points.json",
-      "rows": 37532,
-      "bytes": 718206
+      "rows": 37541,
+      "bytes": 718347
     },
     {
       "name": "monitor/stats.json",
       "rows": 13,
-      "bytes": 21293
+      "bytes": 21294
     },
     {
       "name": "auctions/onshore.json",
       "rows": 34,
-      "bytes": 320278
+      "bytes": 320284
     },
     {
       "name": "auctions/awards.json",
       "rows": 5217,
-      "bytes": 3255554
+      "bytes": 3255572
     },
     {
       "name": "auctions/solar.json",
       "rows": 40,
-      "bytes": 149171
+      "bytes": 149201
     },
     {
       "name": "auctions/solar_awards.json",
       "rows": 2874,
-      "bytes": 1758130
+      "bytes": 1758243
     },
     {
       "name": "auctions/company_facts.json",
@@ -100,7 +100,7 @@
     {
       "name": "grid/grid.json",
       "rows": 401,
-      "bytes": 34983
+      "bytes": 35081
     }
   ]
 }
