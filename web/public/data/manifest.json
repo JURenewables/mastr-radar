@@ -1,15 +1,15 @@
 {
   "contract_version": "1.8",
-  "as_of": "2026-11-06",
-  "generated_at": "2026-11-06T14:13:59+00:00",
+  "as_of": "2026-11-07",
+  "generated_at": "2026-11-07T12:23:01+00:00",
   "pipeline_version": "0.1.0",
   "incomplete_after": {
-    "biomass": "2026-06-14",
-    "hydro": "2026-09-07",
-    "solar": "2026-09-03",
-    "storage": "2026-08-25",
-    "wind_offshore": "2026-10-21",
-    "wind_onshore": "2026-10-12"
+    "biomass": "2026-06-15",
+    "hydro": "2026-09-08",
+    "solar": "2026-09-04",
+    "storage": "2026-08-26",
+    "wind_offshore": "2026-10-22",
+    "wind_onshore": "2026-10-13"
   },
   "files": [
     {
@@ -19,13 +19,13 @@
     },
     {
       "name": "units.parquet",
-      "rows": 156913,
-      "bytes": 7870349
+      "rows": 156928,
+      "bytes": 7870075
     },
     {
       "name": "summary.parquet",
-      "rows": 451393,
-      "bytes": 2611190
+      "rows": 451521,
+      "bytes": 2610911
     },
     {
       "name": "boundaries/states.geojson",
@@ -40,12 +40,12 @@
     {
       "name": "monitor/buildout.json",
       "rows": 37,
-      "bytes": 181252
+      "bytes": 181253
     },
     {
       "name": "monitor/points.json",
-      "rows": 37568,
-      "bytes": 718745
+      "rows": 37571,
+      "bytes": 718773
     },
     {
       "name": "monitor/stats.json",
@@ -55,22 +55,22 @@
     {
       "name": "auctions/onshore.json",
       "rows": 34,
-      "bytes": 320289
+      "bytes": 320248
     },
     {
       "name": "auctions/awards.json",
       "rows": 5217,
-      "bytes": 3255763
+      "bytes": 3255744
     },
     {
       "name": "auctions/solar.json",
       "rows": 40,
-      "bytes": 149220
+      "bytes": 149216
     },
     {
       "name": "auctions/solar_awards.json",
       "rows": 2874,
-      "bytes": 1758315
+      "bytes": 1758330
     },
     {
       "name": "auctions/company_facts.json",
@@ -88,11 +88,6 @@
       "bytes": 17920
     },
     {
-      "name": "grid/grid.json",
-      "rows": 401,
-      "bytes": 35226
-    },
-    {
       "name": "grid/redispatch.json",
       "rows": 71,
       "bytes": 15997
@@ -101,6 +96,11 @@
       "name": "grid/flows.json",
       "rows": 15,
       "bytes": 2568
+    },
+    {
+      "name": "grid/grid.json",
+      "rows": 401,
+      "bytes": 35280
     }
   ]
 }
