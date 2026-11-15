@@ -1,15 +1,15 @@
 {
   "contract_version": "1.8",
-  "as_of": "2026-11-14",
-  "generated_at": "2026-11-14T13:01:53+00:00",
+  "as_of": "2026-11-15",
+  "generated_at": "2026-11-15T13:17:49+00:00",
   "pipeline_version": "0.1.0",
   "incomplete_after": {
-    "biomass": "2026-06-22",
-    "hydro": "2026-09-15",
-    "solar": "2026-09-12",
-    "storage": "2026-09-02",
-    "wind_offshore": "2026-10-30",
-    "wind_onshore": "2026-10-20"
+    "biomass": "2026-06-23",
+    "hydro": "2026-09-16",
+    "solar": "2026-09-13",
+    "storage": "2026-09-04",
+    "wind_offshore": "2026-10-31",
+    "wind_onshore": "2026-10-21"
   },
   "files": [
     {
@@ -19,13 +19,13 @@
     },
     {
       "name": "units.parquet",
-      "rows": 157193,
-      "bytes": 7880001
+      "rows": 157201,
+      "bytes": 7880264
     },
     {
       "name": "summary.parquet",
-      "rows": 452323,
-      "bytes": 2613848
+      "rows": 452372,
+      "bytes": 2614122
     },
     {
       "name": "boundaries/states.geojson",
@@ -40,7 +40,7 @@
     {
       "name": "monitor/buildout.json",
       "rows": 37,
-      "bytes": 181256
+      "bytes": 181258
     },
     {
       "name": "monitor/points.json",
@@ -55,12 +55,12 @@
     {
       "name": "auctions/onshore.json",
       "rows": 34,
-      "bytes": 320286
+      "bytes": 320289
     },
     {
       "name": "auctions/awards.json",
       "rows": 5217,
-      "bytes": 3255954
+      "bytes": 3255967
     },
     {
       "name": "auctions/solar.json",
@@ -88,11 +88,6 @@
       "bytes": 17920
     },
     {
-      "name": "grid/grid.json",
-      "rows": 401,
-      "bytes": 35507
-    },
-    {
       "name": "grid/redispatch.json",
       "rows": 71,
       "bytes": 15974
@@ -101,6 +96,11 @@
       "name": "grid/flows.json",
       "rows": 15,
       "bytes": 2569
+    },
+    {
+      "name": "grid/grid.json",
+      "rows": 401,
+      "bytes": 35536
     }
   ]
 }
