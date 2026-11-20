@@ -88,6 +88,11 @@
       "bytes": 17919
     },
     {
+      "name": "grid/grid.json",
+      "rows": 401,
+      "bytes": 35250
+    },
+    {
       "name": "grid/redispatch.json",
       "rows": 71,
       "bytes": 15974
@@ -95,12 +100,7 @@
     {
       "name": "grid/flows.json",
       "rows": 15,
-      "bytes": 2568
-    },
-    {
-      "name": "grid/grid.json",
-      "rows": 401,
-      "bytes": 35250
+      "bytes": 2569
     }
   ]
 }
