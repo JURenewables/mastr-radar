@@ -15,17 +15,17 @@
   },
   {
     "technology": "solar",
-    "installed_capacity_kw": 133362446.825,
-    "installed_units": 6516240,
-    "planned_capacity_kw": 9918254.4,
-    "added_capacity_kw_ytd": 15407642.946
+    "installed_capacity_kw": 133422321.606,
+    "installed_units": 6517603,
+    "planned_capacity_kw": 9882291.655,
+    "added_capacity_kw_ytd": 15467574.042
   },
   {
     "technology": "storage",
-    "installed_capacity_kw": 32607440.014,
-    "installed_units": 2917656,
-    "planned_capacity_kw": 13501878.086,
-    "added_capacity_kw_ytd": 5765979.029
+    "installed_capacity_kw": 32621349.542,
+    "installed_units": 2918788,
+    "planned_capacity_kw": 13502529.136,
+    "added_capacity_kw_ytd": 5775750.137
   },
   {
     "technology": "wind_offshore",
