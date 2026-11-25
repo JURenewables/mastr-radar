@@ -5,7 +5,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-import { DuckDBInstance, type DuckDBConnection } from "@duckdb/node-api";
+import type { DuckDBConnection, DuckDBInstance } from "@duckdb/node-api";
 
 export const DATA_DIR = path.join(process.cwd(), "public", "data");
 
@@ -69,6 +69,8 @@ let ready: Promise<{ inst: DuckDBInstance; views: View[]; manifest: Manifest }> 
 
 async function init() {
   const manifest = readManifest();
+  // Loaded on first use, so the protocol keeps working even if the native engine cannot load.
+  const { DuckDBInstance } = await import("@duckdb/node-api");
   const inst = await DuckDBInstance.create(":memory:", { threads: "2", memory_limit: "512MB" });
   const con = await inst.connect();
   const views: View[] = [];

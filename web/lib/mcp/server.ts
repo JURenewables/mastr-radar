@@ -203,6 +203,10 @@ export async function handleBody(body: unknown): Promise<RpcResponse | RpcRespon
 
 /** Warm the engine (used by the health check). */
 export async function health() {
-  const { manifest, views } = await engine();
-  return { ok: true, as_of: manifest.as_of, contract_version: manifest.contract_version, views: views.length };
+  try {
+    const { manifest, views } = await engine();
+    return { ok: true, as_of: manifest.as_of, contract_version: manifest.contract_version, views: views.length };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e).split("\n")[0].slice(0, 200) };
+  }
 }
