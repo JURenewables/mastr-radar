@@ -120,8 +120,20 @@ export function WindRunUp({ version, date }: { version: string; date: string }) 
       takeaways={[
         medPermit != null ? `Median: the permit of an awarded turbine was registered ${Math.abs(medPermit)} days ${medPermit <= 0 ? "before" : "after"} the bid date.` : "",
         `${pct(inLast(permitDays, -56, 0))} of these permits appeared in the last eight weeks before the bid date; companies keep their projects out of view until shortly before the round.`,
-        `The turbines themselves are registered later: ${pct(unitDays.filter((x) => x <= 0).length / (unitDays.length || 1))} before the bid date, the rest after the award.`,
+        `The turbines are mostly registered together with their permit: ${pct(unitDays.filter((x) => x <= 0).length / (unitDays.length || 1))} of them before the bid date.`,
         "The weekly chart shows the waves: permit registrations peak just before each deadline (red dashed lines), then drop.",
+        (() => {
+          const med = (yr: string) => {
+            const m = rs.filter((r) => r.bid_date.startsWith(yr)).map((r) => r.permit.median_days).filter((x): x is number => x != null);
+            return m.length ? m.reduce((t, x) => t + x, 0) / m.length : null;
+          };
+          const a = med("2024");
+          const lastYear = rs.at(-1)?.bid_date.slice(0, 4) ?? "";
+          const b = med(lastYear);
+          return a != null && b != null && b < a - 30
+            ? `In ${lastYear} the permits of winners were older: registered about ${Math.round(Math.abs(b))} days before the bid on average, against ${Math.round(Math.abs(a))} in 2024. With more bids than volume, many winners had bid and lost before.`
+            : "";
+        })(),
       ].filter(Boolean)}
       caveats={[
         "Rounds since 2022 (earlier pages give no deadline). Turbines linked through the register numbers on the award lists.",

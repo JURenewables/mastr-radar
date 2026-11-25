@@ -149,7 +149,10 @@ export function Outlook({ version }: { version: string }) {
           `${topState[0]} has the most capacity past EEG support (${mw(topState[1])}), followed by ${Object.keys(r.by_state_mw).slice(1, 3).join(" and ")}.`,
           `The typical old turbine is small: ${r.old.avg_mw} MW on average, led by the ${r.models.slice(0, 3).map((m) => m.model).join(", ")}. A new turbine averages ${r.potential.new_turbine_mw} MW.`,
           `Illustration: replacing every old turbine with one new turbine per two old ones would bring about ${mw(r.potential.mw)} on the same sites, about ${(r.potential.mw / r.old.mw).toFixed(1)}× today's capacity there.`,
-          "Retirements have risen to about 0.7–0.8 GW a year since 2023; most old sites are repowered rather than abandoned, but permits, distance rules and bird protection decide site by site.",
+          (() => {
+            const rec = years.filter((y) => Number(y) >= 2023).map((y) => r.retired_mw_by_year[y] ?? 0);
+            return rec.length ? `Retirements have risen to ${mw(Math.min(...rec))}–${mw(Math.max(...rec))} a year since 2023. Whether a site can be repowered depends on the new permit: distance rules, bird protection and height limits decide site by site.` : "";
+          })(),
         ]}
         caveats={[
           `Age from the commissioning date; EEG support counts ${r.eeg_years} years plus the commissioning year.`,
