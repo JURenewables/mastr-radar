@@ -777,13 +777,30 @@ manifest `as_of`. **Check:** a test calls every tool against the published
 files and validates the result envelope; `run_sql` rejects writes, file
 access outside the data folder, network and settings changes.
 
-### Daily snapshots (WP78)
+### Daily snapshots (WP78, built 25 Nov 2026)
 
-After each successful daily run, the explorer files are packed into a
-GitHub Release asset `data-YYYY-MM-DD.tar.zst` (tag `data-YYYY-MM-DD`);
-`snapshots.json` in `web/public/data/` lists date, URL, bytes and manifest
-version of each. `whats_new` compares the current files with a snapshot.
-**Check:** the newest snapshot date equals the manifest `as_of`.
+After each successful daily run on `main`, the explorer files (without
+`days/`) are packed into `data-YYYY-MM-DD.tar.zst` and attached to the
+GitHub Release `data-YYYY-MM-DD` (title "Data YYYY-MM-DD (contract X)").
+`mastr-radar snapshots-index` writes `snapshots.json` in `web/public/data/`:
+`repo`, `format`, `snapshots` (date, tag, name, published, url; newest
+first) and updates its manifest and dictionary entries. **Check:** the
+newest snapshot date equals the manifest `as_of`; no duplicate dates.
+
+### Built (25 Nov 2026)
+
+- **WP81:** typed tools `find_units`, `auction_round`, `auction_winners`,
+  `company_profile`, `region_profile`, `grid_redispatch`,
+  `cross_border_flows`, `whats_new` (units registered since a date, from
+  `units.registration_date`; works without snapshots). Inputs validated and
+  quoted; numeric results returned as numbers.
+- **WP82:** rate limit 60 requests/minute per client and server instance
+  (in memory, IPs never logged); one log line per tool call with the tool
+  name only; `.github/workflows/mcp-health.yml` checks `/mcp/health` and a
+  tool call every 3 hours and sends a phone alert on failure.
+- **WP84:** `/connect` page with setup for Claude apps, Claude Code, the
+  Claude API MCP connector and other agents; linked from `/open-data`,
+  `/llms.txt` and the landing page.
 
 ## v1.11: cost benchmarks, onshore wind and solar PV (approved 25 Nov 2026)
 

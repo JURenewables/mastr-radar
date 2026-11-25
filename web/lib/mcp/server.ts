@@ -147,6 +147,8 @@ async function handle(req: RpcRequest): Promise<RpcResponse | null> {
         const name = String(params.name ?? "");
         const args = (params.arguments ?? {}) as Record<string, unknown>;
         if (!TOOLS.some((t) => t.name === name)) return fail(id, -32602, `Unknown tool '${name}'.`);
+        // Anonymous usage count: tool name only (no IP, no arguments).
+        console.info(`mcp tool ${name}`);
         try {
           const env = await callTool(name, args);
           return ok(id, { content: [{ type: "text", text: JSON.stringify(env) }], structuredContent: env });

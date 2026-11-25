@@ -42,7 +42,11 @@ describe("mcp protocol", () => {
 
   it("lists the v1 tools, resources and prompts", async () => {
     const tools = (await rpc("tools/list")).result.tools.map((t: any) => t.name);
-    expect(tools).toEqual(["list_datasets", "describe_dataset", "run_sql", "get_kpis"]);
+    expect(tools).toEqual([
+      "list_datasets", "describe_dataset", "run_sql", "get_kpis",
+      "find_units", "auction_round", "auction_winners", "company_profile",
+      "region_profile", "grid_redispatch", "cross_border_flows", "whats_new",
+    ]);
     const res = (await rpc("resources/list")).result.resources.map((r: any) => r.uri);
     expect(res).toContain("mastr-radar://dictionary");
     for (const uri of res) {
@@ -127,5 +131,55 @@ describe("mcp tools", () => {
     const r = await tool("get_kpis", { technology: "solar" });
     expect(r.structuredContent.data.kpis[0].installed_capacity_kw).toBeGreaterThan(1e7);
     expect((await tool("get_kpis")).structuredContent.data.kpis.length).toBeGreaterThan(4);
+  });
+});
+
+describe("mcp typed tools (v2)", () => {
+  it("find_units answers the March question without SQL", async () => {
+    const r = await tool("find_units", { technology: ["wind_onshore", "solar"], commissioned_from: "2026-03-01", commissioned_to: "2026-03-31", min_mw: 1, limit: 5 });
+    expect(r.isError).toBeFalsy();
+    const d = r.structuredContent.data;
+    expect(d.units.length).toBe(5);
+    expect(d.units[0].mw).toBeGreaterThanOrEqual(d.units[4].mw);
+    expect(d.totals_units_100kw_plus.length).toBeGreaterThan(0);
+    const all = await tool("find_units", { technology: ["solar"], state: "Bayern", commissioned_from: "2025-01-01", commissioned_to: "2025-12-31" });
+    expect(all.structuredContent.data.totals_all_sizes[0].units).toBeGreaterThan(1000);
+  });
+
+  it("auction_round and auction_winners", async () => {
+    const r = await tool("auction_round", { technology: "wind" });
+    expect(r.structuredContent.data.avg_ct).toBeGreaterThan(3);
+    const s = await tool("auction_round", { technology: "solar", bid_date: "2025-03-01" });
+    expect(s.structuredContent.data.programme).toBe("solar");
+    const bad = await tool("auction_round", { technology: "wind", bid_date: "2020-01-02" });
+    expect(bad.isError).toBe(true);
+    const w = await tool("auction_winners", { technology: "wind", limit: 3 });
+    expect(w.structuredContent.data.awards.length).toBe(3);
+    const g = await tool("auction_winners", { technology: "wind", group: "RWE" });
+    expect(g.structuredContent.data.total.awards).toBeGreaterThan(0);
+  });
+
+  it("company_profile, region_profile, grid and flows", async () => {
+    const c = await tool("company_profile", { name: "RWE" });
+    expect(c.isError).toBeFalsy();
+    expect(c.structuredContent.data.wind_awards_by_year.length).toBeGreaterThan(0);
+    const r = await tool("region_profile", { state: "Schleswig-Holstein" });
+    expect(r.structuredContent.data.capacity.length).toBeGreaterThan(0);
+    expect((await tool("region_profile", {})).isError).toBe(true);
+    const g = await tool("grid_redispatch", { months: 6 });
+    expect(g.structuredContent.data.monthly.length).toBe(6);
+    const f = await tool("cross_border_flows", { neighbour: "FR" });
+    expect(f.structuredContent.data.last_12m.FR).toBeDefined();
+    expect((await tool("cross_border_flows", { neighbour: "XX" })).isError).toBe(true);
+  });
+
+  it("whats_new and input validation", async () => {
+    const w = await tool("whats_new", { since: "2026-11-01" });
+    expect(w.isError).toBeFalsy();
+    expect(Array.isArray(w.structuredContent.data.largest)).toBe(true);
+    const bad = await tool("whats_new", { since: "yesterday" });
+    expect(bad.structuredContent.error.code).toBe("bad_input");
+    const inj = await tool("company_profile", { name: "x' OR 1=1; DROP VIEW units; --" });
+    expect(["not_found", "bad_input"]).toContain(inj.structuredContent.error.code);
   });
 });

@@ -463,6 +463,35 @@ def profit_build() -> None:
     typer.echo(f"Check passed: {', '.join(sorted(names))}")
 
 
+@app.command("snapshots-index")
+def snapshots_index(
+    releases: Path = typer.Argument(
+        ..., help="JSON from: gh release list --json tagName,name,publishedAt"
+    ),
+    repo: str = typer.Option(..., help="owner/repo"),
+) -> None:
+    """Snapshots (v1.10): write snapshots.json from the list of data-YYYY-MM-DD
+    releases, check it, and update its entry and the data dictionary."""
+    import json
+
+    from mastr_radar import dictionary, snapshots
+
+    s = load_settings()
+    try:
+        files = snapshots.build(s.output_dir, json.loads(releases.read_text()), repo)
+    except snapshots.SnapshotCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    mpath = s.output_dir / "manifest.json"
+    manifest = json.loads(mpath.read_text())
+    names = {f["name"] for f in files}
+    kept = [f for f in manifest["files"] if f["name"] not in names | {dictionary.FILE}]
+    files += dictionary.build(s.output_dir, [f["name"] for f in kept + files])
+    manifest["files"] = kept + files
+    mpath.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+    typer.echo(f"Check passed: {', '.join(sorted(names))}")
+
+
 @app.command("notify")
 def notify(
     previous: Path = typer.Option(None, help="kpis.json of the previous update, for the changes."),

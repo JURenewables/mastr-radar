@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.11 approved (25 Nov 2026): cost pages `/costs/wind` and `/costs/solar` built (Phase 10, WP89–92). MCP server v1 live. Next: Phase 11 profitability and co-location (contract v1.12 draft awaits approval); then WP81, WP78, WP82, WP84**
+**You are here: contract v1.12 (25 Nov 2026). Phase 11 built (profitability on the cost pages, co-location on the wind page); Phase 9 WP78, 81, 82, 84 built (snapshots, typed MCP tools, guardrails, /connect). Open: WP83 agent evals (needs budget), WP93 optional cost trend data, listing in public MCP registries**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -381,7 +381,7 @@ correctly. Design and decisions: `docs/platform-plan.md`.
   time on the 5 heaviest questions. Fallback if too slow: precomputed
   answers only. Decide hosting of larger files (WP78). *Done: DuckDB
   fits (start 23 ms, queries ≤ 85 ms, 154 MB); details in platform-plan.*
-- [ ] **WP78. Daily snapshots (history).** Keep a dated copy of the explorer
+- [x] **WP78. Daily snapshots (history).** Keep a dated copy of the explorer
   files every day (decision 2: GitHub Release assets) so agents can ask
   "what changed since …" and answers stay reproducible. Snapshot index in
   the catalogue.
@@ -396,13 +396,13 @@ correctly. Design and decisions: `docs/platform-plan.md`.
   small JSON-RPC handler (no SDK), DuckDB locked to the data folder, flat
   views for awards, rounds, players and redispatch; checked with the
   official MCP client and a test of every tool.*
-- [ ] **WP81. Domain tools v2.** Typed tools for the common questions so
+- [x] **WP81. Domain tools v2.** Typed tools for the common questions so
   agents need no SQL: `find_units` (technology, status, region, size,
   commissioning period), `auction_round`, `auction_winners`,
   `company_profile`, `region_profile`, `grid_redispatch`,
   `cross_border_flows`, `whats_new` (from WP78). Prompts (templates) for
   typical analyses.
-- [ ] **WP82. Guardrails and operations.** Rate limits, query timeouts, size
+- [x] **WP82. Guardrails and operations.** Rate limits, query timeouts, size
   caps, privacy enforced in the tool layer (no natural persons, D4),
   anonymous usage counts (no personal data), a health endpoint and an
   alert when the server fails.
@@ -410,11 +410,12 @@ correctly. Design and decisions: `docs/platform-plan.md`.
   "which wind and solar projects went online in March 2026, and where?").
   Run them through Claude with the MCP server after every release and track
   the pass rate. Costs API money: needs your approval and budget.
-- [ ] **WP84. "Connect your AI" page and listings.** Copy-paste setup for
+- [x] **WP84. "Connect your AI" page and listings.** Copy-paste setup for
   Claude (custom connector URL), Claude Code
   (`claude mcp add --transport http mastr-radar https://mastr-radar.vercel.app/mcp`)
   and other MCP clients; an OpenAPI description for agents without MCP;
-  listing in public MCP registries.
+  listing in public MCP registries. *Built: `/connect`. Still open: OpenAPI
+  description and registry listings (listings need your account).*
 
 ---
 

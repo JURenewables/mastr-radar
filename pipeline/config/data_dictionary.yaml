@@ -370,6 +370,17 @@ datasets:
       sites: "tier, kind (storage/solar), partner_mw, partner_mwh, partner_status, partner_year, wind_mw and wind_units (within 1 km or at the location), wind_status, award_rounds (bid dates of awards among those turbines), distance_km, state, district, lat, lon, operator"
     questions: ["Which wind farms have a battery next to them?", "How many awarded wind projects plan a battery?"]
 
+  - file: snapshots.json
+    title: Daily snapshots (history)
+    grain: one entry per day with a dated copy of the explorer files
+    licence: own
+    caveats: ["Each snapshot carries the licences of the files it contains (see catalog.json of that day)."]
+    fields:
+      repo: "GitHub repository that holds the release assets"
+      format: "Archive format"
+      snapshots: "date, tag, name, published, url (download of data-YYYY-MM-DD.tar.zst), newest first"
+    questions: ["What did the register say on a past date?", "What changed since last month?"]
+
   - file: days/
     title: Day files (SMARD and DWD)
     grain: one file per day, quarter-hourly

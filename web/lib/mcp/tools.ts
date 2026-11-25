@@ -6,6 +6,7 @@ import path from "node:path";
 import type { Dictionary, DictDataset } from "../dictionary";
 import { SITE_URL } from "../site";
 import { DATA_DIR, LIMITS, QueryError, engine, runSelect, viewName, type Manifest, type View } from "./engine";
+import { InputError, TOOLS_V2, V2_NAMES, callV2 } from "./tools2";
 
 export type ErrorCode = "bad_input" | "not_found" | "query_rejected" | "query_timeout" | "too_many_rows" | "rate_limited" | "internal";
 
@@ -73,7 +74,7 @@ function filesIn(sql: string, views: View[]): string[] {
 
 // ---------- tool definitions (names and input schemas are the contract) ----------
 
-export const TOOLS = [
+const TOOLS_V1 = [
   {
     name: "list_datasets",
     title: "List datasets",
@@ -131,11 +132,24 @@ export const TOOLS = [
   },
 ] as const;
 
+export const TOOLS = [...TOOLS_V1, ...TOOLS_V2];
+
 type Args = Record<string, unknown>;
 
 export async function callTool(name: string, args: Args): Promise<Envelope> {
   const { views, manifest: m } = await engine();
   const rows = new Map(m.files.map((f) => [f.name, f.rows]));
+
+  if (V2_NAMES.has(name)) {
+    try {
+      const r = await callV2(name, args, m.as_of);
+      return envelope(m, r.files, r.data, r.caveats);
+    } catch (e) {
+      if (e instanceof InputError) throw new ToolError(/^No |^Nothing /.test(e.message) ? "not_found" : "bad_input", e.message);
+      if (e instanceof QueryError) throw new ToolError(e.code, e.message);
+      throw e;
+    }
+  }
 
   switch (name) {
     case "list_datasets": {
@@ -212,7 +226,8 @@ export async function callTool(name: string, args: Args): Promise<Envelope> {
 
 export const INSTRUCTIONS = `MaStR Radar: Germany's renewable energy units (Marktstammdatenregister), auctions, grid redispatch and cross-border flows, as published at ${SITE_URL}. Read-only, updated daily.
 How to answer well:
-- Start with list_datasets, then describe_dataset for the fields; use run_sql (DuckDB SELECT over the views) or get_kpis.
+- For common questions use the typed tools: find_units, auction_round, auction_winners, company_profile, region_profile, grid_redispatch, cross_border_flows, whats_new, get_kpis.
+- For anything else: list_datasets, describe_dataset for the fields, then run_sql (DuckDB SELECT over the views).
 - Capacity is stored in kW; report MW or GW with units, and say whether you mean installed (operating) or added in a period.
 - Units below 100 kW are only in 'summary' (totals by technology, status, size class, district and commissioning month); 'units' lists units of 100 kW or more.
 - Always state the as-of date, cite the source and licence line from the result, and pass on the caveats (recent months are incomplete because of late registrations).

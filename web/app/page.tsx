@@ -65,8 +65,14 @@ const SECTIONS: { href: string; scope: string; title: string; text: string; fact
   {
     href: "/open-data",
     scope: "Data",
-    title: "Open data & AI",
-    text: "Every file behind the site, with licence and schema. Point your AI agent at one address and it finds the answer.",
+    title: "Open data",
+    text: "Every file behind the site, with licence and schema, ready to download or query.",
+  },
+  {
+    href: "/connect",
+    scope: "AI",
+    title: "Connect your AI",
+    text: "A free, read-only MCP server: add one address to Claude or any MCP client and ask about Germany's renewables, auctions, costs and grid in plain language.",
   },
   {
     href: "/methodology",

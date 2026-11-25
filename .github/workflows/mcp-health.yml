@@ -1,0 +1,42 @@
+# MCP server health (contract v1.10, WP82): every 3 hours, check that the
+# server answers and a tool returns data; on failure, send a phone alert
+# (Telegram, if configured) and fail the run so GitHub emails the owner.
+name: MCP health
+
+on:
+  schedule:
+    - cron: "37 */3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Health endpoint
+        run: |
+          curl -fsS --retry 3 --retry-delay 20 https://mastr-radar.vercel.app/mcp/health | tee health.json
+          grep -q '"ok":true' health.json
+      - name: Tool call (get_kpis)
+        run: |
+          curl -fsS --retry 3 --retry-delay 20 -X POST https://mastr-radar.vercel.app/mcp \
+            -H 'content-type: application/json' -H 'accept: application/json, text/event-stream' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_kpis","arguments":{"technology":"solar"}}}' > kpis.json
+          grep -q '"installed_capacity_kw"' kpis.json
+      - uses: actions/checkout@v4
+        if: failure()
+      - uses: astral-sh/setup-uv@v6
+        if: failure()
+      - name: Phone alert
+        if: failure()
+        working-directory: pipeline
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          uv sync --python 3.12
+          uv run mastr-radar notify --message "⚠️ MaStR Radar MCP server is not answering. $RUN_URL" || true
