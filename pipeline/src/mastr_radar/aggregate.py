@@ -20,7 +20,7 @@ from mastr_radar import __version__
 from mastr_radar.config import PIPELINE_ROOT
 from mastr_radar.extract import ENUMS, UNITS_SCHEMA, export_date_of
 
-CONTRACT_VERSION = "1.8"
+CONTRACT_VERSION = "1.9"
 MAX_TOTAL_BYTES = 50 * 1024 * 1024  # contract v1.4
 MAP_POINT_MIN_KW = 100.0  # D5: units from 100 kW are individual points
 DEFAULT_OPERATOR_NAME_MIN_KW = 1000.0  # operator names only from 1 MW (settings)
@@ -212,6 +212,15 @@ def build(
         from mastr_radar import players
 
         files += players.build(out_dir)
+        from mastr_radar import outlook, runup
+
+        if (units_path.parent / "unit_details.parquet").exists():
+            files += runup.build(
+                list(auction_rounds), auctions_dir, units_path.parent, out_dir, as_of
+            )
+            files += outlook.build(
+                units_path.parent, out_dir, as_of, list(auction_rounds), auctions_dir
+            )
     from mastr_radar import redispatch as rdp
 
     # Grid API files (v1.8) are built from data/grid when present (grid run);
@@ -339,6 +348,15 @@ def check_explorer_files(
             market_risk.check(out_dir)
         except market_risk.RiskCheckError as exc:
             problems.append(str(exc))
+        from mastr_radar import outlook, runup
+
+        for mod, err in ((runup, runup.RunupCheckError), (outlook, outlook.OutlookCheckError)):
+            if (out_dir / mod.FILE).exists():
+                expected_files.add(mod.FILE)
+                try:
+                    mod.check(out_dir)
+                except err as exc:
+                    problems.append(str(exc))
         from mastr_radar import players
 
         expected_files.add(players.FILE)

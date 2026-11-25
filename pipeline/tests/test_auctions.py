@@ -148,6 +148,7 @@ def test_parse_round_page():
         "avg_ct": 4.79,
         "awards": 3,
         "awarded_kw": 19000,
+        "permit_deadline": None,
     }
 
 

@@ -641,6 +641,52 @@ average over the last 12 months). Only aggregates are published; raw
 Netztransparenz rows are not redistributed. **Check:** ≥ 12 months in order;
 no negative values; reductions present; ≥ 8 neighbours; 24 hourly values.
 
+## v1.9: auction run-up, outlook (repowering, auction outlook), phone report (approved 25 Nov 2026)
+
+**Station 2:** `unit_details.parquet` gains `permit_registered` (date the
+permit was entered in MaStR, `Registrierungsdatum` of the permit record).
+
+**Station 3, `auctions/onshore.json`:** each round gains `permit_deadline`
+(date by which permits must be issued and registered in MaStR, parsed from
+the round page; null where the page gives none, i.e. before 2022).
+
+**`auctions/runup.json`** (WP85): `as_of`; `wind.rounds` (id, bid_date,
+permit_deadline, deadline_days, turbines linked via the award lists,
+`permit_days` and `unit_days`: days from the bid date to the registration of
+each awarded turbine's permit and of the turbine itself, kept within ±365
+days, and a summary of each: n, median_days, share_before_bid,
+share_last_8_weeks; `eligible_earlier`: n, share_1plus, share_2plus of
+awarded turbines whose permit was registered before the deadline of one, or
+two or more, earlier rounds; rounds with a deadline only);
+`wind.awarded_turbines`, `wind.reawarded_turbines` (turbines on the award
+lists of two or more rounds); `wind.weekly_permits` (weeks from 2019, units and MW of
+onshore wind whose permit was registered that week); `solar.rounds` (id,
+bid_date, awards, `unit_days`: days from the bid date to the first
+registration of the awarded park, summary); `solar.weekly_ground_mounted`
+(ground-mounted parks ≥ 750 kW registered per week). **Check:** ≥ 10 wind
+rounds; ≥ 1,000 awarded turbines with a permit date; weekly arrays aligned
+and ≥ 100 weeks; ≥ 5 solar rounds.
+
+**`outlook/outlook.json`** (WP86–87): `as_of`; `repowering` (eeg_years,
+next_wave_years from `config/outlook.yaml`; `old` and `next_wave` units and
+MW; `potential` with its assumptions; `by_state_mw`; `districts` (key →
+[old MW, old units, next-wave MW]); `points` (lon×100, lat×100, kW/10, class
+1 = past EEG support, 2 = next wave; public locations only); `models` (top 12
+brand and model family of old turbines with hub height and rotor); `owners`
+(top 15 groups or legal entities, units ≥ 1 MW only); `retired_mw_by_year`,
+`added_mw_by_year`) and `auction_outlook` (wind: next four bid dates,
+permitted pool without award in MW and by permit year, awarded but not
+built, average volume of the last four rounds, rounds covered, recent rounds,
+oversubscription; solar: next bid dates, recent rounds, oversubscription).
+**Check:** ≥ 1,000 old turbines; points in fours; ≥ 100 districts; four
+ordered bid dates; pool ≥ 0.
+
+**Phone report** (WP88): `mastr-radar notify` sends a short daily summary
+(installed capacity per technology with the change since the previous
+update, added this year, latest onshore award) through a Telegram bot, and a
+message when the daily run fails. Needs GitHub Secrets `TELEGRAM_BOT_TOKEN`
+and `TELEGRAM_CHAT_ID`; without them nothing is sent.
+
 ## Version history
 
 | Version | Date | Change |
@@ -654,3 +700,4 @@ no negative values; reductions present; ≥ 8 neighbours; 24 hourly values.
 | 1.6 | 2026-11-01 | Auctions since May 2019 with yield estimate (DWD), five bidder types, reviewed attributions and company-reported totals, office attribution via the new internal `data/extract/operators.parquet`, race, profiles and map points. Approved by the user. |
 | 1.7 | 2026-11-01 | Solar and innovation auctions, internal unit details and grid register, wind calibration and success drivers, rise-and-fall dynamics, company facts, market risk, players worldwide, grid page. Approved by the user. |
 | 1.8 | 2026-11-02 | Netztransparenz TSO redispatch since 2021 and ENTSO-E cross-border flows (internal extracts, `grid/redispatch.json`, `grid/flows.json`, aggregates only), fetched with GitHub Secrets by a separate daily workflow. Approved by the user. |
+| 1.9 | 2026-11-25 | Auction run-up (`auctions/runup.json`, permit deadlines, `permit_registered` in unit details), Outlook page (`outlook/outlook.json`: repowering, auction outlook), Telegram phone report. Approved by the user. |

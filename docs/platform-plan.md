@@ -1,35 +1,80 @@
-# AI-friendly data platform: plan (WP73)
+# Open data for AI agents: design (Phase 9)
 
-Goal: "Point your AI at mastr-radar.vercel.app and it finds the answer."
+Goal: anyone can point an AI agent at MaStR Radar and get correct, sourced
+answers about Germany's renewables, auctions and grid, without reading our
+code.
 
-## Principle
+## What exists (live)
 
-The site already is the platform. Every dataset is a static file with a
-contract, a check and a stable URL. AI agents work best with:
+- Static, checked files under `/data/*` (Parquet and JSON), CORS open.
+- `/catalog.json` (every file with licence, rows, size) and `/llms.txt`
+  (question → file map, primary-source directory), built from the manifest.
+- Daily updates: MaStR, auctions, grid APIs, SMARD hub.
 
-1. **One entry point**: `/llms.txt`, a plain-text map of what exists, which
-   file answers which question, and how to go deeper. Done (WP73a).
-2. **A machine-readable catalogue**: `/catalog.json` with licence,
-   attribution, rows, size and URL per file. Done.
-3. **Query-ready files**: Parquet over HTTP (DuckDB `read_parquet('https://…')`)
-   and small JSON. Done; CORS open on `/data/*`.
-4. **A primary-source directory**: what MaStR, SMARD, Netztransparenz,
-   ENTSO-E, BNetzA auctions, DWD and BKG offer and how to access them.
-   Done on `/open-data` and in `/llms.txt`.
+## Target architecture
 
-## Next steps
+```
+data-dictionary.yaml ──▶ generated context ──▶ /llms.txt, /llms-full.txt,
+ (WP75, one source)       (WP76)               /schema.json, dataset cards
+                                                      │
+explorer files (daily) ──▶ snapshots (WP78) ──┐       │
+                                              ▼       ▼
+                                   MCP server /mcp (WP80–81)
+                                   Streamable HTTP, read-only, no login
+                                   tools · resources · prompts
+                                              │
+                         Claude (custom connector), Claude Code,
+                         Messages API MCP connector, other MCP clients
+```
 
-| Step | What | Needs |
+## Design rules
+
+1. **One source of meaning.** The data dictionary defines every column once;
+   docs, `llms.txt`, schemas and MCP tool descriptions are generated from it,
+   so they cannot drift.
+2. **Answers carry their context.** Every tool result includes `as_of`, the
+   source, the licence line, and the caveat that applies (e.g. "recent
+   months incomplete").
+3. **Typed tools first, SQL second.** Common questions get typed tools with
+   small inputs (technology, region, period). `run_sql` exists for
+   everything else, read-only with limits.
+4. **Same rules as the website.** Privacy (no natural persons, D4),
+   aggregates only for Netztransparenz data, attribution on every answer.
+5. **Contracts first.** The MCP interface (tool names and schemas) is a
+   contract (v1.9) approved before code; breaking changes bump the version.
+
+## Technical choices (to confirm in WP77)
+
+| Topic | Choice | Why |
 |---|---|---|
-| A | Netztransparenz station: EEG plant data, redispatch by grid element, curtailment, market values → `grid/redispatch.json` (lines and areas most often congested) | `NETZTRANSPARENZ_CLIENT_ID` / `_SECRET` in GitHub Secrets (rotate the one pasted in chat) |
-| B | ENTSO-E station: hourly load, generation, cross-border flows → day files and a flows chart on `/grid` | `ENTSOE_TOKEN` in GitHub Secrets |
-| C | OpenStreetMap grid topology (lines, substations) → line map and plant-to-substation distance (WP41, WP67) | Your decision to accept the ODbL licence |
-| D | Query endpoint (MCP server on Vercel): tools `list_datasets`, `describe(file)`, `sql(query)` over the Parquet files with DuckDB | Small serverless function; no secrets |
-| E | Reports index: links to BNetzA monitoring reports, network development plan, EEG reports, with a one-line summary each | Hand-curated YAML with sources |
+| Transport | MCP Streamable HTTP, stateless | Current standard for remote servers; works on serverless |
+| Hosting | Next.js route handler on Vercel (`/mcp`) | Same deployment as the site |
+| Query engine | DuckDB (Node) over the published Parquet | Fast analytical SQL, no database to run |
+| History | Daily snapshots as GitHub Release assets | Decision 2; free, versioned |
+| Limits | Row cap, query timeout, rate limit | Free public service must stay up |
+
+If DuckDB is too slow or large for a serverless function, the fallback is a
+small always-on container (e.g. Fly.io or Cloud Run) or precomputed answers.
+
+## How agents will connect (WP84)
+
+- **Claude apps:** add a custom connector with the URL
+  `https://mastr-radar.vercel.app/mcp`.
+- **Claude Code:** `claude mcp add --transport http mastr-radar https://mastr-radar.vercel.app/mcp`
+- **Claude API:** the MCP connector (`mcp_servers` with the URL plus an
+  `mcp_toolset` tool).
+- **Other agents:** any MCP client; agents without MCP use `/llms.txt`,
+  `/schema.json` and the files directly, or an OpenAPI description.
+
+## Open decisions
+
+1. Snapshot storage: GitHub Release assets (default) or Hugging Face
+   Datasets (browsable, larger files).
+2. Budget for agent evals (WP83): Claude API costs per run.
+3. Netztransparenz written permission (optional; we publish aggregates only).
 
 ## Rules that stay
 
 - Secrets only in GitHub Secrets; never in code, chat or the repo.
 - Every new source goes into `docs/sources.md` with its licence before use.
-- Every new file gets a contract entry and a check (a broken station never
-  reaches the website).
+- Every new file or interface gets a contract entry and a check.

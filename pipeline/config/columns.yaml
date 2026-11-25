@@ -189,6 +189,7 @@ unit_details:
     id: GenMastrNummer
     date: Datum
     kind: Art
+    registered: Registrierungsdatum   # when the permit was entered in MaStR (v1.9)
   grid:
     files: Netzanschlusspunkte_*.xml
     record: Netzanschlusspunkt

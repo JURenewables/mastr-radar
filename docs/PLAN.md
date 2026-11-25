@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.8 live (2 Nov 2026): Monitor, Solar, Wind, Grid (incl. TSO redispatch and cross-border flows), Players, AI guide. Next: WP67 grid distance and WP41 grid map (need OSM decision), WP45b attribution, WP73 query endpoint**
+**You are here: contract v1.9 live (25 Nov 2026): run-up, Outlook page, Telegram report. Now: Phase 9 (open data for AI agents), WP75 → WP84**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -288,7 +288,7 @@ real stress signals (line loading itself is not published).
   since 2021 and ENTSO-E cross-border flows, fetched with GitHub Secrets by a
   separate daily workflow; Grid page sections "Redispatch by the TSOs" and
   "Cross-border flows". Open: written permission from the TSOs (optional).
-- [ ] **WP73. AI-friendly data platform:** see `docs/platform-plan.md`.
+- [x] **WP73a. AI guide** on `/open-data` and `/llms.txt` (question → file map, primary-source directory). The rest of WP73 is Phase 9.
 - [ ] **WP67. Grid distance:** distance to the nearest substation (needs the
   OpenStreetMap ODbL decision).
 - [ ] **WP45b. Better attribution (continue):** map project companies to their parent
@@ -297,6 +297,77 @@ real stress signals (line loading itself is not published).
 - [ ] **WP46. Winners map and time to going online.**
 - [ ] **WP47. Run-up before bid dates.**
 - [ ] **WP48. Optional: energy yield estimate.**
+
+
+---
+
+## Phase 8b: Auction timing, outlook, phone report
+
+- [x] **WP85. Auction run-up:** when permits and units of awarded projects
+  appear in MaStR relative to the bid date and the permit deadline (wind),
+  first registration of awarded solar parks; weekly registration waves.
+  Sections high up on Wind and Solar. *Contract v1.9.*
+- [x] **WP86. Outlook page: repowering potential** (`/outlook`): map of
+  turbines past EEG support and the next wave, models, owners, retirements,
+  illustrative potential with stated assumptions.
+- [x] **WP87. Outlook page: auction outlook:** next bid dates, permitted pool
+  without award vs round volume, price direction (assessment).
+- [x] **WP88. Phone report:** daily Telegram summary and failure alert from
+  the daily workflow (secrets `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`).
+
+---
+
+## Phase 9: Open data for AI agents (MCP)
+
+Goal: "Point your AI at MaStR Radar and it finds the answer." A public,
+read-only MCP server plus the context an agent needs to use the data
+correctly. Design and decisions: `docs/platform-plan.md`.
+
+- [ ] **WP75. Semantic layer (one data dictionary).** Every published file
+  and column in one machine-readable file (`docs/data-dictionary.yaml`):
+  meaning, type, unit, allowed values, source, licence, caveats, example
+  questions. The check fails if a published column is undescribed.
+  Everything below is generated from it. *Contract v1.9.*
+- [ ] **WP76. Agent context pack.** Generated from WP75: `/llms-full.txt`
+  (all datasets with columns), `/schema.json` (JSON Schema per dataset),
+  one short "dataset card" per file, a citation line, known gaps (late
+  registrations, private units without location, TSO-only redispatch) and
+  20 starter questions with the query that answers each.
+- [ ] **WP77. Query engine prototype.** DuckDB in a Vercel Node function
+  reading the published Parquet/JSON. Measure cold start, memory and query
+  time on the 5 heaviest questions. Fallback if too slow: precomputed
+  answers only. Decide hosting of larger files (WP78).
+- [ ] **WP78. Daily snapshots (history).** Keep a dated copy of the explorer
+  files every day (decision 2: GitHub Release assets) so agents can ask
+  "what changed since …" and answers stay reproducible. Snapshot index in
+  the catalogue.
+- [ ] **WP79. MCP contract (v1.9).** Tool names, input/output schemas,
+  limits and error messages written down and approved before code
+  (contracts first).
+- [ ] **WP80. MCP server v1.** Remote, read-only, Streamable HTTP, no login,
+  at `https://mastr-radar.vercel.app/mcp`. Tools: `list_datasets`,
+  `describe_dataset`, `run_sql` (SELECT only, row cap, timeout),
+  `get_kpis`. Resources: data dictionary, methodology, contract,
+  licences. Every answer carries `as_of`, source and licence.
+- [ ] **WP81. Domain tools v2.** Typed tools for the common questions so
+  agents need no SQL: `find_units` (technology, status, region, size,
+  commissioning period), `auction_round`, `auction_winners`,
+  `company_profile`, `region_profile`, `grid_redispatch`,
+  `cross_border_flows`, `whats_new` (from WP78). Prompts (templates) for
+  typical analyses.
+- [ ] **WP82. Guardrails and operations.** Rate limits, query timeouts, size
+  caps, privacy enforced in the tool layer (no natural persons, D4),
+  anonymous usage counts (no personal data), a health endpoint and an
+  alert when the server fails.
+- [ ] **WP83. Agent evals.** 30 real questions with checked answers (e.g.
+  "which wind and solar projects went online in March 2026, and where?").
+  Run them through Claude with the MCP server after every release and track
+  the pass rate. Costs API money: needs your approval and budget.
+- [ ] **WP84. "Connect your AI" page and listings.** Copy-paste setup for
+  Claude (custom connector URL), Claude Code
+  (`claude mcp add --transport http mastr-radar https://mastr-radar.vercel.app/mcp`)
+  and other MCP clients; an OpenAPI description for agents without MCP;
+  listing in public MCP registries.
 
 ---
 

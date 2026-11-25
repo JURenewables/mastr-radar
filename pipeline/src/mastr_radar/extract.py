@@ -250,6 +250,7 @@ UNIT_DETAILS_SCHEMA = pa.schema(
         ("yield_ratio_pct", pa.float64()),
         ("permit_date", pa.date32()),
         ("permit_kind", pa.string()),
+        ("permit_registered", pa.date32()),
         ("solar_kind", pa.string()),
         ("solar_orientation", pa.string()),
         ("solar_tracker", pa.bool_()),
@@ -348,7 +349,9 @@ def write_unit_details(zip_path: Path, out_path: Path, cfg: dict | None = None) 
         for r in iter_records(zf, pc_["files"], pc_["record"]):
             for uid in want_permit.get(r.get(pc_["id"]), []):
                 rows[uid].update(
-                    permit_date=_date(r.get(pc_["date"])), permit_kind=cat(r.get(pc_["kind"]))
+                    permit_date=_date(r.get(pc_["date"])),
+                    permit_kind=cat(r.get(pc_["kind"])),
+                    permit_registered=_date(r.get(pc_["registered"])),
                 )
         gc = dc["grid"]
         want_loc = {}
