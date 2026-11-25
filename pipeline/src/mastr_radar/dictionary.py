@@ -1,4 +1,4 @@
-"""Data dictionary (contract v1.10 draft, WP75): config/data_dictionary.yaml is
+"""Data dictionary (contract v1.10, WP75): config/data_dictionary.yaml is
 checked against every published file and written to data/dictionary.json."""
 
 from __future__ import annotations

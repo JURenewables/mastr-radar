@@ -687,7 +687,7 @@ update, added this year, latest onshore award) through a Telegram bot, and a
 message when the daily run fails. Needs GitHub Secrets `TELEGRAM_BOT_TOKEN`
 and `TELEGRAM_CHAT_ID`; without them nothing is sent.
 
-## v1.10: data dictionary, agent context, MCP server (DRAFT, awaiting approval)
+## v1.10: data dictionary, agent context, MCP server (approved 25 Nov 2026)
 
 Phase 9 (WP75–WP84). The MCP server reads **only** the published explorer
 files (station 4 side), so privacy rules D4 and D13 and the
@@ -718,8 +718,10 @@ the field list per dataset on `/open-data`, and a link from `/llms.txt`.
 
 DuckDB for Node (`@duckdb/node-api`, exact pin) inside the Vercel function,
 reading the published files bundled with the function. Each Parquet/JSON
-file is exposed as a read-only **view** named after the file (`units`,
-`summary`, `kpis`, `awards`, `onshore_rounds`, …; the names are listed by
+file is exposed as a read-only **view** named after its path (`units`,
+`summary`, `kpis`, `auctions_onshore`, `grid_redispatch`, …), plus flat
+views over the main lists: `wind_awards`, `solar_awards`, `wind_rounds`,
+`solar_rounds`, `players`, `redispatch_monthly` (all listed by
 `list_datasets`). After the views are created the engine is locked:
 `allowed_directories` = the data folder, `enable_external_access = false`,
 no extension install/load, `lock_configuration = true`, 2 threads, 512 MB.
@@ -761,12 +763,14 @@ no extension install/load, `lock_configuration = true`, 2 threads, 512 MB.
 | `whats_new` | `since` (date) | changes between two daily snapshots (needs WP78) |
 
 **Resources:** `mastr-radar://dictionary` (dictionary.json),
-`mastr-radar://methodology`, `mastr-radar://contract` (this file),
-`mastr-radar://licences`. **Prompts:** templates for "commissioned in a
+`mastr-radar://licences`, `mastr-radar://guide` (same as `/llms-full.txt`),
+`mastr-radar://methodology` (short methodology built from the dictionary,
+links the full page), `mastr-radar://contract` (this file). **Prompts:** templates for "commissioned in a
 period, where?", "auction round summary", "company profile".
 
 **Limits (WP82):** `run_sql` accepts exactly one SELECT or WITH statement
-(checked with the DuckDB parser), 10 s timeout, ≤ 1,000 rows, ≤ 1 MB per
+(checked with the DuckDB parser; read-only PRAGMAs that DuckDB turns into
+a SELECT are allowed), 10 s timeout, ≤ 1,000 rows, ≤ 1 MB per
 result; about 60 requests per minute per client IP (anonymous, no
 logging of IPs or query text beyond counts); `/mcp/health` returns the
 manifest `as_of`. **Check:** a test calls every tool against the published
@@ -795,3 +799,4 @@ version of each. `whats_new` compares the current files with a snapshot.
 | 1.7 | 2026-11-01 | Solar and innovation auctions, internal unit details and grid register, wind calibration and success drivers, rise-and-fall dynamics, company facts, market risk, players worldwide, grid page. Approved by the user. |
 | 1.8 | 2026-11-02 | Netztransparenz TSO redispatch since 2021 and ENTSO-E cross-border flows (internal extracts, `grid/redispatch.json`, `grid/flows.json`, aggregates only), fetched with GitHub Secrets by a separate daily workflow. Approved by the user. |
 | 1.9 | 2026-11-25 | Auction run-up (`auctions/runup.json`, permit deadlines, `permit_registered` in unit details), Outlook page (`outlook/outlook.json`: repowering, auction outlook), Telegram phone report. Approved by the user. |
+| 1.10 | 2026-11-25 | Data dictionary (`dictionary.json`, check), agent context (`/llms-full.txt`, `/schema.json`), MCP server at `/mcp` (tools, resources, prompts, limits), daily snapshots. Approved by the user. |

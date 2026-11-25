@@ -1,4 +1,4 @@
-// Data dictionary (contract v1.10 draft): read at build time from
+// Data dictionary (contract v1.10): read at build time from
 // public/data/dictionary.json, which the pipeline checks against every file.
 // Feeds /llms-full.txt, /schema.json and the field lists on /open-data.
 import { readFile } from "node:fs/promises";
