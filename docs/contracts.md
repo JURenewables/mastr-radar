@@ -655,7 +655,11 @@ permit_deadline, deadline_days, turbines linked via the award lists,
 `permit_days` and `unit_days`: days from the bid date to the registration of
 each awarded turbine's permit and of the turbine itself, kept within ±365
 days, and a summary of each: n, median_days, share_before_bid,
-share_last_8_weeks); `wind.weekly_permits` (weeks from 2019, units and MW of
+share_last_8_weeks; `eligible_earlier`: n, share_1plus, share_2plus of
+awarded turbines whose permit was registered before the deadline of one, or
+two or more, earlier rounds; rounds with a deadline only);
+`wind.awarded_turbines`, `wind.reawarded_turbines` (turbines on the award
+lists of two or more rounds); `wind.weekly_permits` (weeks from 2019, units and MW of
 onshore wind whose permit was registered that week); `solar.rounds` (id,
 bid_date, awards, `unit_days`: days from the bid date to the first
 registration of the awarded park, summary); `solar.weekly_ground_mounted`

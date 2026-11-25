@@ -12,12 +12,12 @@ import { cssVar } from "@/lib/theme";
 import { Section, Stat } from "./ui";
 
 interface Summary { n: number; median_days: number | null; share_before_bid: number | null; share_last_8_weeks: number | null }
-interface WindRound { id: string; bid_date: string; permit_deadline: string | null; deadline_days: number | null; turbines: number; permit_days: number[]; unit_days: number[]; permit: Summary; unit: Summary }
+interface WindRound { id: string; bid_date: string; permit_deadline: string | null; deadline_days: number | null; turbines: number; permit_days: number[]; unit_days: number[]; permit: Summary; unit: Summary; eligible_earlier?: { n: number; share_1plus: number | null; share_2plus: number | null } | null }
 interface SolarRound { id: string; bid_date: string; awards: number; unit_days: number[]; unit: Summary }
 interface Weekly { weeks: string[]; units: number[]; mw: number[] }
 interface RunupFile {
   as_of: string;
-  wind: { rounds: WindRound[]; weekly_permits: Weekly };
+  wind: { rounds: WindRound[]; weekly_permits: Weekly; awarded_turbines?: number; reawarded_turbines?: number };
   solar?: { rounds: SolarRound[]; weekly_ground_mounted: Weekly };
 }
 
@@ -105,6 +105,17 @@ export function WindRunUp({ version, date }: { version: string; date: string }) 
   const before = permitDays.filter((x) => x <= 0);
   const lastMonthBeforeDeadline = medDeadline != null ? before.filter((x) => x > medDeadline - 28 && x <= medDeadline).length / (before.length || 1) : null;
   const medPermit = permitDays.length ? [...permitDays].sort((a, b) => a - b)[Math.floor(permitDays.length / 2)] : null;
+  const elig = rs.filter((r) => r.eligible_earlier?.n && r.bid_date >= "2023-01-01").map((r) => ({ round: r.bid_date.slice(0, 7), one: r.eligible_earlier!.share_1plus ?? 0, two: r.eligible_earlier!.share_2plus ?? 0, n: r.eligible_earlier!.n }));
+  const eligRows = elig.flatMap((e) => [
+    { round: e.round, kind: "Could have bid in 1 earlier round", share: e.one - e.two },
+    { round: e.round, kind: "In 2 or more earlier rounds", share: e.two },
+  ]);
+  const lastE = elig.at(-1);
+  const yearShare = (yr: string) => {
+    const x = elig.filter((e) => e.round.startsWith(yr));
+    const n = x.reduce((t, e) => t + e.n, 0);
+    return n ? x.reduce((t, e) => t + e.one * e.n, 0) / n : null;
+  };
   const marks = [
     ...d.wind.rounds.map((r) => ({ date: r.bid_date, kind: "bid" })),
     ...d.wind.rounds.filter((r) => r.permit_deadline).map((r) => ({ date: r.permit_deadline!, kind: "deadline" })),
@@ -122,6 +133,8 @@ export function WindRunUp({ version, date }: { version: string; date: string }) 
         `${pct(inLast(permitDays, -56, 0))} of these permits appeared in the last eight weeks before the bid date; companies keep their projects out of view until shortly before the round.`,
         `The turbines are mostly registered together with their permit: ${pct(unitDays.filter((x) => x <= 0).length / (unitDays.length || 1))} of them before the bid date.`,
         "The weekly chart shows the waves: permit registrations peak just before each deadline (red dashed lines), then drop.",
+        lastE ? `Many winners had tried before: ${pct(lastE.one)} of the turbines awarded in ${lastE.round} could already have bid in an earlier round (${pct(lastE.two)} in two or more), against ${pct(yearShare("2024"))} across 2024. In oversubscribed rounds (since 2024) the likely reason is a lost earlier bid, then a lower one; in early 2023, when rounds had too few bids, projects more likely waited for the higher price ceiling.` : "",
+        d.wind.reawarded_turbines ? `${d.wind.reawarded_turbines} of ${(d.wind.awarded_turbines ?? 0).toLocaleString("en-GB")} awarded turbines won in two different rounds: their first award most likely lapsed or was returned.` : "",
         (() => {
           const med = (yr: string) => {
             const m = rs.filter((r) => r.bid_date.startsWith(yr)).map((r) => r.permit.median_days).filter((x): x is number => x != null);
@@ -137,6 +150,7 @@ export function WindRunUp({ version, date }: { version: string; date: string }) 
       ].filter(Boolean)}
       caveats={[
         "Rounds since 2022 (earlier pages give no deadline). Turbines linked through the register numbers on the award lists.",
+        "Losing bids are not published. \"Could have bid earlier\" means the permit was registered before an earlier round's deadline; it does not prove the project bid then.",
         "A permit can be registered once for a whole wind farm; the date then counts for each of its turbines.",
         "The permit's registration date is when it was entered in the register, not when the authority issued it.",
       ]}
@@ -147,6 +161,24 @@ export function WindRunUp({ version, date }: { version: string; date: string }) 
         <Stat label="Median permit registration" value={medPermit != null ? `${Math.abs(medPermit)} days` : "–"} sub="before the bid date" />
         <Stat label="Awarded turbines analysed" value={permitDays.length.toLocaleString("en-GB")} sub="with a permit date" />
       </div>
+      {eligRows.length > 0 && (
+        <div className="mt-8 min-w-0">
+          <p className="text-sm font-semibold">Did the winners try before? Share of awarded turbines that could already have bid in earlier rounds</p>
+          <PlotFigure
+            deps={[eligRows]}
+            render={(width) =>
+              Plot.plot({
+                width, height: 240, marginLeft: 40, ...axis(),
+                x: { type: "band", label: null, tickRotate: width < 640 ? -45 : 0 },
+                y: { label: null, percent: true, domain: [0, 100], grid: true, tickFormat: (v: number) => `${v}%` },
+                color: { domain: ["Could have bid in 1 earlier round", "In 2 or more earlier rounds"], range: ["#93c5fd", ACC], legend: true },
+                marks: [Plot.barY(eligRows, { x: "round", y: "share", fill: "kind", order: ["In 2 or more earlier rounds", "Could have bid in 1 earlier round"], tip: true, title: (r: { round: string; kind: string; share: number }) => `${r.round} · ${r.kind}: ${pct(r.share)}` })],
+              })
+            }
+          />
+          <p className="text-xs text-ink-muted">Rounds since 2023. Bars stack to the share eligible for at least one earlier round.</p>
+        </div>
+      )}
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <div className="min-w-0">
           <p className="text-sm font-semibold">Permit registration of awarded turbines, weeks relative to the bid date</p>

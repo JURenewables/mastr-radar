@@ -71,14 +71,35 @@ def build_wind(rounds: list[dict], cache_dir: Path, extract_dir: Path, as_of: da
     key = {**dict(zip(u.index, u.index, strict=True))}
     key.update({e: i for e, i in zip(units["eeg_id"], units["unit_id"], strict=True) if e})
     out_rounds = []
-    for rnd in rounds:
-        page = wa.parse_round_page((cache_dir / f"{rnd['id']}.html").read_text(encoding="utf-8"))
-        if not page["bid_date"]:
-            continue
+    deadlines: list[tuple[str, pd.Timestamp]] = []  # (bid date, permit deadline) of earlier rounds
+    awarded_in: dict[str, set[str]] = {}
+    pages = [
+        (rnd, wa.parse_round_page((cache_dir / f"{rnd['id']}.html").read_text(encoding="utf-8")))
+        for rnd in rounds
+    ]
+    for rnd, page in sorted((x for x in pages if x[1]["bid_date"]), key=lambda x: x[1]["bid_date"]):
         bid = pd.Timestamp(page["bid_date"])
         awards = wa.parse_award_list(cache_dir / f"{rnd['id']}.xlsx")
         ids = sorted({key[r] for a in awards for r in a["turbines"] if r in key})
+        for i in ids:
+            awarded_in.setdefault(i, set()).add(page["bid_date"])
         x = u.loc[ids]
+        # Earlier rounds whose permit deadline this turbine's permit already met.
+        earlier = None
+        if page["permit_deadline"]:
+            reg = pd.to_datetime(x["permit_registered"]).dropna()
+            prior = [d for b, d in deadlines if b < page["bid_date"]]
+            n_prior = [sum(1 for d in prior if r <= d) for r in reg]
+            earlier = {
+                "n": len(n_prior),
+                "share_1plus": round(sum(v >= 1 for v in n_prior) / len(n_prior), 3)
+                if n_prior
+                else None,
+                "share_2plus": round(sum(v >= 2 for v in n_prior) / len(n_prior), 3)
+                if n_prior
+                else None,
+            }
+            deadlines.append((page["bid_date"], pd.Timestamp(page["permit_deadline"])))
         permit = _days(x["permit_registered"], bid).dropna()
         unit = _days(x["registration_date"], bid).dropna()
         clip = lambda s: [int(v) for v in s if WINDOW[0] <= v <= WINDOW[1]]  # noqa: E731
@@ -95,11 +116,14 @@ def build_wind(rounds: list[dict], cache_dir: Path, extract_dir: Path, as_of: da
                 "unit_days": clip(unit),
                 "permit": _summary(list(permit)),
                 "unit": _summary(list(unit)),
+                "eligible_earlier": earlier,
             }
         )
     with_permit = u[u["permit_registered"].notna()]
     return {
         "rounds": out_rounds,
+        "awarded_turbines": len(awarded_in),
+        "reawarded_turbines": sum(1 for v in awarded_in.values() if len(v) > 1),
         "weekly_permits": _weekly(
             with_permit["permit_registered"], with_permit["capacity_kw"], as_of
         ),
@@ -182,6 +206,12 @@ def check_data(d: dict) -> None:
     wk = w["weekly_permits"]
     if not (len(wk["weeks"]) == len(wk["units"]) == len(wk["mw"])) or len(wk["weeks"]) < 100:
         problems.append("wind: weekly series broken.")
+    for r in w["rounds"]:
+        e = r.get("eligible_earlier")
+        if e and any(
+            v is not None and not 0 <= v <= 1 for v in (e["share_1plus"], e["share_2plus"])
+        ):
+            problems.append(f"wind {r['id']}: eligible-earlier share outside 0..1.")
     if "solar" in d and len(d["solar"]["rounds"]) < 5:
         problems.append("solar: fewer than 5 rounds.")
     if problems:
