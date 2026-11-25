@@ -27,6 +27,12 @@ const SECTIONS: { href: string; scope: string; title: string; text: string; fact
     fact: (k) => `${formatPower(k.solar)} solar`,
   },
   {
+    href: "/costs/wind",
+    scope: "Germany",
+    title: "Costs",
+    text: "What onshore wind and solar projects cost to build and run: CAPEX and OPEX by component, WindGuard, Fraunhofer ISE, the Danish Energy Agency and IRENA compared, trends and award prices.",
+  },
+  {
     href: "/grid",
     scope: "Germany",
     title: "Grid",

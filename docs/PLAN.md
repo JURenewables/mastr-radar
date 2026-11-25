@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.10 approved (25 Nov 2026). Phase 9: WP75–77, 79, 80 done (MCP server v1 at `/mcp`). Next: Phase 10 cost pages (contract v1.11 draft awaits approval), then WP81 typed tools, WP78, WP82, WP84**
+**You are here: contract v1.11 approved (25 Nov 2026): cost pages `/costs/wind` and `/costs/solar` built (Phase 10, WP89–92). MCP server v1 live. Next: WP81 typed MCP tools, WP78 snapshots, WP82 guardrails, WP84 connect page, optional WP93**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -322,16 +322,15 @@ real stress signals (line loading itself is not published).
 Goal: "What does a wind or solar project cost to build and run in Germany,
 what is it made of, and how do the main sources compare?" Contract v1.11.
 
-- [ ] **WP89. Sources and contract v1.11.** WindGuard 2024, Fraunhofer ISE
+- [x] **WP89. Sources and contract v1.11.** WindGuard 2024, Fraunhofer ISE
   2024/2021/2018, Danish Energy Agency (Aug 2026), IRENA 2025: editions,
-  licences, which source leads per technology. *Draft written, awaits
-  approval.*
-- [ ] **WP90. Cost config and station 3.** `config/costs.yaml` with every
+  licences, which source leads per technology. *Approved 25 Nov 2026.*
+- [x] **WP90. Cost config and station 3.** `config/costs.yaml` with every
   value and its source; `costs/costs.json` with breakdowns, comparison,
   trends, projections, auction link; checks; dictionary entry; tests.
-- [ ] **WP91. `/costs/wind` page.** Capex and opex breakdown (WindGuard),
+- [x] **WP91. `/costs/wind` page.** Capex and opex breakdown (WindGuard),
   sources compared, turbine price trend 2015–2024, costs vs award prices.
-- [ ] **WP92. `/costs/solar` page.** Capex breakdown (DEA), Fraunhofer
+- [x] **WP92. `/costs/solar` page.** Capex breakdown (DEA), Fraunhofer
   range, IRENA Germany trend, ground-mounted vs rooftop, costs vs award
   prices.
 - [ ] **WP93 (optional). More trend data.** Quarterly turbine selling prices

@@ -785,7 +785,7 @@ GitHub Release asset `data-YYYY-MM-DD.tar.zst` (tag `data-YYYY-MM-DD`);
 version of each. `whats_new` compares the current files with a snapshot.
 **Check:** the newest snapshot date equals the manifest `as_of`.
 
-## v1.11: cost benchmarks, onshore wind and solar PV (DRAFT, awaiting approval)
+## v1.11: cost benchmarks, onshore wind and solar PV (approved 25 Nov 2026)
 
 Two new pages, `/costs/wind` and `/costs/solar`: what a project costs to
 build (capex) and run (opex), broken down by component, and how the main
@@ -816,7 +816,9 @@ One entry per value: `tech` (wind_onshore, solar_ground, solar_roof),
 lcoe, wacc, lifetime), `component` (for breakdowns), `value` or `low`/`high`,
 `unit` (€/kW, €/kWp, €/kW/yr, €/MWh, %, years), `currency`, `price_basis`
 (nominal or real, price year), `year` (data year or commissioning period),
-`method` (table, text, or chart_read with `tolerance`), `page`, `note`.
+`method` (table, text, or chart_read with `tolerance`), `page` (PDF page),
+`note`. Built by the daily `aggregate` and on demand by `mastr-radar
+costs-build` (updates the manifest entry and the data dictionary).
 
 ### Output `costs/costs.json` (station 3)
 
@@ -834,11 +836,13 @@ per technology (`wind_onshore`, `solar`):
 - `capex_trend`: series per source (year, value or range, price basis, method);
 - `projections`: DEA central and range for 2030, 2040, 2050;
 - `auction_link`: the average award price per year from
-  `auctions/onshore.json` or `auctions/solar.json` (already published), for a
-  "costs against award prices" chart.
+  `auctions/onshore.json` or `auctions/solar.json` (already published; simple
+  mean of the round averages, since some rounds lack the awarded volume), for
+  a "costs against award prices" chart.
 
 **Check (fails loudly):** every value has a source in `sources`, a unit and
-a price basis; component sums match the stated total within 2 %; shares sum
+a price basis; component sums match the stated total within 2 % (or the
+rounding of the components, 0.5 per component, where the source rounds); shares sum
 to 100 % ± 1; ranges have low ≤ high; chart-read values carry a tolerance;
 every converted value states its rate; trend years in order; values within
 plausible bounds (wind capex 500–3,000 €/kW, solar 200–2,500 €/kWp, opex
@@ -869,3 +873,4 @@ chart-read values marked "approx."). Source line under every chart.
 | 1.8 | 2026-11-02 | Netztransparenz TSO redispatch since 2021 and ENTSO-E cross-border flows (internal extracts, `grid/redispatch.json`, `grid/flows.json`, aggregates only), fetched with GitHub Secrets by a separate daily workflow. Approved by the user. |
 | 1.9 | 2026-11-25 | Auction run-up (`auctions/runup.json`, permit deadlines, `permit_registered` in unit details), Outlook page (`outlook/outlook.json`: repowering, auction outlook), Telegram phone report. Approved by the user. |
 | 1.10 | 2026-11-25 | Data dictionary (`dictionary.json`, check), agent context (`/llms-full.txt`, `/schema.json`), MCP server at `/mcp` (tools, resources, prompts, limits), daily snapshots. Approved by the user. |
+| 1.11 | 2026-11-25 | Cost benchmarks: `config/costs.yaml` (WindGuard 2024, Fraunhofer ISE 2024/2021/2018, Danish Energy Agency, IRENA 2025), `costs/costs.json` with breakdowns, comparison, trends, projections and award prices; pages `/costs/wind` and `/costs/solar`. Approved by the user. |
