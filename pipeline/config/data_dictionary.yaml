@@ -24,6 +24,7 @@ licences:
   ccby: {name: "Creative Commons Attribution 4.0", id: CC-BY-4.0, url: "https://creativecommons.org/licenses/by/4.0/", attribution: "Bundesnetzagentur | SMARD.de; Deutscher Wetterdienst"}
   netztransparenz: {name: "Netztransparenz.de terms (aggregated facts)", id: NTP-terms, url: "https://www.netztransparenz.de/", attribution: "Netztransparenz.de (German TSOs); aggregated by MaStR Radar"}
   entsoe: {name: "ENTSO-E Transparency Platform terms", id: ENTSOE-terms, url: "https://transparency.entsoe.eu/", attribution: "ENTSO-E Transparency Platform; processed by MaStR Radar"}
+  studies: {name: "Cited study figures (DEA: CC BY 4.0; IRENA: free use with acknowledgement; WindGuard, Fraunhofer ISE: figures cited with source)", id: cited-figures, url: "https://mastr-radar.vercel.app/methodology", attribution: "Deutsche WindGuard (2024); Fraunhofer ISE (2024, 2021, 2018); Danish Energy Agency Technology Data (CC BY 4.0); IRENA (2025). Compiled by MaStR Radar"}
   own: {name: "Creative Commons Attribution 4.0 (compiled by MaStR Radar from linked sources)", id: CC-BY-4.0, url: "https://creativecommons.org/licenses/by/4.0/", attribution: "MaStR Radar, compiled from the linked sources"}
 
 glossary:
@@ -329,6 +330,20 @@ datasets:
       auction_outlook: "Wind: next bid dates, permitted pool without award, awarded not built, average volume, rounds covered, recent rounds, oversubscription; solar: next bid dates, recent rounds, oversubscription"
     questions: ["Where is the most repowering potential?", "How many permitted wind projects are waiting for an award?"]
 
+  - file: costs/costs.json
+    title: Cost benchmarks, onshore wind and solar PV
+    grain: per technology; breakdowns, one row per source in comparisons, series per source in trends
+    licence: studies
+    caveats: ["Figures come from published studies, not from MaStR; each value states its source, edition, page and price basis.", "Values marked chart_read were read off a published chart and are approximate (see tolerance).", "Sources differ in scope (country, what is included) and price year; converted values (eur_*) are for comparison only."]
+    fields:
+      as_of: "Date of the newest edition used"
+      sources: "Source id → title, edition, url, licence, attribution, scope"
+      fx_usd_per_eur: "USD per EUR used for conversion, by price year (ECB annual average)"
+      deflator_dea: "Danish net price index used to express DEA €2020 values in € of a later year"
+      wind_onshore: "lead source and note; capex_breakdown (WindGuard: groups with components in €/kW and shares), capex_breakdown_alt (DEA), opex_breakdown (€/kW/yr, decade 1 and 2), capex_compare and opex_compare (one row per source: value or low/high in native unit, price_basis, method, eur_value/eur_low/eur_high, conversion), capex_trend (series per source), projections (DEA to 2050), lcoe (ct/kWh), auction_link (average award price per year from auctions/onshore.json)"
+      solar: "Same structure for ground-mounted PV (lead: DEA, €/kWp DC), plus segments (ground-mounted, rooftop, agri-PV by source); auction_link from the solar rounds of auctions/solar.json"
+    questions: ["What does an onshore wind project cost to build in Germany?", "How are the investment costs of a solar park split?", "How do WindGuard, Fraunhofer ISE, the Danish Energy Agency and IRENA compare?"]
+
   - file: days/
     title: Day files (SMARD and DWD)
     grain: one file per day, quarter-hourly
@@ -342,6 +357,8 @@ datasets:
 starter_queries:
   - q: "Which wind and solar units of 1 MW or more went online in March 2026, and where?"
     sql: "SELECT technology, name, capacity_kw/1000 AS mw, state, district, municipality, lat, lon FROM '{data}units.parquet' WHERE technology IN ('wind_onshore','solar') AND commissioning_date BETWEEN '2026-03-01' AND '2026-03-31' AND capacity_kw >= 1000 ORDER BY capacity_kw DESC"
+  - q: "How do the cost sources compare for onshore wind investment (€/kW)?"
+    sql: "SELECT r.label, r.year, r.eur_value, r.eur_low, r.eur_high, r.method FROM (SELECT unnest(wind_onshore.capex_compare) AS r FROM read_json_auto('{data}costs/costs.json'))"
   - q: "How much capacity per technology went online in 2025 (all sizes)?"
     sql: "SELECT technology, round(sum(capacity_kw)/1e6, 2) AS gw, sum(unit_count) AS units FROM '{data}summary.parquet' WHERE commissioning_month LIKE '2025-%' GROUP BY technology ORDER BY gw DESC"
   - q: "Which districts have the most onshore wind in operation?"

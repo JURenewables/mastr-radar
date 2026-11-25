@@ -20,7 +20,7 @@ from mastr_radar import __version__
 from mastr_radar.config import PIPELINE_ROOT
 from mastr_radar.extract import ENUMS, UNITS_SCHEMA, export_date_of
 
-CONTRACT_VERSION = "1.10"
+CONTRACT_VERSION = "1.11"
 MAX_TOTAL_BYTES = 50 * 1024 * 1024  # contract v1.4
 MAP_POINT_MIN_KW = 100.0  # D5: units from 100 kW are individual points
 DEFAULT_OPERATOR_NAME_MIN_KW = 1000.0  # operator names only from 1 MW (settings)
@@ -212,6 +212,9 @@ def build(
         from mastr_radar import players
 
         files += players.build(out_dir)
+        from mastr_radar import costs
+
+        files += costs.build(out_dir)
         from mastr_radar import outlook, runup
 
         if (units_path.parent / "unit_details.parquet").exists():
@@ -366,6 +369,13 @@ def check_explorer_files(
         try:
             players.check(out_dir)
         except players.PlayersCheckError as exc:
+            problems.append(str(exc))
+        from mastr_radar import costs
+
+        expected_files.add(costs.FILE)
+        try:
+            costs.check(out_dir)
+        except costs.CostsCheckError as exc:
             problems.append(str(exc))
     from mastr_radar import redispatch as rdp
 

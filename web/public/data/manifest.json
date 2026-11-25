@@ -113,9 +113,14 @@
       "bytes": 224689
     },
     {
+      "name": "costs/costs.json",
+      "rows": 18,
+      "bytes": 15592
+    },
+    {
       "name": "dictionary.json",
-      "rows": 21,
-      "bytes": 21626
+      "rows": 22,
+      "bytes": 27743
     }
   ]
 }

@@ -394,6 +394,31 @@ def grid_build() -> None:
     typer.echo(f"Check passed: {', '.join(sorted(names))}")
 
 
+@app.command("costs-build")
+def costs_build() -> None:
+    """Costs (v1.11): build costs/costs.json from config/costs.yaml, check it, and
+    update its entry and the data dictionary in manifest.json."""
+    import json
+
+    from mastr_radar import costs, dictionary
+
+    s = load_settings()
+    try:
+        files = costs.build(s.output_dir)
+        costs.check(s.output_dir)
+    except costs.CostsCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    mpath = s.output_dir / "manifest.json"
+    manifest = json.loads(mpath.read_text())
+    names = {f["name"] for f in files}
+    kept = [f for f in manifest["files"] if f["name"] not in names | {dictionary.FILE}]
+    files += dictionary.build(s.output_dir, [f["name"] for f in kept + files])
+    manifest["files"] = kept + files
+    mpath.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+    typer.echo(f"Check passed: {', '.join(sorted(names))}")
+
+
 @app.command("notify")
 def notify(
     previous: Path = typer.Option(None, help="kpis.json of the previous update, for the changes."),
