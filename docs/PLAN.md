@@ -323,15 +323,16 @@ Goal: "What does an awarded wind or solar project earn, and where and in
 which rounds were projects most valuable?" Plus wind with batteries or
 solar on the same grid connection. Contract v1.12.
 
-- [ ] **WP94. Assumptions and contract v1.12.** Capex per project (WindGuard
-  formula), revenue, financing, IRR method. *Draft written, awaits approval.*
-- [ ] **WP95. Profitability model.** `outlook/profitability.json`: capex,
+- [x] **WP94. Assumptions and contract v1.12.** Capex per project (WindGuard
+  formula), revenue, financing, IRR method. *Approved 25 Nov 2026.*
+- [x] **WP95. Profitability model.** `costs/profitability.json`: capex,
   revenue, project and equity IRR, NPV per award; by round, by state,
   sensitivities; checks and tests.
-- [ ] **WP96. Co-location.** Battery grid locations in station 2;
-  `outlook/colocation.json` with wind+storage and wind+solar sites.
-- [ ] **WP97. Outlook page.** Trim repowering; profitability sections for
-  wind and solar; co-location map.
+- [x] **WP96. Co-location.** `auctions/colocation.json` with wind+storage and
+  wind+solar sites (same grid location, or within 500 m).
+- [x] **WP97. Pages.** Profitability sections on `/costs/wind` and
+  `/costs/solar`; co-location section on `/wind` (user's choice; the
+  Outlook stays as it is).
 - [x] **WP98. Find the solar costs.** Separate "Wind costs" / "Solar costs"
   menu entries, links from the wind and solar pages.
 

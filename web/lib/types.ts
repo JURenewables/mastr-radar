@@ -2,7 +2,7 @@
 // If the contract changes, update these types in the same commit.
 
 // 1.5 and 1.6 only add or extend files, so older files still load (e.g. day files until the next hub run).
-export const SUPPORTED_CONTRACTS = ["1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "1.10", "1.11"] as const;
+export const SUPPORTED_CONTRACTS = ["1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "1.10", "1.11", "1.12"] as const;
 
 export type Technology =
   | "wind_onshore"

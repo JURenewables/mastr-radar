@@ -419,6 +419,50 @@ def costs_build() -> None:
     typer.echo(f"Check passed: {', '.join(sorted(names))}")
 
 
+@app.command("market-fetch")
+def market_fetch() -> None:
+    """Market values (v1.12): SMARD day-ahead prices and wind/solar generation →
+    capture prices of the last 12 months, cached in data/market/."""
+    from mastr_radar import market
+
+    s = load_settings()
+    try:
+        path = market.fetch(s.data_dir / "market")
+    except market.MarketCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"Saved {path}")
+
+
+@app.command("profit-build")
+def profit_build() -> None:
+    """Profitability and co-location (v1.12): build costs/profitability.json and
+    auctions/colocation.json, check them, and update the manifest and dictionary."""
+    import json
+
+    from mastr_radar import colocation, dictionary, profitability
+    from mastr_radar.aggregate import export_date_of
+
+    s = load_settings()
+    ex = s.data_dir / "extract"
+    files = []
+    try:
+        files += profitability.build(s.output_dir, s.data_dir)
+        if (ex / "unit_details.parquet").exists():
+            files += colocation.build(ex, s.output_dir, export_date_of(ex / "units.parquet"))
+    except (profitability.ProfitabilityCheckError, colocation.ColocationCheckError) as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    mpath = s.output_dir / "manifest.json"
+    manifest = json.loads(mpath.read_text())
+    names = {f["name"] for f in files}
+    kept = [f for f in manifest["files"] if f["name"] not in names | {dictionary.FILE}]
+    files += dictionary.build(s.output_dir, [f["name"] for f in kept + files])
+    manifest["files"] = kept + files
+    mpath.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+    typer.echo(f"Check passed: {', '.join(sorted(names))}")
+
+
 @app.command("notify")
 def notify(
     previous: Path = typer.Option(None, help="kpis.json of the previous update, for the changes."),

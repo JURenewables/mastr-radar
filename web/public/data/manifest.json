@@ -118,9 +118,19 @@
       "bytes": 15592
     },
     {
+      "name": "costs/profitability.json",
+      "rows": 7672,
+      "bytes": 1139697
+    },
+    {
+      "name": "auctions/colocation.json",
+      "rows": 564,
+      "bytes": 191538
+    },
+    {
       "name": "dictionary.json",
-      "rows": 22,
-      "bytes": 27743
+      "rows": 24,
+      "bytes": 30742
     }
   ]
 }

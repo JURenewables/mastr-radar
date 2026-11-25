@@ -344,6 +344,32 @@ datasets:
       solar: "Same structure for ground-mounted PV (lead: DEA, €/kWp DC), plus segments (ground-mounted, rooftop, agri-PV by source); auction_link from the solar rounds of auctions/solar.json"
     questions: ["What does an onshore wind project cost to build in Germany?", "How are the investment costs of a solar park split?", "How do WindGuard, Fraunhofer ISE, the Danish Energy Agency and IRENA compare?"]
 
+  - file: costs/profitability.json
+    title: Profitability of awarded wind and solar projects (model)
+    grain: one row per award with the needed inputs (compact fields/rows), plus summaries by round and state
+    licence: own
+    caveats: ["An illustration with stated assumptions, not a valuation: investment estimated from the WindGuard formula (wind) or Fraunhofer ISE ranges (solar), yield from our DWD-based model.", "Base case: EEG award value for 20 years only; full-life case adds years 21–25 (wind) or 21–30 (solar) at the SMARD capture price of the last 12 months.", "Pre-tax, nominal; same financing for all bid years."]
+    fields:
+      as_of: "Date of the newest cost source used"
+      assumptions: "Inputs per technology (formula, opex, financing, lifetimes), notes and cost sources"
+      market: "SMARD capture prices (€/MWh): last 12 complete months and monthly, baseload, solar, onshore wind"
+      wind: "projects {fields, rows}: round, bid_date, group, state, lat, lon, model, mw_turbine, turbines, hub_m, rotor_m, flh (full-load hours), quality_pct, ct (received ct/kWh), capex (€/kW), opex (€/kW/yr, first year), revenue (€/kW/yr), project_irr, equity_irr, npv (€/kW at WACC), project_irr_full, max_capex (€/kW that still earns the WACC); skipped; overall, by_round, by_state (p25/median/p75 per metric); sensitivity (representative project; capex ±10 %, price ±0.5 ct, interest ±1 point)"
+      solar: "Same for solar-programme awards: mw, yield (kWh/kWp), ct (round average), capex (€/kWp), project_irr_low_capex (Danish Energy Agency capex), project_irr_full, max_capex"
+    questions: ["What return can an onshore wind project awarded in 2026 expect?", "How much may a solar park cost to earn its cost of capital at today's award prices?", "In which states were awarded wind projects most valuable?"]
+
+  - file: auctions/colocation.json
+    title: Wind with batteries or solar (co-location)
+    grain: one row per battery or solar site next to onshore wind
+    licence: mastr
+    caveats: ["same_location = registered at the same grid connection location in MaStR (confirmed); nearby = battery or ground-mounted solar park of at least 1 MW within 500 m of a wind turbine (likely).", "Locations and operator names only for legal entities."]
+    fields:
+      as_of: "Data date"
+      rules: "near_km, wind_km, min_partner_kw, statuses"
+      totals: "Per tier × kind × status: sites, partner MW and MWh, wind MW, sites with awarded wind"
+      by_year: "Per kind and year of commissioning (planned year for planned units): sites, partner MW"
+      sites: "tier, kind (storage/solar), partner_mw, partner_mwh, partner_status, partner_year, wind_mw and wind_units (within 1 km or at the location), wind_status, award_rounds (bid dates of awards among those turbines), distance_km, state, district, lat, lon, operator"
+    questions: ["Which wind farms have a battery next to them?", "How many awarded wind projects plan a battery?"]
+
   - file: days/
     title: Day files (SMARD and DWD)
     grain: one file per day, quarter-hourly

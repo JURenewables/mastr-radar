@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Header } from "@/components/layout/Header";
+import { Colocation } from "@/components/monitor/Colocation";
 import { Monitor } from "@/components/monitor/Monitor";
 import { loadExplorerData } from "@/lib/data";
 import { formatDate } from "@/lib/format";
@@ -46,6 +47,7 @@ export default async function WindPage() {
           </p>
         </section>
         <Monitor asOf={data.manifest.as_of} part="wind" />
+        <Colocation version={data.manifest.as_of} />
         <p className="pb-10 text-xs text-ink-muted">
           Sources: Marktstammdatenregister (as of {asOf}), Bundesnetzagentur award lists and round
           results, Deutscher Wetterdienst wind grid. See the methodology page for definitions and

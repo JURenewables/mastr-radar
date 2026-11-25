@@ -46,6 +46,11 @@ jobs:
         working-directory: pipeline
         run: uv run mastr-radar auctions-fetch
 
+      - name: "Market values: SMARD prices for the profitability model (last values kept if this fails)"
+        working-directory: pipeline
+        continue-on-error: true
+        run: uv run mastr-radar market-fetch
+
       - name: "Station 3: build explorer files, check, cross-check"
         working-directory: pipeline
         run: uv run mastr-radar aggregate
