@@ -1,31 +1,31 @@
 [
   {
     "technology": "biomass",
-    "installed_capacity_kw": 9044217.535,
-    "installed_units": 21692,
-    "planned_capacity_kw": 691546.84,
-    "added_capacity_kw_ytd": 133729.17
+    "installed_capacity_kw": 9044257.535,
+    "installed_units": 21691,
+    "planned_capacity_kw": 691506.84,
+    "added_capacity_kw_ytd": 134269.17
   },
   {
     "technology": "hydro",
-    "installed_capacity_kw": 5398557.619,
+    "installed_capacity_kw": 5398567.619,
     "installed_units": 8594,
     "planned_capacity_kw": 25712.3,
     "added_capacity_kw_ytd": 22780.9
   },
   {
     "technology": "solar",
-    "installed_capacity_kw": 133432103.498,
-    "installed_units": 6523157,
-    "planned_capacity_kw": 9890214.643,
-    "added_capacity_kw_ytd": 15485399.958
+    "installed_capacity_kw": 133482692.822,
+    "installed_units": 6526829,
+    "planned_capacity_kw": 9971093.738,
+    "added_capacity_kw_ytd": 15536327.75
   },
   {
     "technology": "storage",
-    "installed_capacity_kw": 32643608.547,
-    "installed_units": 2923701,
-    "planned_capacity_kw": 13528755.021,
-    "added_capacity_kw_ytd": 5801165.587
+    "installed_capacity_kw": 32701207.718,
+    "installed_units": 2927018,
+    "planned_capacity_kw": 13527541.121,
+    "added_capacity_kw_ytd": 5859218.614
   },
   {
     "technology": "wind_offshore",
@@ -36,9 +36,9 @@
   },
   {
     "technology": "wind_onshore",
-    "installed_capacity_kw": 72193405.017,
+    "installed_capacity_kw": 72208206.017,
     "installed_units": 30529,
-    "planned_capacity_kw": 53889793.2,
-    "added_capacity_kw_ytd": 4919430.28
+    "planned_capacity_kw": 53889792.2,
+    "added_capacity_kw_ytd": 4940431.28
   }
 ]
