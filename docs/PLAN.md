@@ -323,7 +323,7 @@ Goal: "Point your AI at MaStR Radar and it finds the answer." A public,
 read-only MCP server plus the context an agent needs to use the data
 correctly. Design and decisions: `docs/platform-plan.md`.
 
-- [ ] **WP75. Semantic layer (one data dictionary).** Every published file
+- [x] **WP75. Semantic layer (one data dictionary).** Every published file
   and column in one machine-readable file (`docs/data-dictionary.yaml`):
   meaning, type, unit, allowed values, source, licence, caveats, example
   questions. The check fails if a published column is undescribed.

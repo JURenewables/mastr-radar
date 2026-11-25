@@ -82,6 +82,7 @@ def test_manifest(built):
         "summary.parquet",
         "boundaries/states.geojson",
         "boundaries/districts.geojson",
+        "dictionary.json",
     }
     assert files["kpis.json"]["rows"] == 2
     assert files["boundaries/states.geojson"]["rows"] == 16

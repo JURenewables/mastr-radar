@@ -242,6 +242,9 @@ def build(
 
         files += grid.build(units_path.parent, out_dir, as_of)
 
+    from mastr_radar import dictionary
+
+    files += dictionary.build(out_dir, [f["name"] for f in files])
     manifest = {
         "contract_version": CONTRACT_VERSION,
         "as_of": as_of.isoformat(),
@@ -381,6 +384,13 @@ def check_explorer_files(
             grid.check(out_dir)
         except grid.GridCheckError as exc:
             problems.append(str(exc))
+    from mastr_radar import dictionary
+
+    expected_files.add(dictionary.FILE)
+    try:
+        dictionary.check(out_dir)
+    except dictionary.DictionaryCheckError as exc:
+        problems.append(str(exc))
     if missing := expected_files - set(listed):
         problems.append(f"manifest: missing files {sorted(missing)}.")
     for name in ("units.parquet", "summary.parquet"):
