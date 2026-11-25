@@ -785,6 +785,75 @@ GitHub Release asset `data-YYYY-MM-DD.tar.zst` (tag `data-YYYY-MM-DD`);
 version of each. `whats_new` compares the current files with a snapshot.
 **Check:** the newest snapshot date equals the manifest `as_of`.
 
+## v1.11: cost benchmarks, onshore wind and solar PV (DRAFT, awaiting approval)
+
+Two new pages, `/costs/wind` and `/costs/solar`: what a project costs to
+build (capex) and run (opex), broken down by component, and how the main
+public sources compare over time. Cost figures come from published studies,
+not from MaStR, so they are entered by hand with their source and checked by
+the pipeline (like `company_facts.yaml`).
+
+### Sources (each goes into `docs/sources.md` before use)
+
+| Id | Source | Edition | Scope | Licence / use |
+|---|---|---|---|---|
+| `windguard` | Deutsche WindGuard for BMWK, "Kostensituation der Windenergie an Land" | Stand 2024 (1 Oct 2024, corr. 2 Dec 2024); trend back to 2015 | Germany, survey of manufacturers and 72 projects (1,470 MW), commissioning 2024–26 | Figures quoted with source (facts); no charts copied |
+| `ise` | Fraunhofer ISE, "Stromgestehungskosten erneuerbare Energien" | July 2024, plus editions 2021 and 2018 for the trend | Germany, ranges (low/high) | Figures quoted with source |
+| `dea` | Danish Energy Agency, Technology Data for Generation of Electricity and District Heating | Onshore sheet Feb 2024 (€2020); solar sheets Aug 2026 (€2025) | Denmark; component breakdown and projections to 2050 | CC BY 4.0: values may be republished with attribution |
+| `irena` | IRENA, Renewable Power Generation Costs in 2024 | July 2025 | Germany (read from country charts), Europe and world (tables), 2024 USD | Free use with acknowledgement of IRENA |
+
+**Which source leads.** Onshore wind: WindGuard (German survey data, the
+reference used by the ministry); DEA is shown as an international
+comparison, because its onshore sheet reflects Danish rules (grid paid by
+the public, neighbour buy-outs) and 2020 prices. Solar PV: DEA for the
+component breakdown (most detailed and newest, Aug 2026); Fraunhofer ISE
+for the German range. Each page says this in one line.
+
+### Config `pipeline/config/costs.yaml` (hand-checked)
+
+One entry per value: `tech` (wind_onshore, solar_ground, solar_roof),
+`source`, `edition`, `metric` (capex, capex_component, opex, opex_component,
+lcoe, wacc, lifetime), `component` (for breakdowns), `value` or `low`/`high`,
+`unit` (€/kW, €/kWp, €/kW/yr, €/MWh, %, years), `currency`, `price_basis`
+(nominal or real, price year), `year` (data year or commissioning period),
+`method` (table, text, or chart_read with `tolerance`), `page`, `note`.
+
+### Output `costs/costs.json` (station 3)
+
+`as_of` (date of the newest edition used); `sources` (id, title, edition,
+url, licence, attribution); `fx` (USD→EUR rate per price year, ECB annual
+average) and `deflator` (the DEA price index for converting €2020 values);
+per technology (`wind_onshore`, `solar`):
+
+- `capex_breakdown`: lead source, total, components (name, €/kW, share);
+- `opex_breakdown`: lead source, components per year (wind: first and
+  second decade);
+- `capex_compare` and `opex_compare`: one row per source (value or range,
+  native unit and price basis, plus a converted `eur_kw` in € of the data
+  year for the comparison chart);
+- `capex_trend`: series per source (year, value or range, price basis, method);
+- `projections`: DEA central and range for 2030, 2040, 2050;
+- `auction_link`: the average award price per year from
+  `auctions/onshore.json` or `auctions/solar.json` (already published), for a
+  "costs against award prices" chart.
+
+**Check (fails loudly):** every value has a source in `sources`, a unit and
+a price basis; component sums match the stated total within 2 %; shares sum
+to 100 % ± 1; ranges have low ≤ high; chart-read values carry a tolerance;
+every converted value states its rate; trend years in order; values within
+plausible bounds (wind capex 500–3,000 €/kW, solar 200–2,500 €/kWp, opex
+> 0). Dictionary entry for the new file (WP75 rule).
+
+### Website (station 4)
+
+`/costs/wind` and `/costs/solar`, linked from the landing page and the
+header ("Costs"). Each page: headline finding; capex breakdown (lead
+source); opex breakdown; cross-source comparison (dots and ranges, one row
+per source, price basis shown); trend over time (each source as its own
+line or range, never merged); outlook (DEA projections); costs against our
+auction award prices; a method box (price years, currency conversion,
+chart-read values marked "approx."). Source line under every chart.
+
 ## Version history
 
 | Version | Date | Change |
