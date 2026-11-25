@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.9 live (25 Nov 2026): run-up, Outlook page, Telegram report. Now: Phase 9 (open data for AI agents), WP75 → WP84**
+**You are here: contract v1.9 live (25 Nov 2026): run-up, Outlook page, Telegram report. Phase 9: WP75–77 done; contract v1.10 draft (data dictionary, context pack, MCP server) waits for approval before WP80**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -327,21 +327,22 @@ correctly. Design and decisions: `docs/platform-plan.md`.
   and column in one machine-readable file (`docs/data-dictionary.yaml`):
   meaning, type, unit, allowed values, source, licence, caveats, example
   questions. The check fails if a published column is undescribed.
-  Everything below is generated from it. *Contract v1.9.*
+  Everything below is generated from it. *Contract v1.10.*
 - [x] **WP76. Agent context pack.** Generated from WP75: `/llms-full.txt`
   (all datasets with columns), `/schema.json` (JSON Schema per dataset),
   one short "dataset card" per file, a citation line, known gaps (late
   registrations, private units without location, TSO-only redispatch) and
   20 starter questions with the query that answers each.
-- [ ] **WP77. Query engine prototype.** DuckDB in a Vercel Node function
+- [x] **WP77. Query engine prototype.** DuckDB in a Vercel Node function
   reading the published Parquet/JSON. Measure cold start, memory and query
   time on the 5 heaviest questions. Fallback if too slow: precomputed
-  answers only. Decide hosting of larger files (WP78).
+  answers only. Decide hosting of larger files (WP78). *Done: DuckDB
+  fits (start 23 ms, queries ≤ 85 ms, 154 MB); details in platform-plan.*
 - [ ] **WP78. Daily snapshots (history).** Keep a dated copy of the explorer
   files every day (decision 2: GitHub Release assets) so agents can ask
   "what changed since …" and answers stay reproducible. Snapshot index in
   the catalogue.
-- [ ] **WP79. MCP contract (v1.9).** Tool names, input/output schemas,
+- [ ] **WP79. MCP contract (v1.10).** Tool names, input/output schemas,
   limits and error messages written down and approved before code
   (contracts first).
 - [ ] **WP80. MCP server v1.** Remote, read-only, Streamable HTTP, no login,

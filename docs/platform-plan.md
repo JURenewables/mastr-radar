@@ -41,9 +41,9 @@ explorer files (daily) ──▶ snapshots (WP78) ──┐       │
 4. **Same rules as the website.** Privacy (no natural persons, D4),
    aggregates only for Netztransparenz data, attribution on every answer.
 5. **Contracts first.** The MCP interface (tool names and schemas) is a
-   contract (v1.9) approved before code; breaking changes bump the version.
+   contract (v1.10) approved before code; breaking changes bump the version.
 
-## Technical choices (to confirm in WP77)
+## Technical choices (WP77: measured 25 Nov 2026)
 
 | Topic | Choice | Why |
 |---|---|---|
@@ -53,8 +53,17 @@ explorer files (daily) ──▶ snapshots (WP78) ──┐       │
 | History | Daily snapshots as GitHub Release assets | Decision 2; free, versioned |
 | Limits | Row cap, query timeout, rate limit | Free public service must stay up |
 
-If DuckDB is too slow or large for a serverless function, the fallback is a
-small always-on container (e.g. Fly.io or Cloud Run) or precomputed answers.
+**WP77 result: DuckDB fits a serverless function.** `@duckdb/node-api`
+2.0.0-r.1 (pinned; 2.0.1 was too new), 94 MB of packages plus 38 MB of data,
+well under Vercel's 250 MB function limit. On the published files: start-up
+23 ms, 154 MB memory; "wind and solar ≥ 1 MW commissioned in March 2026"
+17 ms, solar by year from the summary 20 ms, top districts 5 ms, top owners
+10 ms, award groups from `awards.json` 85 ms. Locked down with
+`allowed_directories`, `enable_external_access = false` and
+`lock_configuration`: reading `/etc/passwd`, URLs, `COPY TO`, `ATTACH`,
+`INSTALL` and settings changes are all refused. Statements are additionally
+limited to a single SELECT/WITH. No fallback needed; the larger files
+(snapshots) go to GitHub Releases (WP78), not the function.
 
 ## How agents will connect (WP84)
 
