@@ -13,6 +13,7 @@ export async function GET() {
     "",
     `Data as of ${c.as_of}. Updated daily. Contract (schemas, rules): ${c.contract_url} (version ${c.contract}).`,
     `Machine-readable catalogue: ${c.site}/catalog.json`,
+    `Full reference with every field, glossary and tested starter queries: ${c.site}/llms-full.txt (also ${c.site}/schema.json and ${c.site}/data/dictionary.json)`,
     "All files are static and can be fetched directly (CORS enabled). Parquet files support HTTP range requests.",
     "",
     "## Datasets",

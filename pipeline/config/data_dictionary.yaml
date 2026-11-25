@@ -336,3 +336,31 @@ datasets:
     optional: true
     fields:
       "*": "See /catalog.json day_files: generation per technology and demand for Germany and the four TSO areas, DWD station weather"
+
+# Starter questions with the query that answers each (DuckDB SQL; {data} is
+# the data base URL). Every query is run against the real files by a test.
+starter_queries:
+  - q: "Which wind and solar units of 1 MW or more went online in March 2026, and where?"
+    sql: "SELECT technology, name, capacity_kw/1000 AS mw, state, district, municipality, lat, lon FROM '{data}units.parquet' WHERE technology IN ('wind_onshore','solar') AND commissioning_date BETWEEN '2026-03-01' AND '2026-03-31' AND capacity_kw >= 1000 ORDER BY capacity_kw DESC"
+  - q: "How much capacity per technology went online in 2025 (all sizes)?"
+    sql: "SELECT technology, round(sum(capacity_kw)/1e6, 2) AS gw, sum(unit_count) AS units FROM '{data}summary.parquet' WHERE commissioning_month LIKE '2025-%' GROUP BY technology ORDER BY gw DESC"
+  - q: "Which districts have the most onshore wind in operation?"
+    sql: "SELECT district, state, round(sum(capacity_kw)/1000) AS mw, count(*) AS turbines FROM '{data}units.parquet' WHERE technology = 'wind_onshore' AND status = 'operating' GROUP BY district, state ORDER BY mw DESC LIMIT 15"
+  - q: "Which large batteries (≥ 10 MW) are planned, and where?"
+    sql: "SELECT name, capacity_kw/1000 AS mw, storage_capacity_kwh/1000 AS mwh, state, district, planned_commissioning_date FROM '{data}units.parquet' WHERE technology = 'storage' AND status = 'planned' AND capacity_kw >= 10000 ORDER BY capacity_kw DESC"
+  - q: "Who owns the most onshore wind capacity (companies, units ≥ 1 MW)?"
+    sql: "SELECT operator_name, round(sum(capacity_kw)/1000) AS mw, count(*) AS turbines FROM '{data}units.parquet' WHERE technology = 'wind_onshore' AND status = 'operating' AND operator_name IS NOT NULL GROUP BY operator_name ORDER BY mw DESC LIMIT 20"
+  - q: "What were the average award prices of the onshore wind rounds?"
+    sql: "SELECT r.bid_date, r.avg_ct, r.ceiling_ct, r.awarded_kw/1000 AS awarded_mw FROM (SELECT unnest(rounds) AS r FROM read_json_auto('{data}auctions/onshore.json')) ORDER BY r.bid_date"
+  - q: "Which company groups won the most onshore wind capacity since 2019?"
+    sql: "SELECT \"group\", round(sum(kw)/1000) AS mw, count(*) AS awards FROM (SELECT unnest(awards, recursive := true) FROM read_json_auto('{data}auctions/awards.json')) WHERE \"group\" IS NOT NULL GROUP BY \"group\" ORDER BY mw DESC LIMIT 15"
+  - q: "Which solar awards since 2023 have a battery on site?"
+    sql: "SELECT round, bidder, \"group\", kw/1000 AS mw, state, district FROM (SELECT unnest(awards, recursive := true) FROM read_json_auto('{data}auctions/solar_awards.json')) WHERE co_located ORDER BY kw DESC LIMIT 20"
+  - q: "Which wind projects won an award but are not running yet, by state?"
+    sql: "SELECT state, round(sum(kw - coalesce(kw_operating, 0))/1000) AS unbuilt_mw FROM (SELECT unnest(awards, recursive := true) FROM read_json_auto('{data}auctions/awards.json')) GROUP BY state ORDER BY unbuilt_mw DESC"
+  - q: "How many turbines are older than 20 years, by state?"
+    sql: "SELECT state, count(*) AS turbines, round(sum(capacity_kw)/1000) AS mw FROM '{data}units.parquet' WHERE technology = 'wind_onshore' AND status = 'operating' AND commissioning_date < make_date(year(current_date) - 20, 1, 1) GROUP BY state ORDER BY mw DESC"
+  - q: "Where do the TSOs curtail renewables most (last 12 months)?"
+    sql: "SELECT s.asset, round(s.mwh/1000) AS gwh, s.tso FROM (SELECT unnest(last_12m.renewable_substations) AS s FROM read_json_auto('{data}grid/redispatch.json')) ORDER BY s.mwh DESC"
+  - q: "How much did Germany import and export per neighbour over the last 12 months?"
+    sql: "WITH f AS (SELECT json(last_12m) AS m FROM read_json_auto('{data}grid/flows.json')) SELECT k AS neighbour, (m->k->>'import_gwh')::DOUBLE AS import_gwh, (m->k->>'export_gwh')::DOUBLE AS export_gwh FROM f, unnest(json_keys(m)) AS t(k) ORDER BY import_gwh DESC"

@@ -328,7 +328,7 @@ correctly. Design and decisions: `docs/platform-plan.md`.
   meaning, type, unit, allowed values, source, licence, caveats, example
   questions. The check fails if a published column is undescribed.
   Everything below is generated from it. *Contract v1.9.*
-- [ ] **WP76. Agent context pack.** Generated from WP75: `/llms-full.txt`
+- [x] **WP76. Agent context pack.** Generated from WP75: `/llms-full.txt`
   (all datasets with columns), `/schema.json` (JSON Schema per dataset),
   one short "dataset card" per file, a citation line, known gaps (late
   registrations, private units without location, TSO-only redispatch) and
