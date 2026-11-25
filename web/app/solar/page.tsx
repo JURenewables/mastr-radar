@@ -40,7 +40,9 @@ export default async function SolarPage() {
           <p className="mt-3 max-w-2xl text-sm text-ink-muted">
             Everything on this page covers Germany only. For the same companies worldwide (size,
             debt, markets abroad, generation mix), see{" "}
-            <a href="/players" className="text-accent underline underline-offset-2">Players worldwide</a>.
+            <a href="/players" className="text-accent underline underline-offset-2">Players worldwide</a>. What solar
+            projects cost to build and run:{" "}
+            <a href="/costs/solar" className="text-accent underline underline-offset-2">Solar costs</a>.
           </p>
         </section>
         <Monitor asOf={data.manifest.as_of} part="solar" />

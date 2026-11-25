@@ -4,7 +4,7 @@
 // solar project costs to build and run, by component, and how the main public
 // sources compare over time. Figures come from cited studies, not from MaStR.
 import * as Plot from "@observablehq/plot";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { PlotFigure } from "@/components/explorer/PlotFigure";
 import { Loading, Section, Stat } from "@/components/monitor/ui";
@@ -266,7 +266,7 @@ function Sources({ d, ids }: { d: CostsFile; ids: SourceId[] }) {
   );
 }
 
-export function Costs({ tech, version }: { tech: "wind_onshore" | "solar"; version: string }) {
+export function Costs({ tech, version, extra }: { tech: "wind_onshore" | "solar"; version: string; extra?: ReactNode }) {
   const [d, setD] = useState<CostsFile | null>(null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -277,7 +277,7 @@ export function Costs({ tech, version }: { tech: "wind_onshore" | "solar"; versi
   }, [version]);
   if (failed) return <p className="py-10 text-ink-muted">Cost data is not available.</p>;
   if (!d) return <Loading height={500} />;
-  return tech === "wind_onshore" ? <Wind d={d} /> : <Solar d={d} />;
+  return tech === "wind_onshore" ? <Wind d={d} extra={extra} /> : <Solar d={d} extra={extra} />;
 }
 
 function sourceLine(d: CostsFile, ids: SourceId[], extra = "") {
@@ -289,7 +289,7 @@ function sourceLine(d: CostsFile, ids: SourceId[], extra = "") {
   );
 }
 
-function Wind({ d }: { d: CostsFile }) {
+function Wind({ d, extra }: { d: CostsFile; extra?: ReactNode }) {
   const t = d.wind_onshore;
   const cb = t.capex_breakdown;
   const [turbine, ancillary] = cb.groups!;
@@ -448,12 +448,13 @@ function Wind({ d }: { d: CostsFile }) {
         </div>
       </Section>
 
+      {extra}
       <Method d={d} ids={["windguard", "ise", "dea", "irena"]} />
     </>
   );
 }
 
-function Solar({ d }: { d: CostsFile }) {
+function Solar({ d, extra }: { d: CostsFile; extra?: ReactNode }) {
   const t = d.solar;
   const cb = t.capex_breakdown;
   const ob = t.opex_breakdown;
@@ -592,6 +593,7 @@ function Solar({ d }: { d: CostsFile }) {
         <AuctionChart t={t} color="#d97706" />
       </Section>
 
+      {extra}
       <Method d={d} ids={["dea", "ise", "irena"]} />
     </>
   );

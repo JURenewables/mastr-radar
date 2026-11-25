@@ -1,0 +1,58 @@
+# Profitability of awarded projects (contract v1.12, WP95). Assumptions with
+# their source. Approved by the user on 25 Nov 2026. Station 3
+# (profitability.py) applies them to every award with the needed data.
+
+wind:
+  # WindGuard 2024 (p. 12): main investment incl. foundation, €/kW, 2024 level.
+  # HIK = a + b*P[MW] + c*SFL[W/m²] + d*NH[m]
+  hik_formula: {a: 1743.95, b: -81.21, c: -1.66, d: 2.91, year: 2024, source: windguard}
+  hik_bounds: [700, 2000]          # clamp outside the formula's data range
+  ancillary_eur_kw: 506            # WindGuard 2024 (p. 18), nominal, kept flat over time
+  # Bid-year price level of the main investment: WindGuard survey trend
+  # (costs.json, chart read). Years without a survey are interpolated; years
+  # after the last survey use the last value.
+  price_trend_from: costs.json
+  opex_eur_kw: {years_1_10: 49, years_11_20: 57, year: 2024, source: windguard}
+  years: 20
+  life_years: 25                   # Fraunhofer ISE 2024 (p. 16), for the full-life case
+  debt_share: 0.79                 # WindGuard 2024 (p. 22)
+  debt_rate: 0.0494                # WindGuard 2024 (p. 24), KfW 270 after Oct 2024
+  debt_years: 19                   # WindGuard 2024 (p. 25), mean repayment period
+  equity_target: 0.08              # WindGuard 2024 (p. 23)
+  wacc_nominal: 0.058              # Fraunhofer ISE 2024 (p. 16), for the NPV ("value")
+  opex_inflation: 0.02
+  # Plausible input bounds; awards outside are left out and counted.
+  bounds: {flh: [1000, 5000], ct: [3, 12], mw: [0.5, 10]}
+
+solar:
+  # Investment €/kWp: Fraunhofer ISE midpoint per edition, interpolated by bid
+  # year (2018: 700, 2021: 665, 2024: 800); low case Danish Energy Agency 458 (€2025).
+  capex_mid_by_year: {2018: 700, 2021: 665, 2024: 800}
+  capex_low: 458
+  opex_eur_kwp: 13.3               # Fraunhofer ISE 2024 (p. 16)
+  degradation: 0.0025              # Fraunhofer ISE 2024 / DEA
+  years: 20
+  life_years: 30                   # Fraunhofer ISE 2024 (p. 16), for the full-life case
+  debt_share: 0.80                 # Fraunhofer ISE 2024 (p. 16)
+  debt_rate: 0.05                  # Fraunhofer ISE 2024 (p. 16)
+  debt_years: 20                   # assumed: the EEG support period
+  equity_target: 0.065             # Fraunhofer ISE 2024 (p. 16)
+  wacc_nominal: 0.053              # Fraunhofer ISE 2024 (p. 16)
+  opex_inflation: 0.02
+  bounds: {yield: [700, 1400], ct: [3, 12]}
+
+sensitivity:
+  capex_pct: 10
+  price_ct: 0.5
+  rate_points: 1.0
+
+# Full-life case: years after the 20 EEG years until life_years earn the
+# capture price of the last 12 complete months from SMARD (data/market/),
+# held flat. A scenario, not a forecast.
+market_file: market/market_values.json
+
+notes:
+  - "Full-life case: operation until year 25 (wind) or 30 (solar), Fraunhofer ISE 2024 lifetimes; the years after the EEG period earn today's market value (SMARD capture price of the last 12 months), held flat."
+  - "Base case: revenue counts only the EEG award value for 20 years (wind: award × correction factor as estimated in awards.json; solar: average award of the round). Market prices above the award, operation after year 20 and residual value are not counted."
+  - "Pre-tax, nominal. No trade tax, no balancing or direct marketing income, no curtailment compensation."
+  - "Yields come from our DWD-based model (wind: calibrated full-load hours; solar: radiation × performance ratio); individual sites can differ substantially."

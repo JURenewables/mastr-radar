@@ -20,7 +20,7 @@ from mastr_radar import __version__
 from mastr_radar.config import PIPELINE_ROOT
 from mastr_radar.extract import ENUMS, UNITS_SCHEMA, export_date_of
 
-CONTRACT_VERSION = "1.11"
+CONTRACT_VERSION = "1.12"
 MAX_TOTAL_BYTES = 50 * 1024 * 1024  # contract v1.4
 MAP_POINT_MIN_KW = 100.0  # D5: units from 100 kW are individual points
 DEFAULT_OPERATOR_NAME_MIN_KW = 1000.0  # operator names only from 1 MW (settings)
@@ -215,6 +215,9 @@ def build(
         from mastr_radar import costs
 
         files += costs.build(out_dir)
+        from mastr_radar import profitability
+
+        files += profitability.build(out_dir, units_path.parent.parent)
         from mastr_radar import outlook, runup
 
         if (units_path.parent / "unit_details.parquet").exists():
@@ -224,6 +227,10 @@ def build(
             files += outlook.build(
                 units_path.parent, out_dir, as_of, list(auction_rounds), auctions_dir
             )
+    if (units_path.parent / "unit_details.parquet").exists():
+        from mastr_radar import colocation
+
+        files += colocation.build(units_path.parent, out_dir, as_of)
     from mastr_radar import redispatch as rdp
 
     # Grid API files (v1.8) are built from data/grid when present (grid run);
@@ -376,6 +383,21 @@ def check_explorer_files(
         try:
             costs.check(out_dir)
         except costs.CostsCheckError as exc:
+            problems.append(str(exc))
+        from mastr_radar import profitability
+
+        expected_files.add(profitability.FILE)
+        try:
+            profitability.check(out_dir)
+        except profitability.ProfitabilityCheckError as exc:
+            problems.append(str(exc))
+    if (out_dir / "auctions" / "colocation.json").exists():
+        from mastr_radar import colocation
+
+        expected_files.add(colocation.FILE)
+        try:
+            colocation.check(out_dir)
+        except colocation.ColocationCheckError as exc:
             problems.append(str(exc))
     from mastr_radar import redispatch as rdp
 

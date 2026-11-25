@@ -29,8 +29,14 @@ const SECTIONS: { href: string; scope: string; title: string; text: string; fact
   {
     href: "/costs/wind",
     scope: "Germany",
-    title: "Costs",
-    text: "What onshore wind and solar projects cost to build and run: CAPEX and OPEX by component, WindGuard, Fraunhofer ISE, the Danish Energy Agency and IRENA compared, trends and award prices.",
+    title: "Wind costs",
+    text: "What an onshore wind farm costs to build and run: CAPEX and OPEX by component, WindGuard, Fraunhofer ISE, the Danish Energy Agency and IRENA compared, turbine price trend and award prices.",
+  },
+  {
+    href: "/costs/solar",
+    scope: "Germany",
+    title: "Solar costs",
+    text: "What a solar park or rooftop system costs: investment by component, segments, sources compared, the trend since 2010 and award prices.",
   },
   {
     href: "/grid",
@@ -59,8 +65,14 @@ const SECTIONS: { href: string; scope: string; title: string; text: string; fact
   {
     href: "/open-data",
     scope: "Data",
-    title: "Open data & AI",
-    text: "Every file behind the site, with licence and schema. Point your AI agent at one address and it finds the answer.",
+    title: "Open data",
+    text: "Every file behind the site, with licence and schema, ready to download or query.",
+  },
+  {
+    href: "/connect",
+    scope: "AI",
+    title: "Connect your AI",
+    text: "A free, read-only MCP server: add one address to Claude or any MCP client and ask about Germany's renewables, auctions, costs and grid in plain language.",
   },
   {
     href: "/methodology",

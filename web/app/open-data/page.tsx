@@ -29,6 +29,7 @@ export default async function OpenData() {
         <p className="mt-4 max-w-2xl text-lg text-ink-muted">
           Cleaned, checked and updated every day. Fetch the files directly, query the Parquet files
           remotely, or point your AI agent at <code className="rounded bg-surface px-1.5">/llms.txt</code>.
+          Using Claude or another MCP client? <a href="/connect" className="text-accent underline underline-offset-2">Connect your AI</a> to our MCP server.
         </p>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-3">

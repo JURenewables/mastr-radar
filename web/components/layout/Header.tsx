@@ -21,7 +21,10 @@ export function Header({ asOf, wide = false }: { asOf?: string; wide?: boolean }
               Wind
             </Link>
             <Link href="/costs/wind" className="hover:text-ink">
-              Costs
+              Wind costs
+            </Link>
+            <Link href="/costs/solar" className="hover:text-ink">
+              Solar costs
             </Link>
             <Link href="/outlook" className="hover:text-ink">
               Outlook

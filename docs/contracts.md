@@ -777,13 +777,30 @@ manifest `as_of`. **Check:** a test calls every tool against the published
 files and validates the result envelope; `run_sql` rejects writes, file
 access outside the data folder, network and settings changes.
 
-### Daily snapshots (WP78)
+### Daily snapshots (WP78, built 25 Nov 2026)
 
-After each successful daily run, the explorer files are packed into a
-GitHub Release asset `data-YYYY-MM-DD.tar.zst` (tag `data-YYYY-MM-DD`);
-`snapshots.json` in `web/public/data/` lists date, URL, bytes and manifest
-version of each. `whats_new` compares the current files with a snapshot.
-**Check:** the newest snapshot date equals the manifest `as_of`.
+After each successful daily run on `main`, the explorer files (without
+`days/`) are packed into `data-YYYY-MM-DD.tar.zst` and attached to the
+GitHub Release `data-YYYY-MM-DD` (title "Data YYYY-MM-DD (contract X)").
+`mastr-radar snapshots-index` writes `snapshots.json` in `web/public/data/`:
+`repo`, `format`, `snapshots` (date, tag, name, published, url; newest
+first) and updates its manifest and dictionary entries. **Check:** the
+newest snapshot date equals the manifest `as_of`; no duplicate dates.
+
+### Built (25 Nov 2026)
+
+- **WP81:** typed tools `find_units`, `auction_round`, `auction_winners`,
+  `company_profile`, `region_profile`, `grid_redispatch`,
+  `cross_border_flows`, `whats_new` (units registered since a date, from
+  `units.registration_date`; works without snapshots). Inputs validated and
+  quoted; numeric results returned as numbers.
+- **WP82:** rate limit 60 requests/minute per client and server instance
+  (in memory, IPs never logged); one log line per tool call with the tool
+  name only; `.github/workflows/mcp-health.yml` checks `/mcp/health` and a
+  tool call every 3 hours and sends a phone alert on failure.
+- **WP84:** `/connect` page with setup for Claude apps, Claude Code, the
+  Claude API MCP connector and other agents; linked from `/open-data`,
+  `/llms.txt` and the landing page.
 
 ## v1.11: cost benchmarks, onshore wind and solar PV (approved 25 Nov 2026)
 
@@ -858,6 +875,89 @@ line or range, never merged); outlook (DEA projections); costs against our
 auction award prices; a method box (price years, currency conversion,
 chart-read values marked "approx."). Source line under every chart.
 
+## v1.12: profitability of awarded projects, co-location (approved 25 Nov 2026)
+
+The cost pages become cost and profitability pages: what each awarded wind
+and solar project likely cost, what it earns, which return (IRR) it can
+expect, and where and in which rounds projects were most valuable. The wind
+page shows wind farms that share a site with a battery or a solar park.
+
+### Assumptions `pipeline/config/profitability.yaml` (hand-checked, sourced)
+
+- **Wind investment per project:** WindGuard 2024 regression for the main
+  investment, HIK = 1,743.95 − 81.21·P − 1.66·SFL + 2.91·NH (€/kW; P rated
+  power MW, SFL specific power W/m², NH hub height m; clamped to 700–2,000),
+  scaled to the bid year with the WindGuard turbine price trend
+  (`costs.json`), plus 506 €/kW ancillary investment. Opex 49 €/kW/yr
+  (years 1–10), 57 (11–20), 2024 level, indexed 2 %/yr from operation start
+  (bid year + 2).
+- **Solar investment:** Fraunhofer ISE midpoint per edition (700, 665,
+  800 €/kWp for 2018, 2021, 2024), interpolated by bid year; low case Danish
+  Energy Agency 458 €/kWp. Opex 13.3 €/kWp/yr; degradation 0.25 %/yr.
+- **Revenue, base case:** EEG award value for 20 years: wind award ×
+  correction factor (`received_ct_est` in `awards.json`), solar the round's
+  average award (no price per award is published), × our modelled yield.
+- **Full-life case:** operation until year 25 (wind) or 30 (solar)
+  (Fraunhofer ISE 2024); the years after the EEG period earn the SMARD
+  capture price of the last 12 complete months, held flat.
+- **Finance:** wind 79 % debt at 4.94 % over 19 years, equity target 8 %,
+  WACC 5.8 %; solar 80 % debt at 5.0 % over 20 years, equity 6.5 %, WACC
+  5.3 % (WindGuard 2024, Fraunhofer ISE 2024). Pre-tax, nominal, no residual
+  value.
+- **Per project:** investment, first-year opex, revenue, project IRR, equity
+  IRR, NPV per kW at the WACC ("value"), full-life IRR, and `max_capex`: the
+  highest investment that still earns the WACC over the EEG years.
+
+### Market values (station 1, `mastr-radar market-fetch`)
+
+SMARD (CC BY 4.0) hourly day-ahead price DE-LU (4169) and generation of solar
+(4068) and onshore wind (4067) for the last 58 weeks → capture prices per
+month and for the last 12 complete months, cached in
+`data/market/market_values.json`. **Check:** 12 complete months, values
+within −50…500 €/MWh. If the fetch fails, the last published values are kept.
+
+### Output `costs/profitability.json` (station 3)
+
+`as_of`; `assumptions` (inputs, notes, cost sources); `market` (capture
+prices); `wind` and `solar`: `projects` as `{fields, rows}` (wind: round,
+bid_date, group, state, lat, lon, model, mw_turbine, turbines, hub_m,
+rotor_m, flh, quality_pct, ct, capex, opex, revenue, project_irr, equity_irr,
+npv, project_irr_full, max_capex; solar: round, bid_date, group, state, lat,
+lon, mw, yield, ct, capex, revenue, project_irr, equity_irr, npv,
+project_irr_low_capex, project_irr_full, max_capex), `skipped`, `overall`,
+`by_round`, `by_state` (p25/median/p75 per metric), `sensitivity`
+(representative project from the awards since 2025: investment ±10 %,
+price ±0.5 ct, interest ±1 point). Built by `aggregate` and on demand by
+`mastr-radar profit-build`. **Check:** fields as listed; ≥ 1,000 wind and
+≥ 500 solar projects; IRR solved for ≥ 90 %; investment and IRR within
+bounds; overall median and round counts recomputed match.
+
+### Co-location `auctions/colocation.json` (station 3)
+
+Station 2 already carries `location_id` for all storage units ≥ 100 kW
+(about two thirds have one in MaStR); no change needed. Sites, active units
+only (operating, planned):
+- `same_location`: onshore wind and storage or solar registered at the same
+  `LokationMaStRNummer` (confirmed);
+- `nearby`: a battery or ground-mounted solar park ≥ 1 MW within 500 m of a
+  wind turbine (likely).
+
+Per site: tier, kind, partner MW and MWh, partner status and year, wind MW
+and units (within 1 km or at the location), wind status, award rounds of
+those turbines, distance, state, district, lat/lon and operator (legal
+entities only, D4/D13). `totals` per tier × kind × status, `by_year`.
+**Check:** every site has wind and a partner; nearby within the rule; no
+operator without a public location; totals add up.
+
+### Website
+
+`/costs/wind` and `/costs/solar` ("costs and earns"): sections "What awarded
+projects earn" (IRR per round, estimated vs affordable investment), "Where
+projects are worth most" (map by value, table by state), "What moves the
+return" (sensitivity). `/wind`: section "Wind with batteries and solar"
+(map, per year, largest sites). Header: separate "Wind costs" and "Solar
+costs". The Outlook page is unchanged.
+
 ## Version history
 
 | Version | Date | Change |
@@ -874,3 +974,4 @@ chart-read values marked "approx."). Source line under every chart.
 | 1.9 | 2026-11-25 | Auction run-up (`auctions/runup.json`, permit deadlines, `permit_registered` in unit details), Outlook page (`outlook/outlook.json`: repowering, auction outlook), Telegram phone report. Approved by the user. |
 | 1.10 | 2026-11-25 | Data dictionary (`dictionary.json`, check), agent context (`/llms-full.txt`, `/schema.json`), MCP server at `/mcp` (tools, resources, prompts, limits), daily snapshots. Approved by the user. |
 | 1.11 | 2026-11-25 | Cost benchmarks: `config/costs.yaml` (WindGuard 2024, Fraunhofer ISE 2024/2021/2018, Danish Energy Agency, IRENA 2025), `costs/costs.json` with breakdowns, comparison, trends, projections and award prices; pages `/costs/wind` and `/costs/solar`. Approved by the user. |
+| 1.12 | 2026-11-25 | Profitability of awarded wind and solar projects (`costs/profitability.json`, `config/profitability.yaml`, SMARD market values), co-location of wind with batteries and solar (`auctions/colocation.json`); profitability on the cost pages, co-location on the wind page. Approved by the user. |

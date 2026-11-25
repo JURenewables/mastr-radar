@@ -46,6 +46,11 @@ jobs:
         working-directory: pipeline
         run: uv run mastr-radar auctions-fetch
 
+      - name: "Market values: SMARD prices for the profitability model (last values kept if this fails)"
+        working-directory: pipeline
+        continue-on-error: true
+        run: uv run mastr-radar market-fetch
+
       - name: "Station 3: build explorer files, check, cross-check"
         working-directory: pipeline
         run: uv run mastr-radar aggregate
@@ -64,6 +69,22 @@ jobs:
         run: |
           git show HEAD:web/public/data/kpis.json > /tmp/kpis_prev.json || true
           uv run mastr-radar notify --previous /tmp/kpis_prev.json || true
+
+      - name: "Snapshot: dated copy as a GitHub Release asset (main only)"
+        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          AS_OF=$(python3 -c "import json;print(json.load(open('web/public/data/manifest.json'))['as_of'])")
+          CV=$(python3 -c "import json;print(json.load(open('web/public/data/manifest.json'))['contract_version'])")
+          TAG="data-$AS_OF"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            tar --zstd -cf "data-$AS_OF.tar.zst" --exclude=./days -C web/public/data .
+            gh release create "$TAG" "data-$AS_OF.tar.zst" --title "Data $AS_OF (contract $CV)" \
+              --notes "Explorer files of MaStR Radar as of $AS_OF. Licences: see catalog.json inside and https://mastr-radar.vercel.app/open-data" --latest=false
+          fi
+          gh release list --limit 1000 --json tagName,name,publishedAt > /tmp/releases.json
+          cd pipeline && uv run mastr-radar snapshots-index /tmp/releases.json --repo "$GITHUB_REPOSITORY"
 
       - name: Commit fresh data (only if it changed)
         run: |

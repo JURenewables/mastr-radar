@@ -149,6 +149,18 @@ export async function runSelect(sql: string, maxRows = LIMITS.defaultRows): Prom
       throw new QueryError("query_rejected", msg);
     }
     let rows = reader.getRowObjectsJson() as Record<string, unknown>[];
+    // DECIMAL and 64/128-bit integers come back as text; agents want numbers.
+    const names = reader.columnNames();
+    const numeric = reader.columnTypes().map((t) => /^(DECIMAL|HUGEINT|UHUGEINT|BIGINT|UBIGINT)/.test(t.toString()));
+    if (numeric.some(Boolean)) {
+      rows = rows.map((r) => {
+        const o = { ...r };
+        names.forEach((n, i) => {
+          if (numeric[i] && typeof o[n] === "string") o[n] = Number(o[n]);
+        });
+        return o;
+      });
+    }
     let truncated = rows.length > cap;
     rows = rows.slice(0, cap);
     while (rows.length > 1 && JSON.stringify(rows).length > LIMITS.resultBytes) {

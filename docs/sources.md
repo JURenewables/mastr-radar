@@ -22,6 +22,7 @@ we access it. A source is only used once it appears in this file.
 | **Fraunhofer ISE**, Stromgestehungskosten erneuerbare Energien (2024, 2021, 2018) | Capex and opex ranges, cost of electricity | Published study; figures cited as facts with source | "Fraunhofer ISE, Stromgestehungskosten erneuerbare Energien" | PDFs, read by hand into `costs.yaml` (contract v1.11) |
 | **Danish Energy Agency**, Technology Data for Generation of Electricity and District Heating | Capex and opex breakdown, projections to 2050 (onshore wind sheet Feb 2024, solar PV sheets Aug 2026) | CC BY 4.0 | "Danish Energy Agency, Technology Data (CC BY 4.0)" | Excel data sheet, read by hand into `costs.yaml` (contract v1.11) |
 | **IRENA**, Renewable Power Generation Costs in 2024 | Installed costs Germany (from charts, approx.) and Europe (tables), O&M | Free use with acknowledgement of IRENA as source and copyright holder | "IRENA (2025), Renewable Power Generation Costs in 2024" | PDF, read by hand into `costs.yaml` (contract v1.11) |
+| **SMARD day-ahead prices** (Bundesnetzagentur) | Hourly day-ahead price DE-LU with solar and onshore wind generation → capture prices for the profitability model | CC BY 4.0 | "Bundesnetzagentur \| SMARD.de" | JSON API, no account, `mastr-radar market-fetch` (contract v1.12) |
 | **Fraunhofer ISE Energy-Charts** | Cross-check only (installed capacity) | Licence page not machine-readable (JS); not redistributed by us | Named on the methodology page | API, no account |
 
 ## Planned for Phase 7

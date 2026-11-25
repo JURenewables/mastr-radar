@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Header } from "@/components/layout/Header";
+import { Colocation } from "@/components/monitor/Colocation";
 import { Monitor } from "@/components/monitor/Monitor";
 import { loadExplorerData } from "@/lib/data";
 import { formatDate } from "@/lib/format";
@@ -40,10 +41,13 @@ export default async function WindPage() {
           <p className="mt-3 max-w-2xl text-sm text-ink-muted">
             Everything on this page covers Germany only. For the same companies worldwide (size,
             debt, markets abroad, generation mix), see{" "}
-            <a href="/players" className="text-accent underline underline-offset-2">Players worldwide</a>.
+            <a href="/players" className="text-accent underline underline-offset-2">Players worldwide</a>. What onshore wind
+            projects cost to build and run:{" "}
+            <a href="/costs/wind" className="text-accent underline underline-offset-2">Onshore wind costs</a>.
           </p>
         </section>
         <Monitor asOf={data.manifest.as_of} part="wind" />
+        <Colocation version={data.manifest.as_of} />
         <p className="pb-10 text-xs text-ink-muted">
           Sources: Marktstammdatenregister (as of {asOf}), Bundesnetzagentur award lists and round
           results, Deutscher Wetterdienst wind grid. See the methodology page for definitions and
