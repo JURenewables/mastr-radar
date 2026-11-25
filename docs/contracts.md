@@ -858,6 +858,70 @@ line or range, never merged); outlook (DEA projections); costs against our
 auction award prices; a method box (price years, currency conversion,
 chart-read values marked "approx."). Source line under every chart.
 
+## v1.12: profitability of awarded projects, co-location (DRAFT, awaiting approval)
+
+The Outlook page links costs to auctions: what each awarded wind and solar
+project likely cost, what it earns, which return (IRR) it can expect, and
+where and in which rounds projects were most valuable. Plus wind farms that
+share a grid connection with a battery or a solar park.
+
+### Assumptions `pipeline/config/profitability.yaml` (hand-checked, sourced)
+
+- **Wind capex per project:** WindGuard 2024 regression for the main
+  investment, HIK = 1,743.95 − 81.21·P − 1.66·SFL + 2.91·NH (€/kW; P rated
+  power MW, SFL specific power W/m², NH hub height m), plus 506 €/kW
+  ancillary investment; scaled to the bid year with the WindGuard turbine
+  price trend (`costs.json`). Opex 49 €/kW/yr (years 1–10), 57 (11–20).
+- **Solar capex:** central case from Fraunhofer ISE (mid of 700–900 €/kWp)
+  with the Danish Energy Agency value as low case; opex 13.3 €/kWp/yr;
+  degradation 0.25 %/yr.
+- **Revenue:** awarded price × correction factor (wind, already in
+  `awards.json` as `received_ct_est`) or the round's average award (solar,
+  no price per award is published) × estimated yield (our DWD-based model:
+  `full_load_hours`, `specific_yield_kwh_kwp`). Base case counts only the
+  EEG award value over 20 years; market prices above it are a scenario.
+- **Finance:** WindGuard 2024 / Fraunhofer ISE 2024: 79–80 % debt at
+  4.94 % over 19–20 years, equity target 8 % (wind) / 6.5 % (solar);
+  opex indexed at 2 %/yr; no tax, no residual value (stated).
+- **Outputs per project:** capex €/kW, revenue €/kW/yr, project IRR and
+  equity IRR (nominal, pre-tax), NPV per MW at the stated WACC ("value").
+
+### Output `outlook/profitability.json` (station 3)
+
+`as_of`; `assumptions` (copied with sources); `wind.projects` (one row per
+award with turbine data: round, bid_date, state, lat/lon as published in
+`awards.json`, model, MW, hub, rotor, full-load hours, quality %, received
+ct, capex, opex, revenue, project_irr, equity_irr, npv_eur_kw);
+`wind.by_round` and `wind.by_state` (medians and quartiles); `solar.projects`
+and `solar.by_round` (same for solar-programme awards with a yield);
+`sensitivity` (IRR change for capex ±10 %, price ±0.5 ct, interest
+±1 point). **Check:** every project's inputs within plausible bounds;
+IRR solved or flagged; ≥ 1,000 wind and ≥ 500 solar projects; medians
+recomputed match.
+
+### Co-location `outlook/colocation.json` (stations 2 and 3)
+
+**Station 2:** `unit_details.parquet` carries `location_id` (MaStR
+`LokationMaStRNummer`, the grid connection location) for all storage units
+≥ 100 kW, not only those linked to solar (today about 2,300 of the battery
+records).
+**Station 3:** sites where onshore wind shares a location with storage, or
+with solar: per site wind MW and units, storage MW and MWh, solar MW, status
+(operating / planned), any wind award (round), state, district, lat/lon
+(companies only, D4). Totals per type and status, by year of
+commissioning. **Check:** each site has wind plus at least one partner;
+totals match the sites.
+
+### Website
+
+`/outlook`: the repowering section is trimmed (map and key numbers stay;
+the lists of old models and owners and the added/retired chart move out),
+followed by "What wind projects earn" and "What solar parks earn" (map of
+projects by IRR or value, IRR by round, capex vs revenue, sensitivity) and
+"Wind with batteries and solar" (co-located sites on a map, operating and
+planned, awarded ones marked). Header: separate "Wind costs" and "Solar
+costs" links (done).
+
 ## Version history
 
 | Version | Date | Change |

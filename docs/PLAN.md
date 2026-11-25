@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.11 approved (25 Nov 2026): cost pages `/costs/wind` and `/costs/solar` built (Phase 10, WP89–92). MCP server v1 live. Next: WP81 typed MCP tools, WP78 snapshots, WP82 guardrails, WP84 connect page, optional WP93**
+**You are here: contract v1.11 approved (25 Nov 2026): cost pages `/costs/wind` and `/costs/solar` built (Phase 10, WP89–92). MCP server v1 live. Next: Phase 11 profitability and co-location (contract v1.12 draft awaits approval); then WP81, WP78, WP82, WP84**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -314,6 +314,26 @@ real stress signals (line loading itself is not published).
   without award vs round volume, price direction (assessment).
 - [x] **WP88. Phone report:** daily Telegram summary and failure alert from
   the daily workflow (secrets `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`).
+
+---
+
+## Phase 11: Profitability and co-location (Outlook)
+
+Goal: "What does an awarded wind or solar project earn, and where and in
+which rounds were projects most valuable?" Plus wind with batteries or
+solar on the same grid connection. Contract v1.12.
+
+- [ ] **WP94. Assumptions and contract v1.12.** Capex per project (WindGuard
+  formula), revenue, financing, IRR method. *Draft written, awaits approval.*
+- [ ] **WP95. Profitability model.** `outlook/profitability.json`: capex,
+  revenue, project and equity IRR, NPV per award; by round, by state,
+  sensitivities; checks and tests.
+- [ ] **WP96. Co-location.** Battery grid locations in station 2;
+  `outlook/colocation.json` with wind+storage and wind+solar sites.
+- [ ] **WP97. Outlook page.** Trim repowering; profitability sections for
+  wind and solar; co-location map.
+- [x] **WP98. Find the solar costs.** Separate "Wind costs" / "Solar costs"
+  menu entries, links from the wind and solar pages.
 
 ---
 
