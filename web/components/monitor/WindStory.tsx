@@ -13,6 +13,7 @@ import { AuctionMovie, CompanyMap } from "./AuctionMap";
 import { Repowering, TurbineGrowth } from "./Sections";
 import { Chapter, Loading, Section, Stat } from "./ui";
 import { OverheatSection } from "./Overheat";
+import { WindRunUp } from "./RunUp";
 import { CompanyFactsSection, OemWorldSection, RiseFallSection } from "./Dynamics";
 import { CrossTech, crossTakeaways, SuccessSection } from "./Strategy";
 import { BrandRace, BrandShares, TurbineModels } from "./WindIndustry";
@@ -231,6 +232,8 @@ function AuctionChapters({ data, date, source, machines, fleetText }: { data: Mo
       >
         <AuctionPrices a={au} />
       </Section>
+
+      <WindRunUp version={date} date={date} />
 
       <Section
         id="site-quality"

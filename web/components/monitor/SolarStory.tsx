@@ -16,6 +16,7 @@ import { AuctionMovie, CompanyMap, type MapSource } from "./AuctionMap";
 import { BarRace } from "./BarRace";
 import { SolarTypes } from "./Sections";
 import { OverheatSection } from "./Overheat";
+import { SolarRunUp } from "./RunUp";
 import { CompanyFactsSection, RiseFallSection } from "./Dynamics";
 import { CrossTech, crossTakeaways } from "./Strategy";
 import { Chapter, Loading, Section, Segmented, Stat } from "./ui";
@@ -104,6 +105,8 @@ function Story({ data, so, date }: { data: MonitorData; so: SolarAuctions; date:
       >
         <SolarPrices data={data} so={so} />
       </Section>
+
+      <SolarRunUp version={date} date={date} />
 
       <Chapter id="where" n={2} title="What gets built, and where">
         Bavaria leads by far, almost every park is fixed-tilt, and more and more parks bring their own battery.

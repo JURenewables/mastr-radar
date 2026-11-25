@@ -301,6 +301,22 @@ real stress signals (line loading itself is not published).
 
 ---
 
+## Phase 8b: Auction timing, outlook, phone report
+
+- [x] **WP85. Auction run-up:** when permits and units of awarded projects
+  appear in MaStR relative to the bid date and the permit deadline (wind),
+  first registration of awarded solar parks; weekly registration waves.
+  Sections high up on Wind and Solar. *Contract v1.9 draft.*
+- [x] **WP86. Outlook page: repowering potential** (`/outlook`): map of
+  turbines past EEG support and the next wave, models, owners, retirements,
+  illustrative potential with stated assumptions.
+- [x] **WP87. Outlook page: auction outlook:** next bid dates, permitted pool
+  without award vs round volume, price direction (assessment).
+- [x] **WP88. Phone report:** daily Telegram summary and failure alert from
+  the daily workflow (secrets `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`).
+
+---
+
 ## Phase 9: Open data for AI agents (MCP)
 
 Goal: "Point your AI at MaStR Radar and it finds the answer." A public,

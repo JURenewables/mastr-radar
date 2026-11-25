@@ -33,6 +33,12 @@ const SECTIONS: { href: string; scope: string; title: string; text: string; fact
     text: "Which grid operators connect the renewables, the four TSO areas, large consumers and the demand wave, what bottlenecks cost, and the new connection rules.",
   },
   {
+    href: "/outlook",
+    scope: "Germany",
+    title: "Outlook",
+    text: "Looking ahead: where the ageing wind fleet is due for repowering, on a map, and what the next wind and solar auction rounds are likely to bring.",
+  },
+  {
     href: "/players",
     scope: "Worldwide",
     title: "Players",

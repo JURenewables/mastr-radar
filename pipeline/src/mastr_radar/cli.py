@@ -394,6 +394,23 @@ def grid_build() -> None:
     typer.echo(f"Check passed: {', '.join(sorted(names))}")
 
 
+@app.command("notify")
+def notify(
+    previous: Path = typer.Option(None, help="kpis.json of the previous update, for the changes."),
+    message: str = typer.Option(None, help="Send this text instead of the daily summary."),
+    dry_run: bool = typer.Option(False, help="Print the message instead of sending it."),
+) -> None:
+    """Send the daily summary (or a given message) to Telegram, if configured."""
+    import json
+
+    from mastr_radar import notify as nt
+
+    s = load_settings()
+    prev = json.loads(previous.read_text()) if previous and previous.exists() else None
+    text = message or nt.daily_text(s.output_dir, prev)
+    typer.echo(text if dry_run else nt.send(text))
+
+
 @app.command("hub-build")
 def hub_build() -> None:
     """Hub H2: build day files in web/public/data/days/, then check them."""

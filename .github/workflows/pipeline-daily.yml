@@ -55,6 +55,16 @@ jobs:
         working-directory: pipeline
         run: uv run mastr-radar summary >> "$GITHUB_STEP_SUMMARY" || true
 
+      - name: Phone report (Telegram, if configured)
+        if: success()
+        working-directory: pipeline
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          git show HEAD:web/public/data/kpis.json > /tmp/kpis_prev.json || true
+          uv run mastr-radar notify --previous /tmp/kpis_prev.json || true
+
       - name: Commit fresh data (only if it changed)
         run: |
           # Ignore the timestamp line, so a rerun on the same export makes no commit.
@@ -70,6 +80,15 @@ jobs:
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
           echo "Committed data as of $AS_OF." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Phone alert on failure (Telegram, if configured)
+        if: failure()
+        working-directory: pipeline
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: uv run mastr-radar notify --message "⚠️ MaStR Radar daily update failed. The site keeps the last good data. $RUN_URL" || true
 
       - name: Open or update an issue on failure
         if: failure() && github.event_name != 'push'

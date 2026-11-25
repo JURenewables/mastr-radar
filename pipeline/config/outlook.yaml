@@ -1,0 +1,10 @@
+# Outlook page (contract v1.9 draft): assumptions for the repowering estimate.
+# The estimate is an illustration, shown with these assumptions on the page.
+repowering:
+  eeg_years: 20            # EEG support ends after 20 years (plus the commissioning year)
+  next_wave_years: 15      # turbines aged 15–19 years: the next wave
+  replacement_ratio: 0.5   # one new turbine for every two old ones (spacing of larger rotors)
+  owner_min_kw: 1000       # owner names only for units of 1 MW or more (privacy rule)
+auction_outlook:
+  wind_bid_months: [2, 5, 8, 11]   # Gebotstermine onshore wind: 1 Feb, May, Aug, Nov
+  solar_bid_months: [3, 7, 12]     # ground-mounted solar: 1 Mar, Jul, Dec

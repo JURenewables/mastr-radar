@@ -160,6 +160,7 @@ def parse_round_page(text: str) -> dict:
     t = re.sub(r"\s+", " ", t).replace("Zuschlagswe rt", "Zuschlagswert")
     num = r"(\d+,\d+)"
     keys = "bid_date published ceiling_ct volume_kw min_ct max_ct avg_ct awards awarded_kw"
+    keys += " permit_deadline"
     out: dict = dict.fromkeys(keys.split())
     if m := _first(
         t, [r"Gebotstermin ist der (\d+\. \w+ \d{4})", r"Gebotstermin (\d+\. \w+ \d{4})"]
@@ -188,6 +189,11 @@ def parse_round_page(text: str) -> dict:
         out["max_ct"] = _num(m.group(1))
     if m := re.search(rf"Zuschlagswert(?: \([^)]*\))? (?:beträgt|entspricht|betrug) {num}", t):
         out["avg_ct"] = _num(m.group(1))
+    # Permits must be issued and registered in MaStR by this date (wind only).
+    deadline_text = r"bis zum (\d+\. \w+ \d{4}) erteilt und (?:dem|im) Marktstammdatenregister"
+    deadline_table = r"Meldefrist Genehmigung \d+\. \w+ \d{4} [\d.]+ \d+,\d+ (\d+\. \w+ \d{4})"
+    if m := _first(t, [deadline_text, deadline_table]):
+        out["permit_deadline"] = _date(m.group(1))
     if m := re.search(r"Es (?:wurden|werden) ([\d.]+) Gebote", t):
         out["awards"] = int(_num(m.group(1)))
     if m := re.search(r"(?:Gebotsvolumen|Gebotsmenge) von ([\d.]+) (kW|MW) bezuschlagt", t):
