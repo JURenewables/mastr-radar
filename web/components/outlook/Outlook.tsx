@@ -1,6 +1,6 @@
 "use client";
 
-// Outlook: looking ahead (contract v1.9 draft, outlook/outlook.json).
+// Outlook: looking ahead (contract v1.9, outlook/outlook.json).
 // Repowering potential of the ageing wind fleet, and what the next auction
 // rounds are likely to look like.
 import * as Plot from "@observablehq/plot";

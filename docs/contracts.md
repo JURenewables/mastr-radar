@@ -641,7 +641,7 @@ average over the last 12 months). Only aggregates are published; raw
 Netztransparenz rows are not redistributed. **Check:** ≥ 12 months in order;
 no negative values; reductions present; ≥ 8 neighbours; 24 hourly values.
 
-## v1.9 draft: auction run-up, outlook (repowering, auction outlook), phone report (waiting for approval)
+## v1.9: auction run-up, outlook (repowering, auction outlook), phone report (approved 25 Nov 2026)
 
 **Station 2:** `unit_details.parquet` gains `permit_registered` (date the
 permit was entered in MaStR, `Registrierungsdatum` of the permit record).
@@ -700,3 +700,4 @@ and `TELEGRAM_CHAT_ID`; without them nothing is sent.
 | 1.6 | 2026-11-01 | Auctions since May 2019 with yield estimate (DWD), five bidder types, reviewed attributions and company-reported totals, office attribution via the new internal `data/extract/operators.parquet`, race, profiles and map points. Approved by the user. |
 | 1.7 | 2026-11-01 | Solar and innovation auctions, internal unit details and grid register, wind calibration and success drivers, rise-and-fall dynamics, company facts, market risk, players worldwide, grid page. Approved by the user. |
 | 1.8 | 2026-11-02 | Netztransparenz TSO redispatch since 2021 and ENTSO-E cross-border flows (internal extracts, `grid/redispatch.json`, `grid/flows.json`, aggregates only), fetched with GitHub Secrets by a separate daily workflow. Approved by the user. |
+| 1.9 | 2026-11-25 | Auction run-up (`auctions/runup.json`, permit deadlines, `permit_registered` in unit details), Outlook page (`outlook/outlook.json`: repowering, auction outlook), Telegram phone report. Approved by the user. |

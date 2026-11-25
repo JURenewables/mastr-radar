@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.8 live (2 Nov 2026): Monitor, Solar, Wind, Grid (incl. TSO redispatch and cross-border flows), Players, AI guide. Next: WP67 grid distance and WP41 grid map (need OSM decision), WP45b attribution; Phase 9 (MCP for AI agents) planned: start with WP75**
+**You are here: contract v1.9 live (25 Nov 2026): run-up, Outlook page, Telegram report. Now: Phase 9 (open data for AI agents), WP75 → WP84**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -306,7 +306,7 @@ real stress signals (line loading itself is not published).
 - [x] **WP85. Auction run-up:** when permits and units of awarded projects
   appear in MaStR relative to the bid date and the permit deadline (wind),
   first registration of awarded solar parks; weekly registration waves.
-  Sections high up on Wind and Solar. *Contract v1.9 draft.*
+  Sections high up on Wind and Solar. *Contract v1.9.*
 - [x] **WP86. Outlook page: repowering potential** (`/outlook`): map of
   turbines past EEG support and the next wave, models, owners, retirements,
   illustrative potential with stated assumptions.
@@ -327,7 +327,7 @@ correctly. Design and decisions: `docs/platform-plan.md`.
   and column in one machine-readable file (`docs/data-dictionary.yaml`):
   meaning, type, unit, allowed values, source, licence, caveats, example
   questions. The check fails if a published column is undescribed.
-  Everything below is generated from it. *Contract v1.9 draft.*
+  Everything below is generated from it. *Contract v1.9.*
 - [ ] **WP76. Agent context pack.** Generated from WP75: `/llms-full.txt`
   (all datasets with columns), `/schema.json` (JSON Schema per dataset),
   one short "dataset card" per file, a citation line, known gaps (late

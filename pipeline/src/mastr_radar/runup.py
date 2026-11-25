@@ -1,4 +1,4 @@
-"""Registration run-up before auction bid dates (contract v1.9 draft) →
+"""Registration run-up before auction bid dates (contract v1.9) →
 auctions/runup.json (station 3).
 
 Wind: for every awarded turbine linked to MaStR, when its permit and the unit

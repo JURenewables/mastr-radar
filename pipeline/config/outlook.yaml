@@ -1,4 +1,4 @@
-# Outlook page (contract v1.9 draft): assumptions for the repowering estimate.
+# Outlook page (contract v1.9): assumptions for the repowering estimate.
 # The estimate is an illustration, shown with these assumptions on the page.
 repowering:
   eeg_years: 20            # EEG support ends after 20 years (plus the commissioning year)

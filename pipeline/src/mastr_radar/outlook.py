@@ -1,4 +1,4 @@
-"""Outlook page (contract v1.9 draft): repowering potential and auction
+"""Outlook page (contract v1.9): repowering potential and auction
 outlook → outlook/outlook.json (station 3). Reads units.parquet,
 unit_details.parquet and the auction files written earlier in station 3."""
 

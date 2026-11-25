@@ -1,6 +1,6 @@
 "use client";
 
-// Registration run-up before auction bid dates (contract v1.9 draft,
+// Registration run-up before auction bid dates (contract v1.9,
 // auctions/runup.json): when permits and units of awarded projects appear in
 // the Marktstammdatenregister relative to the bid date.
 import * as Plot from "@observablehq/plot";
