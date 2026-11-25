@@ -73,7 +73,7 @@ def test_kpis(built):
 
 def test_manifest(built):
     _, out, manifest = built
-    assert manifest["contract_version"] == "1.9"
+    assert manifest["contract_version"] == "1.10"
     assert manifest["as_of"] == "2026-10-30"
     files = {f["name"]: f for f in manifest["files"]}
     assert set(files) == {
@@ -82,6 +82,7 @@ def test_manifest(built):
         "summary.parquet",
         "boundaries/states.geojson",
         "boundaries/districts.geojson",
+        "dictionary.json",
     }
     assert files["kpis.json"]["rows"] == 2
     assert files["boundaries/states.geojson"]["rows"] == 16

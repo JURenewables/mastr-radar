@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
 import { AI_PROMPT, QUESTIONS, SOURCES } from "@/lib/aiGuide";
 import { buildCatalog } from "@/lib/catalog";
+import { loadDictionary } from "@/lib/dictionary";
 import { formatDate } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -17,7 +18,8 @@ function size(bytes?: number) {
 }
 
 export default async function OpenData() {
-  const c = await buildCatalog();
+  const [c, dict] = await Promise.all([buildCatalog(), loadDictionary()]);
+  const fieldsOf = (file: string) => dict?.datasets.find((x) => x.file === file);
   return (
     <>
       <Header asOf={c.as_of !== "unknown" ? formatDate(c.as_of) : undefined} wide />
@@ -36,7 +38,7 @@ export default async function OpenData() {
           </a>
           <a href="/llms.txt" className="rounded-[20px] bg-surface p-5 hover:bg-rule">
             <p className="font-bold">llms.txt</p>
-            <p className="text-sm text-ink-muted">Plain-text guide for AI agents</p>
+            <p className="text-sm text-ink-muted">Plain-text guide for AI agents (full reference: /llms-full.txt, fields: /schema.json)</p>
           </a>
           <a href={c.contract_url} className="rounded-[20px] bg-surface p-5 hover:bg-rule">
             <p className="font-bold">Data contract v{c.contract}</p>
@@ -85,6 +87,24 @@ export default async function OpenData() {
                   </a>{" "}
                   · {d.attribution}
                 </p>
+                {(() => {
+                  const e = fieldsOf(d.id);
+                  if (!e) return null;
+                  return (
+                    <details className="mt-2 text-sm">
+                      <summary className="cursor-pointer text-accent">Fields ({Object.keys(e.fields).length}){e.caveats?.length ? " and caveats" : ""}</summary>
+                      <dl className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-[minmax(0,12rem)_1fr]">
+                        {Object.entries(e.fields).map(([k, f]) => (
+                          <div key={k} className="contents">
+                            <dt className="truncate font-mono text-xs">{k}{f.unit ? <span className="text-ink-muted"> ({f.unit})</span> : null}</dt>
+                            <dd className="text-xs text-ink-muted">{f.desc}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                      {e.caveats?.length ? <p className="mt-2 text-xs text-ink-muted">Caveats: {e.caveats.join(" ")}</p> : null}
+                    </details>
+                  );
+                })()}
               </div>
               <a href={d.url} className="self-start rounded-full border border-rule px-4 py-1.5 text-sm font-semibold hover:border-ink">
                 Download

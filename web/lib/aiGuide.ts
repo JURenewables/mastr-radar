@@ -26,4 +26,4 @@ export const SOURCES: { name: string; what: string; access: string; licence: str
 ];
 
 export const AI_PROMPT =
-  "Use the MaStR Radar open data at https://mastr-radar.vercel.app. Start by reading /llms.txt, then /catalog.json. Answer from the files listed there (Parquet can be queried with DuckDB over HTTP), cite the file and the as-of date, and mention the known gaps (late registrations, private units without location).";
+  "Use the MaStR Radar open data at https://mastr-radar.vercel.app. Start by reading /llms.txt, then /llms-full.txt (every field, glossary and tested example queries). Answer from the files listed there (Parquet can be queried with DuckDB over HTTP), cite the file and the as-of date, and mention the known gaps (late registrations, private units without location).";

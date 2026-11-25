@@ -111,6 +111,11 @@
       "name": "outlook/outlook.json",
       "rows": 309,
       "bytes": 224689
+    },
+    {
+      "name": "dictionary.json",
+      "rows": 21,
+      "bytes": 21626
     }
   ]
 }

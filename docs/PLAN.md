@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.9 live (25 Nov 2026): run-up, Outlook page, Telegram report. Now: Phase 9 (open data for AI agents), WP75 → WP84**
+**You are here: contract v1.10 approved (25 Nov 2026). Phase 9: WP75–77, 79, 80 done (MCP server v1 at `/mcp`). Next: WP81 typed tools, WP78 snapshots, WP82 guardrails, WP84 connect page**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -323,32 +323,36 @@ Goal: "Point your AI at MaStR Radar and it finds the answer." A public,
 read-only MCP server plus the context an agent needs to use the data
 correctly. Design and decisions: `docs/platform-plan.md`.
 
-- [ ] **WP75. Semantic layer (one data dictionary).** Every published file
+- [x] **WP75. Semantic layer (one data dictionary).** Every published file
   and column in one machine-readable file (`docs/data-dictionary.yaml`):
   meaning, type, unit, allowed values, source, licence, caveats, example
   questions. The check fails if a published column is undescribed.
-  Everything below is generated from it. *Contract v1.9.*
-- [ ] **WP76. Agent context pack.** Generated from WP75: `/llms-full.txt`
+  Everything below is generated from it. *Contract v1.10.*
+- [x] **WP76. Agent context pack.** Generated from WP75: `/llms-full.txt`
   (all datasets with columns), `/schema.json` (JSON Schema per dataset),
   one short "dataset card" per file, a citation line, known gaps (late
   registrations, private units without location, TSO-only redispatch) and
   20 starter questions with the query that answers each.
-- [ ] **WP77. Query engine prototype.** DuckDB in a Vercel Node function
+- [x] **WP77. Query engine prototype.** DuckDB in a Vercel Node function
   reading the published Parquet/JSON. Measure cold start, memory and query
   time on the 5 heaviest questions. Fallback if too slow: precomputed
-  answers only. Decide hosting of larger files (WP78).
+  answers only. Decide hosting of larger files (WP78). *Done: DuckDB
+  fits (start 23 ms, queries ≤ 85 ms, 154 MB); details in platform-plan.*
 - [ ] **WP78. Daily snapshots (history).** Keep a dated copy of the explorer
   files every day (decision 2: GitHub Release assets) so agents can ask
   "what changed since …" and answers stay reproducible. Snapshot index in
   the catalogue.
-- [ ] **WP79. MCP contract (v1.9).** Tool names, input/output schemas,
+- [x] **WP79. MCP contract (v1.10).** Tool names, input/output schemas,
   limits and error messages written down and approved before code
-  (contracts first).
-- [ ] **WP80. MCP server v1.** Remote, read-only, Streamable HTTP, no login,
+  (contracts first). *Approved 25 Nov 2026.*
+- [x] **WP80. MCP server v1.** Remote, read-only, Streamable HTTP, no login,
   at `https://mastr-radar.vercel.app/mcp`. Tools: `list_datasets`,
   `describe_dataset`, `run_sql` (SELECT only, row cap, timeout),
   `get_kpis`. Resources: data dictionary, methodology, contract,
-  licences. Every answer carries `as_of`, source and licence.
+  licences. Every answer carries `as_of`, source and licence. *Done: own
+  small JSON-RPC handler (no SDK), DuckDB locked to the data folder, flat
+  views for awards, rounds, players and redispatch; checked with the
+  official MCP client and a test of every tool.*
 - [ ] **WP81. Domain tools v2.** Typed tools for the common questions so
   agents need no SQL: `find_units` (technology, status, region, size,
   commissioning period), `auction_round`, `auction_winners`,
@@ -372,6 +376,13 @@ correctly. Design and decisions: `docs/platform-plan.md`.
 ---
 
 ## Follow-ups noted
+
+- Web dev tools: `npm audit` shows 7 moderate warnings in a linting dependency
+  (minimatch via typescript-eslint); none in production packages. Fix when
+  eslint-config-next updates.
+- MCP function bundle includes `public/data/days/` (about 21 MB) because
+  `outputFileTracingExcludes` had no effect in Next 16; total about 41 MB,
+  far below the 250 MB limit.
 
 - [x] Automatic cross-check: each `aggregate` run compares installed capacity
   per technology with the Energy-Charts API (±2%, warning only) and writes
