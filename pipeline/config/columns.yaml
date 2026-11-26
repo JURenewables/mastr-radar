@@ -279,3 +279,70 @@ redispatch:
     - {match: Spannung, category: voltage}
     - {match: Strombedingt, category: current}
   substation_prefix: "UW "
+
+# Other assets for multi-asset hubs (contract v1.13, WP101): combustion,
+# gas producers (incl. electrolysers), gas consumers, gas storage, large
+# electricity consumers. Internal extract data/extract/assets_other.parquet.
+other_assets:
+  combustion_min_kw: 1000          # small CHP engines and emergency diesels left out
+  common:
+    id: EinheitMastrNummer
+    location_id: LokationMaStRNummer
+    status: EinheitBetriebsstatus
+    system_status: EinheitSystemstatus
+    operator_id: AnlagenbetreiberMastrNummer
+    state: Bundesland
+    district: Landkreis
+    municipality_key: Gemeindeschluessel
+    lat: Breitengrad
+    lon: Laengengrad
+    commissioning_date: Inbetriebnahmedatum
+    planned_commissioning_date: GeplantesInbetriebnahmedatum
+  sources:
+    combustion:
+      files: EinheitenVerbrennung*.xml
+      record: EinheitVerbrennung
+      name: NameStromerzeugungseinheit
+      plant: NameKraftwerk
+      capacity_kw: Bruttoleistung
+      carrier: Energietraeger          # catalogue value
+      technology: Technologie          # catalogue value
+      chp_id: KwkMaStRNummer
+    gas_producer:
+      files: EinheitenGasErzeuger*.xml
+      record: EinheitGasErzeuger
+      name: NameGaserzeugungseinheit
+      capacity_kw: Erzeugungsleistung
+      technology: Technologie          # catalogue value
+    gas_consumer:
+      files: EinheitenGasverbraucher*.xml
+      record: EinheitGasverbraucher
+      name: NameGasverbrauchsseinheit
+      capacity_kw: MaximaleGasbezugsleistung
+      for_power: EinheitDientDerStromerzeugung
+    gas_storage:
+      files: EinheitenGasSpeicher*.xml
+      record: EinheitGasSpeicher
+      name: NameGasspeicher
+      capacity_kw: MaximaleAusspeicherleistung
+      technology: Speicherart          # catalogue value
+    large_consumer:
+      files: EinheitenStromVerbraucher*.xml
+      record: EinheitStromVerbraucher
+      name: NameStromverbrauchseinheit
+  # Catalogue values (German) → our kinds and subtypes.
+  carrier_kind:
+    Erdgas: gas
+    andere Gase: gas
+    Wasserstoff: hydrogen
+    Mineralölprodukte: oil
+    Steinkohle: coal
+    Braunkohle: coal
+    nicht biogener Abfall: waste
+    Wärme: heat
+  gas_producer_kind:
+    Power-to-Gas (Wasserstoff): electrolyser
+    Power-to-Gas (Methan): electrolyser_methane
+    Biomethan-Erzeugung: biomethane
+    Förderung fossilen Erdgases: gas_production
+    Liquefied Natural Gas: lng

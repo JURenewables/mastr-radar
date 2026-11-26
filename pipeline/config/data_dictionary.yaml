@@ -24,6 +24,7 @@ licences:
   ccby: {name: "Creative Commons Attribution 4.0", id: CC-BY-4.0, url: "https://creativecommons.org/licenses/by/4.0/", attribution: "Bundesnetzagentur | SMARD.de; Deutscher Wetterdienst"}
   netztransparenz: {name: "Netztransparenz.de terms (aggregated facts)", id: NTP-terms, url: "https://www.netztransparenz.de/", attribution: "Netztransparenz.de (German TSOs); aggregated by MaStR Radar"}
   entsoe: {name: "ENTSO-E Transparency Platform terms", id: ENTSOE-terms, url: "https://transparency.entsoe.eu/", attribution: "ENTSO-E Transparency Platform; processed by MaStR Radar"}
+  odbl: {name: "Open Database License 1.0 (power grid from OpenStreetMap); gas: CC BY 4.0 (SciGRID_gas); hydrogen: Datenlizenz Deutschland – Namensnennung (BNetzA)", id: ODbL-1.0, url: "https://opendatacommons.org/licenses/odbl/1-0/", attribution: "© OpenStreetMap contributors (ODbL), via PyPSA-Eur; SciGRID_gas, DLR (CC BY 4.0); Bundesnetzagentur, Wasserstoff-Kernnetz; processed by MaStR Radar"}
   studies: {name: "Cited study figures (DEA: CC BY 4.0; IRENA: free use with acknowledgement; WindGuard, Fraunhofer ISE: figures cited with source)", id: cited-figures, url: "https://mastr-radar.vercel.app/methodology", attribution: "Deutsche WindGuard (2024); Fraunhofer ISE (2024, 2021, 2018); Danish Energy Agency Technology Data (CC BY 4.0); IRENA (2025). Compiled by MaStR Radar"}
   own: {name: "Creative Commons Attribution 4.0 (compiled by MaStR Radar from linked sources)", id: CC-BY-4.0, url: "https://creativecommons.org/licenses/by/4.0/", attribution: "MaStR Radar, compiled from the linked sources"}
 
@@ -260,7 +261,8 @@ datasets:
     caveats: ["Figures from company reports, each with sources; reporting years and EBITDA definitions differ.", "Momentum is an editorial assessment."]
     fields:
       as_of: "Date checked"
-      players: "Per company: type, HQ, owner, staff, revenue, EBITDA, net debt (negative = net cash), capacity, markets, mix, momentum with reason, sources, and German auction results (germany)"
+      players: "Per company: type, HQ, owner, staff, revenue (with revenue_label), EBITDA, net debt (negative = net cash), net_income, each a number, a {value, label} or 'not_published'; capacity, markets, mix, momentum with reason, sources, and German auction results (germany)"
+      champions: "weights, labels, method and rows per company group active in the German auctions: scores 0–100 (scale, execution, breadth, momentum, financial), total, awarded_mw_3y, wind/solar/innovation MW, built_share, median_months_to_operation, momentum_ratio, technologies, ebitda_margin, flag (restructuring or transition, from the players assessment)"
 
   - file: grid/grid.json
     title: Grid
@@ -367,7 +369,10 @@ datasets:
       rules: "near_km, wind_km, min_partner_kw, statuses"
       totals: "Per tier × kind × status: sites, partner MW and MWh, wind MW, sites with awarded wind"
       by_year: "Per kind and year of commissioning (planned year for planned units): sites, partner MW"
-      sites: "tier, kind (storage/solar), partner_mw, partner_mwh, partner_status, partner_year, wind_mw and wind_units (within 1 km or at the location), wind_status, award_rounds (bid dates of awards among those turbines), distance_km, state, district, lat, lon, operator"
+      combos: "Per tier and combination (wind+battery = same grid location without solar, wind+solar, wind+solar+battery): sites, wind MW, battery MW, solar MW, sites with planned parts"
+      by_group: "Per wind award group: sites per combination, battery and solar MW nearby"
+      by_operator: "Per partner operator (companies): sites, battery and solar MW"
+      sites: "site_id, combo, groups (award groups of the wind turbines), tier, kind (storage/solar), partner_mw, partner_mwh, partner_status, partner_year, wind_mw and wind_units (within 1 km or at the location), wind_status, award_rounds (bid dates of awards among those turbines), distance_km, state, district, lat, lon, operator"
     questions: ["Which wind farms have a battery next to them?", "How many awarded wind projects plan a battery?"]
 
   - file: snapshots.json
@@ -380,6 +385,44 @@ datasets:
       format: "Archive format"
       snapshots: "date, tag, name, published, url (download of data-YYYY-MM-DD.tar.zst), newest first"
     questions: ["What did the register say on a past date?", "What changed since last month?"]
+
+  - file: hubs/hubs.json
+    title: Multi-asset hubs
+    grain: one row per place where at least three asset types meet within 2 km
+    licence: mastr
+    caveats: ["Built around batteries, gas plants, electrolysers, gas storage and large consumers (companies only); solar parks, batteries and gas plants ≥ 1 MW.", "Operating and planned units; a hub is a geographic cluster, not necessarily one project."]
+    fields:
+      as_of: "Data date"
+      rules: "radius_km, merge_km, min_types, types, thresholds"
+      totals: "hubs, by_n_types, by_type"
+      combinations: "Most common type combinations with the number of hubs"
+      hubs: "hub_id, lat, lon, state, district, types, n_types, parts (per type: units, mw, planned_units, mwh for batteries), has_planned, anchors (names of the anchor assets), operators (companies)"
+    questions: ["Where do wind, batteries, gas plants and large consumers come together?", "Which hubs combine an electrolyser with renewables?"]
+
+  - file: hubs/siting.json
+    title: Siting screen for multi-asset hubs
+    grain: one row per district
+    licence: own
+    caveats: ["A screening aid with stated, adjustable weights, not site advice.", "Distances from the district centre; the hydrogen core network is drawn schematically."]
+    fields:
+      as_of: "Data date"
+      weights: "Default weight per factor"
+      labels: "Plain-language label per factor"
+      method: "How the factors and the score are computed"
+      districts: "key, name, lon, lat, renewables_mw_km2 (wind + solar parks ≥ 1 MW), curtailed_gwh_50km, h2_km, substation_km, gas_km, large_consumers, h2_take_off_mw_25km, h2_electrolysis_mw_25km, hubs, s_* (percentile per factor), score"
+    questions: ["Which districts suit a hub with wind, storage and an electrolyser?"]
+
+  - file: hubs/infrastructure.json
+    title: Infrastructure layers (power grid, gas, hydrogen core network)
+    grain: lines and points
+    licence: odbl
+    caveats: ["Power grid ≥ 220 kV from OpenStreetMap via PyPSA-Eur (ODbL: share-alike applies to this layer).", "Hydrogen segments drawn as straight lines between geocoded start and end places (schematic); about 80 % of the length is placed.", "No open data for fibre or internet backbones."]
+    fields:
+      attribution: "Attribution per layer"
+      power: "lines [[voltage kV, under_construction 0/1, [[lon, lat], …]]], substations [[lon, lat, voltage kV, under_construction]]"
+      gas: "Pipelines [[diameter_mm, [[lon, lat], …]]]"
+      hydrogen: "segments (id, kind: conversion/new_build/existing, from, to, dn, km, year, coords or null), unmatched_segments, projects (id, name, state, district, feed_in_mw, take_off_mw, electrolysis_mw, purposes, lon, lat at the district centre)"
+    questions: ["Where does the hydrogen core network run?", "Which hydrogen projects are planned near a district?"]
 
   - file: days/
     title: Day files (SMARD and DWD)

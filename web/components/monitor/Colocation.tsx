@@ -28,7 +28,9 @@ interface Site {
   operator: string | null;
 }
 interface Total { tier: string; kind: string; status: string; sites: number; partner_mw: number; partner_mwh: number | null; wind_mw: number; with_award: number }
-interface ColocFile { as_of: string; rules: { near_km: number; wind_km: number; min_partner_kw: number }; totals: Total[]; by_year: { kind: string; year: number; sites: number; partner_mw: number }[]; sites: Site[] }
+interface Combo { tier: string; combo: string; sites: number; wind_mw: number; battery_mw: number; solar_mw: number; planned_sites: number }
+interface ByGroup { group: string; "wind+battery": number; "wind+solar": number; "wind+solar+battery": number; battery_mw: number; solar_mw: number }
+interface ColocFile { combos?: Combo[]; by_group?: ByGroup[]; as_of: string; rules: { near_km: number; wind_km: number; min_partner_kw: number }; totals: Total[]; by_year: { kind: string; year: number; sites: number; partner_mw: number }[]; sites: Site[] }
 
 const axis = () => ({ style: { fontFamily: "var(--font-sans)", fontSize: "12px", color: cssVar("--ink-muted") } });
 const day = (d: string) => new Date(`${d}T00:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
@@ -70,7 +72,11 @@ export function Colocation({ version }: { version: string }) {
       source={src}
       takeaways={[
         `Batteries: ${mw(bOp.mw)} operating and ${mw(bPl.mw)} planned (${Math.round(bPl.mwh).toLocaleString("en-GB")} MWh) next to wind. Most are planned: wind-plus-storage is just starting.`,
-        `Only ${bSame.sites} battery sites share the wind farm's grid connection location in the register; most batteries next to wind are registered separately, often by a different company.`,
+        (() => {
+          const pure = d.combos?.find((c) => c.tier === "same_location" && c.combo === "wind+battery");
+          const both = d.combos?.find((c) => c.tier === "same_location" && c.combo === "wind+solar+battery");
+          return `Pure wind + battery on one grid connection is still rare: ${pure?.sites ?? 0} sites without solar (${mw(pure?.battery_mw ?? 0)} of batteries), plus ${both?.sites ?? 0} that also have solar. Most batteries next to wind are registered separately, often by a different company.`;
+        })(),
         `${bAward.award} battery sites sit next to turbines that won an onshore wind auction.`,
         `Wind and solar together are more common: ${sAll.sites} solar parks (${mw(sAll.mw)}) next to wind, ${sSame.sites} of them on the same grid connection. Wind and sun produce at different times, so they can share one connection.`,
       ]}
@@ -86,6 +92,24 @@ export function Colocation({ version }: { version: string }) {
         <Stat label="Solar parks next to wind" value={mw(sAll.mw)} sub={`${sAll.sites} sites`} swatch={cssVar("--tech-solar")} />
         <Stat label="Same grid connection" value={`${bSame.sites + sSame.sites} sites`} sub={`${bSame.sites} battery · ${sSame.sites} solar`} />
       </div>
+      {d.combos && (
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          {(["wind+battery", "wind+solar", "wind+solar+battery"] as const).map((k) => {
+            const same = d.combos!.find((c) => c.tier === "same_location" && c.combo === k);
+            const near = d.combos!.find((c) => c.tier === "nearby" && c.combo === k);
+            return (
+              <div key={k} className="rounded-[20px] bg-surface p-4">
+                <p className="text-sm font-semibold">{k === "wind+battery" ? "Wind + battery, no solar" : k === "wind+solar" ? "Wind + solar" : "Wind + solar + battery"}</p>
+                <p className="figures mt-1 text-2xl font-extrabold">{same?.sites ?? 0} <span className="text-sm font-normal text-ink-muted">on one grid connection</span></p>
+                <p className="figures text-sm text-ink-muted">
+                  {same ? `${mw(same.battery_mw + same.solar_mw)} with ${mw(same.wind_mw)} wind` : "–"}
+                  {near ? ` · ${near.sites} more within ${d.rules.near_km * 1000} m (${near.planned_sites} planned)` : ""}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
       <div className="mt-6">
         <Segmented
           label="Partner technology"
@@ -120,6 +144,27 @@ export function Colocation({ version }: { version: string }) {
               }
             />
           </div>
+          {d.by_group && (
+            <div>
+              <p className="mb-2 text-sm font-semibold">Who combines: auction winners with batteries or solar next to their wind</p>
+              <div className="overflow-x-auto">
+                <table className="figures w-full min-w-[340px] text-xs">
+                  <thead className="text-left text-ink-muted"><tr><th className="py-1 pr-2 font-medium">Group</th><th className="py-1 pr-2 font-medium">+battery</th><th className="py-1 pr-2 font-medium">+solar</th><th className="py-1 pr-2 font-medium">+both</th><th className="py-1 font-medium">MW</th></tr></thead>
+                  <tbody>
+                    {d.by_group.slice(0, 10).map((g) => (
+                      <tr key={g.group} className="border-t border-rule">
+                        <td className="py-1 pr-2">{g.group}</td>
+                        <td className="py-1 pr-2">{g["wind+battery"] || "–"}</td>
+                        <td className="py-1 pr-2">{g["wind+solar"] || "–"}</td>
+                        <td className="py-1 pr-2">{g["wind+solar+battery"] || "–"}</td>
+                        <td className="py-1">{Math.round(g.battery_mw + g.solar_mw)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
           <div>
             <p className="mb-2 text-sm font-semibold">Largest sites</p>
             <ol className="space-y-2 text-sm">

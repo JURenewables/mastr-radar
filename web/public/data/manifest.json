@@ -83,11 +83,6 @@
       "bytes": 15387
     },
     {
-      "name": "auctions/players.json",
-      "rows": 18,
-      "bytes": 17919
-    },
-    {
       "name": "costs/costs.json",
       "rows": 18,
       "bytes": 15592
@@ -108,11 +103,6 @@
       "bytes": 224289
     },
     {
-      "name": "auctions/colocation.json",
-      "rows": 565,
-      "bytes": 191911
-    },
-    {
       "name": "grid/redispatch.json",
       "rows": 71,
       "bytes": 16024
@@ -128,9 +118,34 @@
       "bytes": 34807
     },
     {
+      "name": "auctions/colocation.json",
+      "rows": 564,
+      "bytes": 234153
+    },
+    {
+      "name": "hubs/hubs.json",
+      "rows": 347,
+      "bytes": 185640
+    },
+    {
+      "name": "hubs/siting.json",
+      "rows": 401,
+      "bytes": 145488
+    },
+    {
+      "name": "auctions/players.json",
+      "rows": 18,
+      "bytes": 44421
+    },
+    {
+      "name": "hubs/infrastructure.json",
+      "rows": 0,
+      "bytes": 704168
+    },
+    {
       "name": "dictionary.json",
-      "rows": 25,
-      "bytes": 31304
+      "rows": 28,
+      "bytes": 35473
     }
   ]
 }

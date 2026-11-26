@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.12 (25 Nov 2026). Phase 11 built (profitability on the cost pages, co-location on the wind page); Phase 9 WP78, 81, 82, 84 built (snapshots, typed MCP tools, guardrails, /connect). Open: WP83 agent evals (needs budget), WP93 optional cost trend data, listing in public MCP registries**
+**You are here: contract v1.13 (26 Nov 2026). Phase 12 built: champions on /players, technology combinations on /wind, new /hubs page (hubs, siting, power/gas/hydrogen networks). Open: more financials for private developers (WP99 follow-up), WP83 evals (budget), WP93, MCP registry listings**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -317,6 +317,27 @@ real stress signals (line loading itself is not published).
 
 ---
 
+## Phase 12: Champions, technology combinations, multi-asset hubs
+
+Goal: "Who are the champions of the energy transition, how do players
+combine technologies, and where are (and should be) hubs that join wind,
+solar, batteries, hydrogen, gas and large consumers?" Contract v1.13.
+
+- [x] **WP99. Champions.** Fill financials from primary sources; scoring
+  framework (scale, breadth, execution, momentum, financial strength).
+- [x] **WP100. Technology combinations.** wind+battery (same grid location,
+  no solar), wind+solar, wind+solar+battery; by company group.
+- [x] **WP101. More of the register.** Combustion, electrolysers, gas
+  consumers and storage, large consumers, locations (station 2).
+- [x] **WP102. Multi-asset hubs.** Sites with ≥ 3 asset types.
+- [x] **WP103. Siting score.** By district, adjustable weights.
+- [x] **WP104. Infrastructure layers.** Power lines, gas, hydrogen core
+  network (decisions needed: OSM ODbL, SciGRID_gas, H2 data).
+- [x] **WP105. Pages.** Champions on `/players`, combinations on `/wind`,
+  new `/hubs`.
+
+---
+
 ## Phase 11: Profitability and co-location (Outlook)
 
 Goal: "What does an awarded wind or solar project earn, and where and in
@@ -420,6 +441,10 @@ correctly. Design and decisions: `docs/platform-plan.md`.
 ---
 
 ## Follow-ups noted
+
+- Players: net debt for Energiekontor and PNE, EBITDA for Alterric and the
+  2025 audited ABO figures (expected June 2026 statements) still to read from
+  the full reports; wpd and UKA publish no group figures.
 
 - Web dev tools: `npm audit` shows 7 moderate warnings in a linting dependency
   (minimatch via typescript-eslint); none in production packages. Fix when

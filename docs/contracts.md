@@ -958,6 +958,91 @@ return" (sensitivity). `/wind`: section "Wind with batteries and solar"
 (map, per year, largest sites). Header: separate "Wind costs" and "Solar
 costs". The Outlook page is unchanged.
 
+## v1.13: champions of the energy transition, technology combinations, multi-asset hubs (approved 26 Nov 2026)
+
+### Players: champions (WP99)
+
+`players.yaml` gains filled financials from primary sources (annual reports,
+Bundesanzeiger filings, company press releases) with year, label and source
+per figure; where a company publishes nothing, the field says
+`"not_published"` instead of staying blank. `players.json` gains
+`champions`: one row per developer, IPP or utility active in Germany with
+five scores (0–100, method stated): **scale** (awarded MW in the last three
+years, wind + solar), **breadth** (technologies with meaningful capacity:
+wind, solar, storage, hybrids, hydrogen), **execution** (share of awarded MW
+in operation; months from award to operation), **momentum** (awards trend),
+**financial strength** (EBITDA margin, net debt / EBITDA where published).
+Total = weighted mean (weights shown; user can change them on the page).
+**Check:** every score in 0–100; every financial figure has a source.
+
+### Technology combinations (WP100)
+
+`auctions/colocation.json` gains `combo` per site: `wind+battery` (same grid
+location, no solar), `wind+solar`, `wind+solar+battery`, and `by_group`:
+per company group (award lists and operators ≥ 1 MW) the sites and MW per
+combination. **Check:** combos match the partner units at the site.
+
+### Station 2: more of the register (WP101)
+
+New internal `data/extract/assets_other.parquet`: combustion units (energy
+carrier, MW, CHP flag), gas producers (incl. electrolysers: technology, MW),
+gas consumers, gas storage, large electricity consumers (MW, legal entities
+only), each with location id, status, coordinates where public, operator.
+(Built: combustion units ≥ 1 MW plus all hydrogen-fired units; gas storage
+records that also appear as gas producers are kept once, as storage. The
+separate locations file was not needed: every unit carries its location id,
+and gas, consumer and generation locations use separate numbering, so hubs
+are found by distance.) **Check:** known kinds only; ≥ 500 gas plants, ≥ 300
+large consumers, ≥ 20 gas storage sites; unique unit ids. Command:
+`mastr-radar extract-assets` (also part of `extract`).
+
+### Multi-asset hubs `hubs/hubs.json` (WP102)
+
+Sites combining at least three asset types among wind, solar park
+(≥ 1 MW, ground-mounted), battery (≥ 1 MW), gas or hydrogen plant (≥ 1 MW),
+electrolyser, gas storage, large consumer, within 2 km of an anchor asset
+(everything but wind and solar, companies only); anchors within 1 km form
+one hub. Per hub: asset types with MW (and MWh), status
+(operating / planned parts), operators (legal entities), state, district,
+lat/lon. Totals by combination. **Check:** ≥ 3 types per hub; no natural
+persons' locations.
+
+### Siting `hubs/siting.json` (WP103)
+
+Per district: wind and solar parks (≥ 1 MW) per km², curtailed renewables at
+TSO substations within 50 km (Netztransparenz top list, geocoded), distance
+from the district centre to the hydrogen core network, a ≥ 220 kV
+substation and a gas pipeline, large consumers and planned hydrogen
+take-off within 25 km. Percentile per factor; score = weighted mean
+(default weights 25/15/15/15/15/15, adjustable on the page). **Check:**
+≥ 390 districts; all scores 0–100. A screening tool, not site advice.
+
+### Infrastructure layers `hubs/infrastructure.json` (WP104, decided: OSM, SciGRID, H2 schematic)
+
+- Power lines ≥ 220 kV and substations: OpenStreetMap via the PyPSA-Eur
+  prebuilt network (Zenodo 23896564, ODbL 1.0; share-alike applies to this
+  file).
+- Gas transmission pipelines: SciGRID_gas IGGIELGNC-3 (Zenodo 5079748, CC BY
+  4.0), segments inside Germany by geometry.
+- Hydrogen core network: segments from the Bundesnetzagentur approval
+  annexes (start and end place, DN, km, year, conversion or new build),
+  drawn as straight lines between geocoded places (register municipalities,
+  else OpenStreetMap Nominatim, cached); a segment is left unplaced when the
+  straight distance exceeds 2 × its stated length + 10 km. Hydrogen projects
+  (annex 1) at their district centre.
+- Fibre / internet backbone: no open data for Germany; not shown.
+
+Station 1: `mastr-radar infra-fetch` (data/infra/, with geocoding); station
+3: `mastr-radar infra-build` (on demand; the daily run keeps the file).
+**Check:** ≥ 300 lines, ≥ 100 substations, ≥ 100 gas segments, ≥ 200
+hydrogen segments and ≥ 100 projects, ≥ 50 % of segments placed.
+
+### Website
+
+`/players`: "Champions" section (scores, matrix of technologies by company,
+filled financials). `/wind`: combinations by company. New page `/hubs`:
+map of multi-asset hubs, infrastructure layers, siting score by district.
+
 ## Version history
 
 | Version | Date | Change |
@@ -975,3 +1060,4 @@ costs". The Outlook page is unchanged.
 | 1.10 | 2026-11-25 | Data dictionary (`dictionary.json`, check), agent context (`/llms-full.txt`, `/schema.json`), MCP server at `/mcp` (tools, resources, prompts, limits), daily snapshots. Approved by the user. |
 | 1.11 | 2026-11-25 | Cost benchmarks: `config/costs.yaml` (WindGuard 2024, Fraunhofer ISE 2024/2021/2018, Danish Energy Agency, IRENA 2025), `costs/costs.json` with breakdowns, comparison, trends, projections and award prices; pages `/costs/wind` and `/costs/solar`. Approved by the user. |
 | 1.12 | 2026-11-25 | Profitability of awarded wind and solar projects (`costs/profitability.json`, `config/profitability.yaml`, SMARD market values), co-location of wind with batteries and solar (`auctions/colocation.json`); profitability on the cost pages, co-location on the wind page. Approved by the user. |
+| 1.13 | 2026-11-26 | Champions scores and filled financials (`players.json`), technology combinations (`colocation.json`), other assets extract (gas plants, electrolysers, gas storage, large consumers), multi-asset hubs, siting screen and infrastructure layers (power grid OSM/ODbL, gas SciGRID, hydrogen core network schematic); new page `/hubs`. Approved by the user. |
