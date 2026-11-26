@@ -33,6 +33,16 @@ assignments:
     group: Qualitas Energy
     evidence: "Qualitas names Sassenberg-Gröblingen (4 × 5.56 MW) as one of its two Aug 2025 awards; with QE Windpark Ingstetten this gives 43.8 MW, as announced."
     source: https://www.renewable-energy-industry.com/news/press-releases/pm-8630-qualitas-energy-secures-43-mw-in-latest-onshore-wind-energy-tender
+  - bidder: "Windpark Überhäsiges Viertel Projekt GmbH"
+    round: GT1082025
+    group: PNE
+    evidence: "PNE reports Überhäsiges Viertel (Löningen, 12 turbines, 85.8 MW) as awarded in the third 2025 onshore round, developed with regional Volksbanken; the award is 85.8 MW."
+    source: https://greentechlead.com/wind/vestas-wins-58-mw-wind-turbine-order-for-uberhasiges-viertel-project-in-germany-55182
+  - bidder: "Windpark Bredenbek GmbH"
+    round: GT01052026
+    group: Denker & Wulf
+    evidence: "DenkerWulf ordered the turbines for the Bredenbek wind farm (Rendsburg-Eckernförde, 9 × Nordex N149)."
+    source: https://www.blackridgeresearch.com/news-releases/nordex-and-denkerwulf-order-turbines-for-bredenbek-wind-farm-in-germany
 
 # addresses: offices reviewed by hand (street, house_number, postcode → group).
 # Awards whose operator company sits there count for that group. Most offices
@@ -74,3 +84,5 @@ reported:
   - {group: wpd, round: GT01052026, mw: 156.9, source: "https://www.wpd.de/wp-content/uploads/2026/07/PM-Maiausschreibung-6.7.2026.pdf"}
   - {group: UKA, round: GT1082025, mw: 700, qualifier: over, source: "https://www.solarserver.de/2026/01/14/uka-gruppe-will-an-land-jaehrlich-1-gw-windenergie-zubauen/"}
   - {group: UKA, round: GT01022026, mw: 600, qualifier: over, note: "includes partner projects", source: "https://www.windtech-international.com/projects-and-contracts/uka-group-secures-over-600mw-in-german-onshore-wind-tender"}
+  - {group: ENOVA, round: GT1112025, mw: 165, qualifier: about, note: "Firrel II, Nettetal, Breberen, Boldecker Land", source: "https://www.enova.de/fileadmin/redakteure/Pressemitteilungen/PDF_Pressemitteilungen/2601_ENOVA_erh%C3%A4lt_EEG-Zuschl%C3%A4ge_f%C3%BCr_165_MW_in_der_Novemberrunde_2025.pdf"}
+  - {group: Energiekontor, round: GT1052025, mw: 125, qualifier: about, source: "https://www.energiekontor.de/en/news/energiekontor-awarded-contracts-for-four-projects-with-125-megawatts-in-the-federal-network-agencys-may-tender.html"}
