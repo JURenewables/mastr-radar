@@ -152,7 +152,10 @@ def champions(out_dir: Path, players: list[dict], as_of: str) -> dict:
         if gw is None and key in g:
             gw = g[key].get("op_kw", 0) / 1000 or None
         on_ground[key] = gw
-        if emp and gw:
+        seg = p.get("segment")
+        if seg:  # utilities: renewables segment staff and capacity
+            eff[key] = round(seg["mw"] / seg["employees"], 2)
+        elif emp and gw:
             eff[key] = round(gw / emp, 2)
     flags = {
         (p.get("group") or p["name"]): {"momentum": p["momentum"], "why": p.get("why")}
@@ -244,7 +247,11 @@ CATEGORY = {
 
 
 def segments(players: list[dict], on_ground: dict, g: dict) -> list[dict]:
-    """MW on the ground against employees, with a category per player."""
+    """MW on the ground against employees, with a category per player.
+
+    Utilities that report a renewables segment are placed with that segment's
+    staff and capacity (the group total is kept for comparison); others use
+    group totals and are marked."""
     out = []
     for p in players:
         emp = (p.get("employees") or {}).get("value")
@@ -253,24 +260,45 @@ def segments(players: list[dict], on_ground: dict, g: dict) -> list[dict]:
         reported = isinstance(p.get("capacity_gw"), (int, float))
         if not emp or not gw or (not reported and p["type"] in ("utility", "municipal")):
             continue
-        out.append({
+        seg = p.get("segment")
+        rev = p.get("revenue") if isinstance(p.get("revenue"), (int, float)) else None
+        row = {
             "name": p["name"],
             "type": p["type"],
-            "employees": emp,
-            "mw_on_ground": round(gw),
-            "basis": "company-reported capacity" if reported else "awarded MW in operation",
+            "employees": seg["employees"] if seg else emp,
+            "mw_on_ground": round(seg["mw"] if seg else gw),
+            "basis": seg["name"]
+            if seg
+            else ("company-reported capacity" if reported else "awarded MW in operation"),
+            "segment_note": seg.get("mw_note") if seg else None,
+            "group_employees": emp,
+            "group_mw": round(gw),
             "own_portfolio_mw": round(p["own_portfolio_gw"] * 1000)
             if p.get("own_portfolio_gw")
             else None,
-            "mw_per_employee": round(gw / emp, 2),
             "awarded_mw_3y": round(g.get(key, {}).get("mw_3y", 0)),
-        })  # fmt: skip
+            "revenue_per_employee_k": round(1000 * rev / emp)
+            if rev and p.get("currency")
+            else None,
+            "currency": p.get("currency"),
+        }
+        row["mw_per_employee"] = round(row["mw_on_ground"] / row["employees"], 2)
+        row["group_mw_per_employee"] = round(gw / emp, 2)
+        if p["type"] in ("utility", "municipal") and not seg:
+            row["basis"] = "group total (no renewables segment reported)"
+        out.append(row)  # fmt: skip
     dev = sorted(x["mw_per_employee"] for x in out if x["type"] == "developer")
     med = dev[len(dev) // 2] if dev else 0
     for x in out:
         cat = CATEGORY.get(x["type"], x["type"])
         if x["type"] == "developer":
             cat = "Lean developer" if x["mw_per_employee"] >= med else "Developer (broad services)"
+        elif x["type"] in ("utility", "municipal"):
+            cat = (
+                "Utility, renewables segment"
+                if x["basis"] not in ("group total (no renewables segment reported)",)
+                else "Utility, group total"
+            )
         x["category"] = cat
     return sorted(out, key=lambda x: -x["mw_per_employee"])
 
@@ -419,6 +447,14 @@ def check_data(d: dict) -> None:
         ]
         if money and not p.get("currency"):
             problems.append(f"{w}: money figures need a currency.")
+        seg = p.get("segment")
+        if seg and not (
+            isinstance(seg.get("employees"), int)
+            and seg["employees"] > 0
+            and isinstance(seg.get("mw"), (int, float))
+            and seg.get("name")
+        ):
+            problems.append(f"{w}: segment needs name, employees and mw.")
         emp = p.get("employees")
         if emp and not (isinstance(emp.get("value"), int) and emp["value"] > 0 and emp.get("unit")):
             problems.append(f"{w}: employees need a positive integer and a unit.")

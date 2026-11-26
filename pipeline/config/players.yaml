@@ -13,6 +13,13 @@ players:
   - name: RWE
     group: RWE
     type: utility
+    segment:
+      name: "Onshore Wind/Solar segment"
+      employees: 3767
+      unit: FTE
+      mw: 16495
+      mw_note: "Renewable capacity of the segment (plus 1,316 MW batteries); Offshore Wind segment separately: 2,533 FTE, 3,515 MW"
+      year: 2025
     hq: Essen, Germany
     owner: Listed (DAX)
     year: 2025
@@ -31,10 +38,19 @@ players:
       - https://www.rwe.com/en/investor-relations/rwe-share/key-data/
       - https://www.rwe.com/en/investor-relations/financial-calendar-and-publications/news-and-ad-hoc-announcements/news/news-2025-11-12/
       - https://chemxplore.com/news/rwe-financial-performance-2025
+      - https://uk.rwe.com/-/media/RWE/documents/05-investor-relations/finanzkalendar-und-veroeffentlichungen/2025-GJ/RWE-Annual-Report-2025.pdf
+
 
   - name: EnBW
     group: EnBW
     type: utility
+    segment:
+      name: "Sustainable Generation Infrastructure segment"
+      employees: 7890
+      unit: headcount
+      mw: 11192
+      mw_note: "Whole segment incl. thermal plants and trading; 66 % renewable (about 7.4 GW)"
+      year: 2025
     hq: Karlsruhe, Germany
     owner: State of Baden-Württemberg and OEW (municipal association)
     year: 2025
@@ -53,10 +69,19 @@ players:
     sources:
       - https://www.enbw.com/geschaeftsbericht-2025/kennzahlen/
       - https://www.enbw.com/annual-report-2025/management-report/
+      - https://www.enbw.com/media/bericht/bericht-2025/downloads/zusammengefasster-lagebericht-des-enbw-konzerns-und-der-enbw-ag.pdf
+
 
   - name: Vattenfall
     group: Vattenfall
     type: utility
+    segment:
+      name: "Wind segment"
+      employees: 1849
+      unit: FTE
+      mw: 6800
+      mw_note: "4.4 GW offshore wind, 2.1 GW onshore wind, 0.3 GW solar and batteries"
+      year: 2025
     hq: Stockholm, Sweden
     owner: Swedish state (100 %)
     year: 2025
@@ -75,6 +100,8 @@ players:
     sources:
       - https://group.vattenfall.com/globalassets/com/about-us/vattenfall-in-brief/vattenfall-in-brief-onepager-2026-03.pdf
       - https://group.vattenfall.com/siteassets/corporate/investors/interim_reports/2025/q4-report-2025.pdf
+      - https://group.vattenfall.com/siteassets/corporate/investors/investor_presentations/vattenfall-corporate-factbook-2026-03.pdf
+
 
   - name: Uniper
     group: null

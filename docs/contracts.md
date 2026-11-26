@@ -1065,6 +1065,24 @@ wins, batteries are a separate topic.
   operating and planned, from `units.parquet`) by company-name stem.
 - **Check:** scores 0–100; segments have positive staff and MW.
 
+## v1.15: renewables segment staff for utilities (approved 26 Nov 2026)
+
+Requested by the user: utilities employ many people in trading, retail and
+grids, so their group headcount is not comparable with developers.
+
+- `players.yaml` / `players.json`: optional `segment` per player (name,
+  employees, unit, MW, note, year, source) from the annual report: RWE
+  Onshore Wind/Solar (3,767 FTE, 16,495 MW), Vattenfall Wind (1,849 FTE,
+  6,800 MW), EnBW Sustainable Generation Infrastructure (7,890, 11,192 MW incl.
+  thermal plants). Utilities without such a segment stay on group totals,
+  marked.
+- `champions.segments`: placed with segment staff and MW where reported;
+  adds `group_employees`, `group_mw`, `group_mw_per_employee`,
+  `segment_note`, `revenue_per_employee_k` and `currency`; categories add
+  "Utility, renewables segment" and "Utility, group total". The efficiency
+  score uses segment figures where reported.
+- **Check:** a segment needs name, positive employees and MW.
+
 ## Version history
 
 | Version | Date | Change |
@@ -1084,3 +1102,4 @@ wins, batteries are a separate topic.
 | 1.12 | 2026-11-25 | Profitability of awarded wind and solar projects (`costs/profitability.json`, `config/profitability.yaml`, SMARD market values), co-location of wind with batteries and solar (`auctions/colocation.json`); profitability on the cost pages, co-location on the wind page. Approved by the user. |
 | 1.13 | 2026-11-26 | Champions scores and filled financials (`players.json`), technology combinations (`colocation.json`), other assets extract (gas plants, electrolysers, gas storage, large consumers), multi-asset hubs, siting screen and infrastructure layers (power grid OSM/ODbL, gas SciGRID, hydrogen core network schematic); new page `/hubs`. Approved by the user. |
 | 1.14 | 2026-11-26 | Champions without corporate finance (efficiency = MW per employee instead), scale relative to the leader, breadth = renewable auction types; lean vs heavy segments; battery builders. Approved by the user. |
+| 1.15 | 2026-11-26 | Renewables segment staff and capacity for utilities (RWE, Vattenfall, EnBW); group vs segment in the lean-vs-heavy matrix; revenue per employee. Approved by the user. |

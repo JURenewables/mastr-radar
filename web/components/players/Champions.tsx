@@ -30,7 +30,7 @@ export interface ChampionsBlock {
     operating_mw_from_awards: number;
     flag: { momentum: string; why: string } | null;
   }[];
-  segments: { name: string; type: string; category: string; employees: number; mw_on_ground: number; basis: string; own_portfolio_mw: number | null; mw_per_employee: number; awarded_mw_3y: number }[];
+  segments: { name: string; type: string; category: string; employees: number; mw_on_ground: number; basis: string; segment_note: string | null; group_employees: number; group_mw: number; group_mw_per_employee: number; own_portfolio_mw: number | null; mw_per_employee: number; awarded_mw_3y: number; revenue_per_employee_k: number | null; currency: string | null }[];
 }
 export interface BatteryBuilder { owner: string; operating_mw: number; planned_mw: number; mwh: number; units: number; operators: number }
 
@@ -190,13 +190,16 @@ const CAT_COLOR: Record<string, string> = {
   "Developer (broad services)": "#93c5fd",
   "IPP / owner-operator": "#8b5cf6",
   Investor: "#0d9488",
-  Utility: "#ef4444",
+  "Utility, renewables segment": "#ef4444",
+  "Utility, group total": "#fca5a5",
 };
 
 export function Segments({ c, asOf }: { c: ChampionsBlock; asOf: string }) {
   const seg = c.segments;
   const lean = seg.filter((x) => x.category === "Lean developer");
-  const util = seg.filter((x) => x.category === "Utility");
+  const util = seg.filter((x) => x.category === "Utility, renewables segment");
+  const groups = util.map((x) => ({ ...x, ge: x.group_employees, gm: x.group_mw }));
+  const rev = seg.filter((x) => x.revenue_per_employee_k && x.currency === "EUR").sort((a, b) => (b.revenue_per_employee_k ?? 0) - (a.revenue_per_employee_k ?? 0));
   const med = (xs: number[]) => (xs.length ? [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)] : 0);
   const cats = [...new Set(seg.map((x) => x.category))];
   const guides = [0.5, 2, 5, 20].flatMap((k) => [{ k, e: 100, m: 100 * k }, { k, e: 40000, m: 40000 * k }]);
@@ -204,17 +207,20 @@ export function Segments({ c, asOf }: { c: ChampionsBlock; asOf: string }) {
     <Section
       id="lean"
       eyebrow="Lean vs heavy"
-      title={`Lean developers put about ${med(lean.map((x) => x.mw_per_employee)).toFixed(1)} MW on the ground per employee; utilities about ${med(util.map((x) => x.mw_per_employee)).toFixed(1)} MW`}
-      subtitle="MW built or operated against employees, per player. Diagonal lines mark equal MW per employee. Categories: lean developers (develop and build, often sell), developers with broad services (EPC, O&M, own portfolio), IPPs that own and operate, investors, and utilities."
+      title={`Counting only their renewables staff, utilities reach ${med(util.map((x) => x.mw_per_employee)).toFixed(1)} MW per employee, close to lean developers at ${med(lean.map((x) => x.mw_per_employee)).toFixed(1)} MW`}
+      subtitle="MW built or operated against employees. Utilities are placed with the staff and capacity of their renewables segment from the annual report; the faint dot and arrow show where the whole group would sit. Diagonal lines mark equal MW per employee."
       asOf={asOf}
       source={<>Sources: company reports and websites (staff, capacity), Bundesnetzagentur auction results and Marktstammdatenregister, as of {asOf}. Categories by MaStR Radar.</>}
       takeaways={[
-        "Developers and IPPs need far fewer people per MW than utilities: they focus on permits, financing and construction, and buy services (turbines, EPC, maintenance) from others.",
-        "Investors look leanest because the capacity sits in funds and is run by service companies; their staff count does not include them.",
-        "Utilities carry grids, retail, trading and conventional plants, so their MW per employee is low even where they build a lot.",
+        "Most utility staff work outside renewables: RWE has about 3,800 of 20,100 staff in onshore wind and solar, Vattenfall about 1,800 of 20,900 in wind. Measured on the whole group, utilities look two to four times heavier than they are in renewables.",
+        "On a like-for-like basis the renewables arms of RWE and Vattenfall are nearly as lean as developers; the gap that remains reflects owning and operating large fleets.",
+        "Business models differ in revenue too: trading and retail bring utilities far more revenue per employee than project sales bring developers (see the right-hand chart).",
+        "Investors look leanest because the capacity sits in funds and is run by service companies whose staff are not counted.",
       ]}
-      caveats={["Capacity definitions differ: built for others vs owned, worldwide vs Germany (see basis in the tooltip). Lean vs broad-services split at the median of developers.", "Staff are worldwide headcount or FTE as reported."]}
+      caveats={["Segments differ: RWE Onshore Wind/Solar and Vattenfall Wind are renewables only; EnBW's generation segment also includes thermal plants and trading. Uniper reports no renewables segment and is shown on group totals.", "Capacity definitions differ: built for others vs owned, worldwide vs Germany (see basis in the tooltip). Lean vs broad-services split at the developers' median. Revenue per employee only for companies reporting in euros."]}
     >
+      <div className="grid gap-8 lg:grid-cols-[3fr_2fr]">
+      <div className="min-w-0">
       <PlotFigure
         deps={[seg]}
         height={420}
@@ -230,6 +236,9 @@ export function Segments({ c, asOf }: { c: ChampionsBlock; asOf: string }) {
             color: { domain: cats, range: cats.map((k) => CAT_COLOR[k] ?? "#94a3b8"), legend: true },
             marks: [
               Plot.line(guides, { x: "e", y: "m", z: "k", stroke: cssVar("--rule"), strokeDasharray: "3,3" }),
+              Plot.dot(groups, { x: "ge", y: "gm", r: 5, fill: "#fca5a5", fillOpacity: 0.5 }),
+              Plot.arrow(groups, { x1: "ge", y1: "gm", x2: "employees", y2: "mw_on_ground", stroke: "#ef4444", strokeOpacity: 0.5, inset: 7, headLength: 6 }),
+              Plot.text(groups, { x: "ge", y: "gm", text: (d: { name: string }) => `${d.name} group`, dy: 12, fontSize: 9, fill: cssVar("--ink-muted") }),
               Plot.text(guides.filter((g) => g.e === 40000 && g.m <= 60000), { x: "e", y: "m", text: (g: { k: number }) => `${g.k} MW/staff`, textAnchor: "end", dy: -6, fill: cssVar("--ink-muted"), fontSize: 10 }),
               Plot.dot(seg, { x: "employees", y: "mw_on_ground", fill: "category", r: 6, stroke: "white", tip: true, title: (x: { name: string; employees: number; mw_on_ground: number; mw_per_employee: number; basis: string }) => `${x.name}\n${x.employees.toLocaleString("en-GB")} staff · ${mw(x.mw_on_ground)}\n${x.mw_per_employee} MW per employee (${x.basis})` }),
               Plot.text(seg, { x: "employees", y: "mw_on_ground", text: "name", dy: -12, fontSize: 10, fill: "currentColor", stroke: cssVar("--paper"), strokeWidth: 3, paintOrder: "stroke" }),
@@ -237,6 +246,20 @@ export function Segments({ c, asOf }: { c: ChampionsBlock; asOf: string }) {
           })
         }
       />
+      </div>
+      <div className="min-w-0">
+        <p className="mb-2 text-sm font-semibold">Revenue per employee (k€, whole company)</p>
+        <ol className="space-y-1.5">
+          {rev.map((x) => (
+            <li key={x.name} className="grid grid-cols-[7.5rem_1fr] items-center gap-2 text-sm">
+              <span className="truncate">{x.name}</span>
+              <span className="flex items-center gap-2"><span className="h-2.5 rounded-full" style={{ width: `${(Math.log10(x.revenue_per_employee_k!) / Math.log10(rev[0].revenue_per_employee_k!)) * 70}%`, background: CAT_COLOR[x.category] ?? "#94a3b8" }} /><span className="figures shrink-0 text-xs text-ink-muted">{x.revenue_per_employee_k!.toLocaleString("en-GB")}</span></span>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-2 text-[11px] text-ink-muted">Log scale. Utilities: whole group (trading and retail included).</p>
+      </div>
+      </div>
     </Section>
   );
 }
