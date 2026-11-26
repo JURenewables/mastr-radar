@@ -262,7 +262,8 @@ datasets:
     fields:
       as_of: "Date checked"
       players: "Per company: type, HQ, owner, staff, revenue (with revenue_label), EBITDA, net debt (negative = net cash), net_income, each a number, a {value, label} or 'not_published'; capacity, markets, mix, momentum with reason, sources, and German auction results (germany)"
-      champions: "weights, labels, method and rows per company group active in the German auctions: scores 0–100 (scale, execution, breadth, momentum, financial), total, awarded_mw_3y, wind/solar/innovation MW, built_share, median_months_to_operation, momentum_ratio, technologies, ebitda_margin, flag (restructuring or transition, from the players assessment)"
+      champions: "weights, labels, method; rows per company group active in the German auctions: scores 0–100 (scale relative to the leader, execution, momentum, breadth of renewable auction types, efficiency = MW on the ground per employee), total, awarded_mw_3y, wind/solar/innovation MW, built_share, median_months_to_operation, momentum_ratio, technologies (incl. battery and hybrid sites, not scored), mw_per_employee, operating_mw_from_awards, flag; segments per player with staff: employees, mw_on_ground, basis, own_portfolio_mw, mw_per_employee, awarded_mw_3y, category (lean developer, developer with broad services, IPP, investor, utility)"
+      battery_builders: "Top 25 battery owners by company-name stem (batteries ≥ 1 MW, operating and planned): owner, operating_mw, planned_mw, mwh, units, operators"
 
   - file: grid/grid.json
     title: Grid

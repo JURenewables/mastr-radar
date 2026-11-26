@@ -1043,6 +1043,28 @@ hydrogen segments and ≥ 100 projects, ≥ 50 % of segments placed.
 filled financials). `/wind`: combinations by company. New page `/hubs`:
 map of multi-asset hubs, infrastructure layers, siting score by district.
 
+## v1.14: champions without corporate finance, lean vs heavy, battery builders (approved 26 Nov 2026)
+
+Requested by the user: corporate financials are not comparable for players
+that use project finance, utilities should not score high on modest auction
+wins, batteries are a separate topic.
+
+- `players.json → champions`: scores scale (awarded MW in the last three
+  years relative to the leader = 100), execution, momentum (percentiles),
+  breadth (renewable auction types won: onshore wind, solar, innovation; out
+  of three) and efficiency (MW on the ground per employee: company-reported
+  capacity, else awarded MW in operation; percentile, only where staff is
+  reported). Default weights 35/20/15/15/15. The financial score is removed;
+  financial figures stay on the cards. Battery and hybrid sites are listed in
+  `technologies` but not scored.
+- `champions.segments`: per player with staff: employees, MW on the ground,
+  basis, own portfolio, MW per employee, category (lean developer, developer
+  with broad services, IPP / owner-operator, investor, utility; lean vs broad
+  split at the developers' median).
+- `players.json → battery_builders`: top 25 battery owners (batteries ≥ 1 MW,
+  operating and planned, from `units.parquet`) by company-name stem.
+- **Check:** scores 0–100; segments have positive staff and MW.
+
 ## Version history
 
 | Version | Date | Change |
@@ -1061,3 +1083,4 @@ map of multi-asset hubs, infrastructure layers, siting score by district.
 | 1.11 | 2026-11-25 | Cost benchmarks: `config/costs.yaml` (WindGuard 2024, Fraunhofer ISE 2024/2021/2018, Danish Energy Agency, IRENA 2025), `costs/costs.json` with breakdowns, comparison, trends, projections and award prices; pages `/costs/wind` and `/costs/solar`. Approved by the user. |
 | 1.12 | 2026-11-25 | Profitability of awarded wind and solar projects (`costs/profitability.json`, `config/profitability.yaml`, SMARD market values), co-location of wind with batteries and solar (`auctions/colocation.json`); profitability on the cost pages, co-location on the wind page. Approved by the user. |
 | 1.13 | 2026-11-26 | Champions scores and filled financials (`players.json`), technology combinations (`colocation.json`), other assets extract (gas plants, electrolysers, gas storage, large consumers), multi-asset hubs, siting screen and infrastructure layers (power grid OSM/ODbL, gas SciGRID, hydrogen core network schematic); new page `/hubs`. Approved by the user. |
+| 1.14 | 2026-11-26 | Champions without corporate finance (efficiency = MW per employee instead), scale relative to the leader, breadth = renewable auction types; lean vs heavy segments; battery builders. Approved by the user. |

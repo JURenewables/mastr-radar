@@ -106,7 +106,8 @@ def test_champions(tmp_path):
     groups = [r["group"] for r in c["rows"]]
     assert groups[0] == "Alpha" and "Citizen wind farms" not in groups
     alpha = c["rows"][0]
-    assert alpha["technologies"] == ["solar", "wind"] and alpha["scores"]["breadth"] == 40
+    assert alpha["technologies"] == ["solar", "wind"] and alpha["scores"]["breadth"] == 67
+    assert alpha["scores"]["scale"] == 100  # leader
     assert alpha["scores"]["execution"] > c["rows"][1]["scores"]["execution"]
     assert all(v is None or 0 <= v <= 100 for r in c["rows"] for v in r["scores"].values())
 

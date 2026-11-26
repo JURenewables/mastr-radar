@@ -133,19 +133,19 @@
       "bytes": 145488
     },
     {
-      "name": "auctions/players.json",
-      "rows": 18,
-      "bytes": 44421
-    },
-    {
       "name": "hubs/infrastructure.json",
       "rows": 0,
       "bytes": 704168
     },
     {
+      "name": "auctions/players.json",
+      "rows": 18,
+      "bytes": 53413
+    },
+    {
       "name": "dictionary.json",
       "rows": 28,
-      "bytes": 35473
+      "bytes": 35936
     }
   ]
 }
