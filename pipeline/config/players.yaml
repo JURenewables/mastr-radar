@@ -18,7 +18,7 @@ players:
       employees: 3767
       unit: FTE
       mw: 16495
-      mw_note: "Renewable capacity of the segment (plus 1,316 MW batteries); Offshore Wind segment separately: 2,533 FTE, 3,515 MW"
+      mw_note: "Renewable capacity of the segment, worldwide (batteries of 1,316 MW not counted); Offshore Wind segment separately: 2,533 FTE, 3,515 MW"
       year: 2025
     hq: Essen, Germany
     owner: Listed (DAX)
@@ -48,8 +48,8 @@ players:
       name: "Sustainable Generation Infrastructure segment"
       employees: 7890
       unit: headcount
-      mw: 11192
-      mw_note: "Whole segment incl. thermal plants and trading; 66 % renewable (about 7.4 GW)"
+      mw: 7354
+      mw_note: "Renewable capacity of the group (all in this segment); the segment's staff also run thermal plants and trading (segment total 11,192 MW)"
       year: 2025
     hq: Karlsruhe, Germany
     owner: State of Baden-Württemberg and OEW (municipal association)
@@ -220,6 +220,7 @@ players:
     owner: Independent investment manager (Q-Energy funds)
     employees: {value: 500, unit: headcount, note: "more than, incl. service companies"}
     capacity_gw: 11
+    capacity_includes_pipeline: true
     capacity_note: "Operating and development assets; €4.6bn raised across funds since inception."
     markets: "Spain, Germany, UK, Italy, Poland, US, Chile"
     mix: "Onshore wind, solar, storage; repowering of old German wind farms."

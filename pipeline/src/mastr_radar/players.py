@@ -61,8 +61,8 @@ CHAMPION_LABELS = {
     "breadth": "Breadth: renewable auctions won (wind, solar, innovation = solar + storage)",
     "momentum": "Momentum: awards in the last 18 months vs the 18 months before",
     "efficiency": (
-        "Efficiency: MW on the ground per employee "
-        "(company-reported capacity, else awarded MW in operation)"
+        "Efficiency: renewable MW on the ground worldwide per employee "
+        "(company-reported; utilities: renewables segment)"
     ),
 }
 
@@ -148,9 +148,11 @@ def champions(out_dir: Path, players: list[dict], as_of: str) -> dict:
         emp = (p.get("employees") or {}).get("value")
         key = p.get("group") or p["name"]
         rep = p.get("capacity_gw")
-        gw = (rep * 1000) if isinstance(rep, (int, float)) else None
-        if gw is None and key in g:
-            gw = g[key].get("op_kw", 0) / 1000 or None
+        # Worldwide renewable capacity on the ground as reported by the company;
+        # utilities only through their renewables segment (group capacity mixes
+        # in thermal plants). No fallback to German auction data.
+        ok = isinstance(rep, (int, float)) and not p.get("capacity_includes_pipeline")
+        gw = rep * 1000 if ok and p["type"] not in ("utility", "municipal") else None
         on_ground[key] = gw
         seg = p.get("segment")
         if seg:  # utilities: renewables segment staff and capacity
@@ -249,30 +251,29 @@ CATEGORY = {
 def segments(players: list[dict], on_ground: dict, g: dict) -> list[dict]:
     """MW on the ground against employees, with a category per player.
 
-    Utilities that report a renewables segment are placed with that segment's
-    staff and capacity (the group total is kept for comparison); others use
-    group totals and are marked."""
+    Renewable MW on the ground worldwide as reported by the company. Utilities
+    only through their renewables segment (staff and renewable MW of the
+    segment; the whole group's staff kept for comparison); players without a
+    worldwide figure are left out."""
     out = []
     for p in players:
         emp = (p.get("employees") or {}).get("value")
         key = p.get("group") or p["name"]
         gw = on_ground.get(key)
-        reported = isinstance(p.get("capacity_gw"), (int, float))
-        if not emp or not gw or (not reported and p["type"] in ("utility", "municipal")):
-            continue
         seg = p.get("segment")
+        if not emp or not (gw or seg):
+            continue
         rev = p.get("revenue") if isinstance(p.get("revenue"), (int, float)) else None
         row = {
             "name": p["name"],
             "type": p["type"],
             "employees": seg["employees"] if seg else emp,
             "mw_on_ground": round(seg["mw"] if seg else gw),
-            "basis": seg["name"]
-            if seg
-            else ("company-reported capacity" if reported else "awarded MW in operation"),
+            "basis": seg["name"] if seg else "company-reported renewable capacity, worldwide",
             "segment_note": seg.get("mw_note") if seg else None,
             "group_employees": emp,
-            "group_mw": round(gw),
+            # same renewable MW, set against the whole group's staff
+            "group_mw": round(seg["mw"]) if seg else round(gw),
             "own_portfolio_mw": round(p["own_portfolio_gw"] * 1000)
             if p.get("own_portfolio_gw")
             else None,
@@ -283,9 +284,9 @@ def segments(players: list[dict], on_ground: dict, g: dict) -> list[dict]:
             "currency": p.get("currency"),
         }
         row["mw_per_employee"] = round(row["mw_on_ground"] / row["employees"], 2)
-        row["group_mw_per_employee"] = round(gw / emp, 2)
-        if p["type"] in ("utility", "municipal") and not seg:
-            row["basis"] = "group total (no renewables segment reported)"
+        row["group_mw_per_employee"] = (
+            round(row["mw_on_ground"] / emp, 2) if seg else row["mw_per_employee"]
+        )
         out.append(row)  # fmt: skip
     dev = sorted(x["mw_per_employee"] for x in out if x["type"] == "developer")
     med = dev[len(dev) // 2] if dev else 0
@@ -294,11 +295,7 @@ def segments(players: list[dict], on_ground: dict, g: dict) -> list[dict]:
         if x["type"] == "developer":
             cat = "Lean developer" if x["mw_per_employee"] >= med else "Developer (broad services)"
         elif x["type"] in ("utility", "municipal"):
-            cat = (
-                "Utility, renewables segment"
-                if x["basis"] not in ("group total (no renewables segment reported)",)
-                else "Utility, group total"
-            )
+            cat = "Utility, renewables segment"
         x["category"] = cat
     return sorted(out, key=lambda x: -x["mw_per_employee"])
 

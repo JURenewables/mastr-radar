@@ -1082,6 +1082,13 @@ grids, so their group headcount is not comparable with developers.
   "Utility, renewables segment" and "Utility, group total". The efficiency
   score uses segment figures where reported.
 - **Check:** a segment needs name, positive employees and MW.
+- **Amended 26 Nov 2026 (user request):** efficiency is renewable MW on the
+  ground worldwide (company-reported) per employee only. No fallback to
+  German auction or register MW: that mixed scopes and distorted the matrix.
+  Players without a worldwide figure, or whose figure includes pipeline
+  (`capacity_includes_pipeline: true`, e.g. Qualitas), are left out.
+  Utilities are placed only by their renewables segment (EnBW: 7,354 MW
+  renewables, no thermal). `group_mw_per_employee` = segment MW / group staff.
 
 ## Version history
 

@@ -140,12 +140,12 @@
     {
       "name": "auctions/players.json",
       "rows": 18,
-      "bytes": 56651
+      "bytes": 55628
     },
     {
       "name": "dictionary.json",
       "rows": 28,
-      "bytes": 36229
+      "bytes": 36365
     }
   ]
 }

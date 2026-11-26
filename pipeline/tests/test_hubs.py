@@ -137,9 +137,23 @@ def test_segments_use_renewables_segment_for_utilities():
     seg = {x["name"]: x for x in players.segments(ps, {"U": 40000, "D": 3000}, {})}
     assert seg["U"]["employees"] == 4000 and seg["U"]["mw_per_employee"] == 4.0
     assert (
-        seg["U"]["group_mw_per_employee"] == 2.0
+        seg["U"]["group_mw_per_employee"] == 0.8  # same RES MW, all staff
         and seg["U"]["category"] == "Utility, renewables segment"
     )
     assert seg["U"]["revenue_per_employee_k"] == 1000
     assert seg["D"]["revenue_per_employee_k"] == 500
     players.check_data({"players": [{**ps[0], "momentum": "steady"}]})
+
+
+def test_segments_skip_players_without_worldwide_res():
+    base = {
+        "momentum": "steady",
+        "why": "w",
+        "sources": ["https://x.org"],
+        "currency": "EUR",
+        "employees": {"value": 100, "unit": "FTE"},
+        "group": None,
+        "type": "developer",
+    }
+    ps = [{**base, "name": "P"}]  # no reported capacity: no auction fallback
+    assert players.segments(ps, {"P": None}, {}) == []

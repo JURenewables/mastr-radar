@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.14 (26 Nov 2026): champions without corporate finance, lean vs heavy, battery builders. Phase 12 built: champions on /players, technology combinations on /wind, new /hubs page (hubs, siting, power/gas/hydrogen networks). Open: more financials for private developers (WP99 follow-up), WP83 evals (budget), WP93, MCP registry listings**
+**You are here: contract v1.15 (26 Nov 2026): utility renewables-segment staff; lean-vs-heavy matrix uses worldwide renewable MW only (no auction fallback). Next: better auction attribution from press releases. Open: WP83 evals (budget), WP93, MCP registry listings**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 

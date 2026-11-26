@@ -78,7 +78,7 @@ export function Champions({ c, asOf }: { c: ChampionsBlock; asOf: string }) {
       ]}
       caveats={[
         c.method,
-        "Efficiency uses company-reported capacity (often worldwide and including projects built for others) or, where none is reported, awarded MW in operation in Germany; staff counts are worldwide.",
+        "Efficiency uses renewable MW on the ground worldwide as reported by the company (built or in operation; utilities: their renewables segment). Companies without such a figure (e.g. UKA, PNE) are n/a; staff counts are worldwide.",
         "Execution measures the median months from award to operation of awards that are in operation; recent awards are not yet included.",
       ]}
     >
@@ -208,16 +208,15 @@ export function Segments({ c, asOf }: { c: ChampionsBlock; asOf: string }) {
       id="lean"
       eyebrow="Lean vs heavy"
       title={`Counting only their renewables staff, utilities reach ${med(util.map((x) => x.mw_per_employee)).toFixed(1)} MW per employee, close to lean developers at ${med(lean.map((x) => x.mw_per_employee)).toFixed(1)} MW`}
-      subtitle="MW built or operated against employees. Utilities are placed with the staff and capacity of their renewables segment from the annual report; the faint dot and arrow show where the whole group would sit. Diagonal lines mark equal MW per employee."
+      subtitle="Renewable MW on the ground worldwide (built or in operation, as reported by each company) against staff. Utilities are placed with the staff of their renewables segment; the faint dot and arrow show the same MW set against the whole group's staff. Diagonal lines mark equal MW per employee."
       asOf={asOf}
       source={<>Sources: company reports and websites (staff, capacity), Bundesnetzagentur auction results and Marktstammdatenregister, as of {asOf}. Categories by MaStR Radar.</>}
       takeaways={[
         "Most utility staff work outside renewables: RWE has about 3,800 of 20,100 staff in onshore wind and solar, Vattenfall about 1,800 of 20,900 in wind. Measured on the whole group, utilities look two to four times heavier than they are in renewables.",
         "On a like-for-like basis the renewables arms of RWE and Vattenfall are nearly as lean as developers; the gap that remains reflects owning and operating large fleets.",
         "Business models differ in revenue too: trading and retail bring utilities far more revenue per employee than project sales bring developers (see the right-hand chart).",
-        "Investors look leanest because the capacity sits in funds and is run by service companies whose staff are not counted.",
       ]}
-      caveats={["Segments differ: RWE Onshore Wind/Solar and Vattenfall Wind are renewables only; EnBW's generation segment also includes thermal plants and trading. Uniper reports no renewables segment and is shown on group totals.", "Capacity definitions differ: built for others vs owned, worldwide vs Germany (see basis in the tooltip). Lean vs broad-services split at the developers' median. Revenue per employee only for companies reporting in euros."]}
+      caveats={["Segments differ: RWE Onshore Wind/Solar and Vattenfall Wind are renewables only; EnBW's generation segment also includes thermal plants and trading. Uniper reports no renewables segment and is shown on group totals.", "Only companies that publish a worldwide renewable figure are shown; UKA and PNE publish none, Qualitas reports operating and development assets together, Uniper has no renewables segment. Developers count capacity they built for others; IPPs and utilities what they operate. Lean vs broad-services split at the developers' median. Revenue per employee only for companies reporting in euros."]}
     >
       <div className="grid gap-8 lg:grid-cols-[3fr_2fr]">
       <div className="min-w-0">
