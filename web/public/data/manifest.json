@@ -1,7 +1,7 @@
 {
-  "contract_version": "1.9",
+  "contract_version": "1.12",
   "as_of": "2026-11-25",
-  "generated_at": "2026-11-25T16:10:17+00:00",
+  "generated_at": "2026-11-26T01:07:40+00:00",
   "pipeline_version": "0.1.0",
   "incomplete_after": {
     "biomass": "2026-07-03",
@@ -55,22 +55,22 @@
     {
       "name": "auctions/onshore.json",
       "rows": 34,
-      "bytes": 320261
+      "bytes": 321191
     },
     {
       "name": "auctions/awards.json",
       "rows": 5218,
-      "bytes": 3256722
+      "bytes": 3256718
     },
     {
       "name": "auctions/solar.json",
       "rows": 40,
-      "bytes": 149646
+      "bytes": 150566
     },
     {
       "name": "auctions/solar_awards.json",
       "rows": 2874,
-      "bytes": 1758862
+      "bytes": 1758861
     },
     {
       "name": "auctions/company_facts.json",
@@ -88,9 +88,29 @@
       "bytes": 17919
     },
     {
-      "name": "grid/grid.json",
-      "rows": 401,
-      "bytes": 34807
+      "name": "costs/costs.json",
+      "rows": 18,
+      "bytes": 15592
+    },
+    {
+      "name": "costs/profitability.json",
+      "rows": 7672,
+      "bytes": 1139688
+    },
+    {
+      "name": "auctions/runup.json",
+      "rows": 34,
+      "bytes": 94260
+    },
+    {
+      "name": "outlook/outlook.json",
+      "rows": 309,
+      "bytes": 224289
+    },
+    {
+      "name": "auctions/colocation.json",
+      "rows": 565,
+      "bytes": 191911
     },
     {
       "name": "grid/redispatch.json",
@@ -103,29 +123,9 @@
       "bytes": 2568
     },
     {
-      "name": "auctions/runup.json",
-      "rows": 34,
-      "bytes": 94338
-    },
-    {
-      "name": "outlook/outlook.json",
-      "rows": 309,
-      "bytes": 224689
-    },
-    {
-      "name": "costs/costs.json",
-      "rows": 18,
-      "bytes": 15592
-    },
-    {
-      "name": "costs/profitability.json",
-      "rows": 7672,
-      "bytes": 1139697
-    },
-    {
-      "name": "auctions/colocation.json",
-      "rows": 564,
-      "bytes": 191538
+      "name": "grid/grid.json",
+      "rows": 401,
+      "bytes": 34807
     },
     {
       "name": "dictionary.json",
