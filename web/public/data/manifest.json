@@ -1,15 +1,15 @@
 {
-  "contract_version": "1.12",
-  "as_of": "2026-11-25",
-  "generated_at": "2026-11-26T01:07:40+00:00",
+  "contract_version": "1.15",
+  "as_of": "2026-11-26",
+  "generated_at": "2026-11-26T15:40:03+00:00",
   "pipeline_version": "0.1.0",
   "incomplete_after": {
-    "biomass": "2026-07-03",
-    "hydro": "2026-09-26",
-    "solar": "2026-09-23",
-    "storage": "2026-09-14",
-    "wind_offshore": "2026-11-10",
-    "wind_onshore": "2026-10-31"
+    "biomass": "2026-07-04",
+    "hydro": "2026-09-27",
+    "solar": "2026-09-24",
+    "storage": "2026-09-15",
+    "wind_offshore": "2026-11-11",
+    "wind_onshore": "2026-11-01"
   },
   "files": [
     {
@@ -19,13 +19,13 @@
     },
     {
       "name": "units.parquet",
-      "rows": 157433,
-      "bytes": 7896691
+      "rows": 157478,
+      "bytes": 7898695
     },
     {
       "name": "summary.parquet",
-      "rows": 453338,
-      "bytes": 2620408
+      "rows": 453438,
+      "bytes": 2619318
     },
     {
       "name": "boundaries/states.geojson",
@@ -40,12 +40,12 @@
     {
       "name": "monitor/buildout.json",
       "rows": 37,
-      "bytes": 181259
+      "bytes": 181260
     },
     {
       "name": "monitor/points.json",
-      "rows": 37701,
-      "bytes": 720774
+      "rows": 37721,
+      "bytes": 721001
     },
     {
       "name": "monitor/stats.json",
@@ -55,22 +55,22 @@
     {
       "name": "auctions/onshore.json",
       "rows": 34,
-      "bytes": 321191
+      "bytes": 321222
     },
     {
       "name": "auctions/awards.json",
       "rows": 5218,
-      "bytes": 3256718
+      "bytes": 3256789
     },
     {
       "name": "auctions/solar.json",
       "rows": 40,
-      "bytes": 150566
+      "bytes": 150887
     },
     {
       "name": "auctions/solar_awards.json",
       "rows": 2874,
-      "bytes": 1758861
+      "bytes": 1758816
     },
     {
       "name": "auctions/company_facts.json",
@@ -83,24 +83,49 @@
       "bytes": 15387
     },
     {
+      "name": "auctions/players.json",
+      "rows": 18,
+      "bytes": 56658
+    },
+    {
       "name": "costs/costs.json",
       "rows": 18,
       "bytes": 15592
     },
     {
       "name": "costs/profitability.json",
-      "rows": 7672,
-      "bytes": 1139688
+      "rows": 7671,
+      "bytes": 1139596
     },
     {
       "name": "auctions/runup.json",
       "rows": 34,
-      "bytes": 94260
+      "bytes": 94217
     },
     {
       "name": "outlook/outlook.json",
       "rows": 309,
-      "bytes": 224289
+      "bytes": 224385
+    },
+    {
+      "name": "auctions/colocation.json",
+      "rows": 567,
+      "bytes": 235573
+    },
+    {
+      "name": "hubs/infrastructure.json",
+      "rows": 0,
+      "bytes": 704168
+    },
+    {
+      "name": "hubs/hubs.json",
+      "rows": 355,
+      "bytes": 189445
+    },
+    {
+      "name": "hubs/siting.json",
+      "rows": 401,
+      "bytes": 145483
     },
     {
       "name": "grid/redispatch.json",
@@ -115,32 +140,12 @@
     {
       "name": "grid/grid.json",
       "rows": 401,
-      "bytes": 34807
+      "bytes": 34837
     },
     {
-      "name": "auctions/colocation.json",
-      "rows": 564,
-      "bytes": 234153
-    },
-    {
-      "name": "hubs/hubs.json",
-      "rows": 347,
-      "bytes": 185640
-    },
-    {
-      "name": "hubs/siting.json",
-      "rows": 401,
-      "bytes": 145488
-    },
-    {
-      "name": "hubs/infrastructure.json",
-      "rows": 0,
-      "bytes": 704168
-    },
-    {
-      "name": "auctions/players.json",
-      "rows": 18,
-      "bytes": 56651
+      "name": "snapshots.json",
+      "rows": 1,
+      "bytes": 406
     },
     {
       "name": "dictionary.json",

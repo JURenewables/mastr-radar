@@ -1,0 +1,13 @@
+{
+ "repo": "JURenewables/mastr-radar",
+ "format": "tar + zstd archive with the explorer files of that day (without days/)",
+ "snapshots": [
+  {
+   "date": "2026-11-26",
+   "tag": "data-2026-11-26",
+   "name": "Data 2026-11-26 (contract 1.15)",
+   "published": "2026-11-26T15:40:19Z",
+   "url": "https://github.com/JURenewables/mastr-radar/releases/download/data-2026-11-26/data-2026-11-26.tar.zst"
+  }
+ ]
+}
