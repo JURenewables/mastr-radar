@@ -141,6 +141,7 @@ def extract(
     _operator_register(zip_path, cfg)
     _unit_details(zip_path, cfg)
     _grid_register(zip_path, cfg)
+    _other_assets(zip_path, cfg)
 
 
 def _grid_register(zip_path: Path, cfg: dict) -> None:
@@ -183,6 +184,34 @@ def _unit_details(zip_path: Path, cfg: dict) -> None:
         out.unlink(missing_ok=True)
         raise typer.Exit(code=1) from exc
     typer.echo(f"Check passed: {n:,} unit details → {out}")
+
+
+def _other_assets(zip_path: Path, cfg: dict) -> None:
+    from mastr_radar import assets_extract as ae
+    from mastr_radar import extract as ex
+
+    out = load_settings().data_dir / "extract" / "assets_other.parquet"
+    counts = ae.write_other_assets(zip_path, out, cfg)
+    try:
+        ae.check_other_assets(out)
+    except ex.UnitsCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        out.unlink(missing_ok=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"Check passed: other assets {counts} → {out}")
+
+
+@app.command("extract-assets")
+def extract_assets(
+    zip_path: Path = typer.Argument(None, help="Export zip. Default: newest in data/raw."),
+) -> None:
+    """Station 2 (v1.13): gas plants, electrolysers, gas consumers and storage,
+    large electricity consumers → data/extract/assets_other.parquet (internal)."""
+    from mastr_radar import extract as ex
+
+    s = load_settings()
+    zip_path = zip_path or sorted(s.raw_dir.glob("Gesamtdatenexport_*.zip"))[-1]
+    _other_assets(zip_path, ex.load_columns_config())
 
 
 @app.command("extract-details")
@@ -490,6 +519,71 @@ def snapshots_index(
     manifest["files"] = kept + files
     mpath.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     typer.echo(f"Check passed: {', '.join(sorted(names))}")
+
+
+def _update_manifest(files: list[dict]) -> None:
+    import json
+
+    from mastr_radar import dictionary
+
+    s = load_settings()
+    mpath = s.output_dir / "manifest.json"
+    manifest = json.loads(mpath.read_text())
+    names = {f["name"] for f in files}
+    kept = [f for f in manifest["files"] if f["name"] not in names | {dictionary.FILE}]
+    files = files + dictionary.build(s.output_dir, [f["name"] for f in kept + files])
+    manifest["files"] = kept + files
+    mpath.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+
+
+@app.command("infra-fetch")
+def infra_fetch() -> None:
+    """Infrastructure (v1.13): download the power grid (OSM via PyPSA-Eur), gas
+    pipelines (SciGRID_gas) and hydrogen core network annexes (BNetzA) into
+    data/infra/, and geocode places our register cannot match (Nominatim)."""
+    from mastr_radar import infra
+
+    s = load_settings()
+    paths = infra.fetch(s.data_dir / "infra")
+    n = infra.geocode_missing(s.data_dir / "infra", s.data_dir / "extract")
+    typer.echo(f"Saved {len(paths)} files; geocoded {n} new places.")
+
+
+@app.command("infra-build")
+def infra_build() -> None:
+    """Infrastructure (v1.13): build hubs/infrastructure.json from data/infra/,
+    check it, and update the manifest and dictionary."""
+    from mastr_radar import infra
+
+    s = load_settings()
+    try:
+        files = infra.build(s.data_dir / "infra", s.data_dir / "extract", s.output_dir)
+    except infra.InfraCheckError as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    _update_manifest(files)
+    typer.echo(f"Check passed: {files[0]['name']}")
+
+
+@app.command("hubs-build")
+def hubs_build() -> None:
+    """Hubs (v1.13): build hubs/hubs.json, hubs/siting.json and the refined
+    auctions/colocation.json from data/extract, check them, update the manifest."""
+    from mastr_radar import colocation, hubs, siting
+    from mastr_radar.aggregate import export_date_of
+
+    s = load_settings()
+    ex = s.data_dir / "extract"
+    as_of = export_date_of(ex / "units.parquet")
+    try:
+        files = colocation.build(ex, s.output_dir, as_of)
+        files += hubs.build(ex, s.output_dir, as_of)
+        files += siting.build(ex, s.output_dir, as_of)
+    except (colocation.ColocationCheckError, hubs.HubsCheckError, siting.SitingCheckError) as exc:
+        typer.echo(f"CHECK FAILED: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    _update_manifest(files)
+    typer.echo(f"Check passed: {', '.join(f['name'] for f in files)}")
 
 
 @app.command("notify")

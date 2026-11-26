@@ -5,6 +5,7 @@
 import * as Plot from "@observablehq/plot";
 import { useEffect, useMemo, useState } from "react";
 
+import { Champions, type ChampionsBlock } from "@/components/players/Champions";
 import { PlotFigure } from "@/components/explorer/PlotFigure";
 import { Loading, Section, Segmented } from "@/components/monitor/ui";
 import { mw } from "@/lib/monitor";
@@ -22,10 +23,11 @@ export interface Player {
   year?: number;
   employees?: { value: number; unit: string; note?: string };
   currency?: string;
-  revenue?: number;
+  revenue?: number | "not_published";
   revenue_label?: string;
-  ebitda?: { value: number; label: string };
-  net_debt?: number;
+  ebitda?: { value: number; label: string } | "not_published";
+  net_debt?: number | "not_published";
+  net_income?: { value: number; label: string };
   net_debt_label?: string;
   capacity_gw?: number;
   renewables_gw?: number;
@@ -48,6 +50,7 @@ export interface Player {
 interface PlayersFile {
   as_of: string;
   players: Player[];
+  champions?: ChampionsBlock;
 }
 
 const TYPE_LABEL: Record<PType, string> = {
@@ -72,7 +75,8 @@ const MOMENTUM: Record<Momentum, { label: string; color: string }> = {
 };
 const SYM: Record<string, string> = { EUR: "€", SEK: "SEK ", NOK: "NOK " };
 
-function money(v: number | undefined, cur?: string): string {
+function money(v: number | "not_published" | undefined, cur?: string): string {
+  if (v === "not_published") return "not published";
   if (v == null || !cur) return "–";
   const s = SYM[cur] ?? `${cur} `;
   const a = Math.abs(v);
@@ -107,6 +111,7 @@ export function Players({ version }: { version: string }) {
 
   return (
     <>
+      {data.champions && <Champions c={data.champions} asOf={asOf} />}
       <Section
         id="size"
         eyebrow="Size vs German success"
@@ -175,9 +180,12 @@ export function Players({ version }: { version: string }) {
                   <td className="px-3 py-2 font-semibold">{p.name}{p.year ? <span className="block text-[11px] font-normal text-ink-muted">{p.year}</span> : null}</td>
                   <td className="px-3 py-2">{TYPE_LABEL[p.type]}</td>
                   <td className="px-3 py-2">{p.employees ? p.employees.value.toLocaleString("en-GB") : "–"}</td>
-                  <td className="px-3 py-2">{money(p.revenue, p.currency)}</td>
-                  <td className="px-3 py-2">{p.ebitda ? <>{money(p.ebitda.value, p.currency)}<span className="block text-[11px] text-ink-muted">{p.ebitda.label}</span></> : "–"}</td>
-                  <td className="px-3 py-2">{p.net_debt != null ? (p.net_debt < 0 ? `net cash ${money(-p.net_debt, p.currency)}` : money(p.net_debt, p.currency)) : "–"}</td>
+                  <td className="px-3 py-2">{money(p.revenue, p.currency)}{p.revenue_label && typeof p.revenue === "number" ? <span className="block text-[11px] text-ink-muted">{p.revenue_label}</span> : null}</td>
+                  <td className="px-3 py-2">
+                    {p.ebitda === "not_published" ? "not published" : p.ebitda ? <>{money(p.ebitda.value, p.currency)}<span className="block text-[11px] text-ink-muted">{p.ebitda.label}</span></> : "–"}
+                    {p.net_income ? <span className="mt-1 block text-[11px] text-ink-muted">Net income {money(p.net_income.value, p.currency ?? "EUR")}: {p.net_income.label}</span> : null}
+                  </td>
+                  <td className="px-3 py-2">{p.net_debt === "not_published" ? "not published" : p.net_debt != null ? (p.net_debt < 0 ? `net cash ${money(-p.net_debt, p.currency)}` : money(p.net_debt, p.currency)) : "–"}</td>
                   <td className="px-3 py-2">{p.capacity_gw ? `${p.capacity_gw} GW` : "–"}{p.own_portfolio_gw ? <span className="block text-[11px] text-ink-muted">own {p.own_portfolio_gw} GW</span> : null}</td>
                   <td className="max-w-[14rem] px-3 py-2 text-xs text-ink-muted">{p.markets ?? "–"}</td>
                   <td className="px-3 py-2">{p.germany.wind_awarded_mw ? mw(p.germany.wind_awarded_mw) : "–"}</td>
@@ -237,8 +245,11 @@ export function Players({ version }: { version: string }) {
               {(p.hq || p.owner) && <p className="mt-1 text-xs text-ink-muted">{[p.hq, p.owner].filter(Boolean).join(" · ")}</p>}
               <dl className="figures mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
                 {p.employees && (<><dt className="text-ink-muted">Staff</dt><dd>{p.employees.value.toLocaleString("en-GB")} {p.employees.note ? <span className="text-[11px] text-ink-muted">({p.employees.note})</span> : null}</dd></>)}
-                {p.ebitda && (<><dt className="text-ink-muted">{p.ebitda.label}</dt><dd>{money(p.ebitda.value, p.currency)}</dd></>)}
-                {p.net_debt != null && (<><dt className="text-ink-muted">{p.net_debt_label ?? "Net debt"}</dt><dd>{money(Math.abs(p.net_debt), p.currency)}{p.net_debt < 0 ? " (cash)" : ""}</dd></>)}
+                {typeof p.revenue === "number" && (<><dt className="text-ink-muted">Revenue</dt><dd>{money(p.revenue, p.currency)}</dd></>)}
+                {p.ebitda && p.ebitda !== "not_published" && (<><dt className="text-ink-muted">{p.ebitda.label}</dt><dd>{money(p.ebitda.value, p.currency)}</dd></>)}
+                {p.ebitda === "not_published" && (<><dt className="text-ink-muted">Financials</dt><dd>not published</dd></>)}
+                {p.net_income && (<><dt className="text-ink-muted">Net income</dt><dd>{money(p.net_income.value, p.currency ?? "EUR")}</dd></>)}
+                {typeof p.net_debt === "number" && (<><dt className="text-ink-muted">{p.net_debt_label ?? "Net debt"}</dt><dd>{money(Math.abs(p.net_debt), p.currency)}{p.net_debt < 0 ? " (cash)" : ""}</dd></>)}
                 {p.capacity_gw && (<><dt className="text-ink-muted">Capacity</dt><dd>{p.capacity_gw} GW</dd></>)}
                 {(p.germany.wind_awarded_mw || p.germany.solar_awarded_mw) && (<><dt className="text-ink-muted">Won in Germany</dt><dd>{[p.germany.wind_awarded_mw ? `${mw(p.germany.wind_awarded_mw)} wind` : "", p.germany.solar_awarded_mw ? `${mw(p.germany.solar_awarded_mw)} solar` : ""].filter(Boolean).join(", ")}</dd></>)}
               </dl>

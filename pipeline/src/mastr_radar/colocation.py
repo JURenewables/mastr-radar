@@ -90,10 +90,12 @@ def build(extract_dir: Path, out_dir: Path, as_of) -> list[dict]:
     ).to_pandas()
     u = u.merge(det, on="unit_id", how="left")
     awards = {}
+    groups: dict[str, str | None] = {}
     awards_path = out_dir / "auctions" / "awards.json"
     if awards_path.exists():
         for a in json.loads(awards_path.read_text())["awards"]:
             awards[str(a.get("award_no"))] = a["bid_date"]
+            groups[str(a.get("award_no"))] = a.get("group")
 
     def public(r) -> bool:
         return r.get("operator_is_person") is False or r.get("operator_is_person") == 0
@@ -106,6 +108,9 @@ def build(extract_dir: Path, out_dir: Path, as_of) -> list[dict]:
         if "wind_onshore" not in techs or not techs & {"storage", "solar"}:
             continue
         w = g[g.technology == "wind_onshore"]
+        has = [k for k in ("solar", "storage") if (g.technology == k).any()]
+        combo = "wind+" + "+".join("battery" if k == "storage" else k for k in has)
+        wgroups = sorted({groups.get(str(x)) for x in w.award_no.dropna()} - {None})
         for kind in ("storage", "solar"):
             p = g[g.technology == kind]
             if p.empty:
@@ -115,6 +120,9 @@ def build(extract_dir: Path, out_dir: Path, as_of) -> list[dict]:
             rounds = sorted({awards.get(str(x)) for x in w.award_no.dropna()} - {None})
             sites.append({
                 "tier": "same_location",
+                "site_id": str(_loc),
+                "combo": combo,
+                "groups": wgroups,
                 "kind": kind,
                 "partner_mw": round(p.capacity_kw.sum() / 1000, 2),
                 "partner_mwh": _mwh(kind, p.storage_capacity_kwh),
@@ -150,9 +158,13 @@ def build(extract_dir: Path, out_dir: Path, as_of) -> list[dict]:
             continue
         ww = grid.df.iloc[[k for k, _ in near]]
         rounds = sorted({awards.get(str(x)) for x in ww.award_no.dropna()} - {None})
+        wgroups = sorted({groups.get(str(x)) for x in ww.award_no.dropna()} - {None})
         ok = public(r)
         sites.append({
             "tier": "nearby",
+            "site_id": r["unit_id"],
+            "combo": "wind+battery" if r["technology"] == "storage" else "wind+solar",
+            "groups": wgroups,
             "kind": r["technology"],
             "partner_mw": round(r["capacity_kw"] / 1000, 2),
             "partner_mwh": _mwh(r["technology"], [r["storage_capacity_kwh"]]),
@@ -190,6 +202,62 @@ def build(extract_dir: Path, out_dir: Path, as_of) -> list[dict]:
             )
             e["sites"] += 1
             e["partner_mw"] = round(e["partner_mw"] + s["partner_mw"], 2)
+    # Combinations: each grid location or nearby partner counted once.
+    combos: dict[tuple, dict] = {}
+    seen_sites: set[str] = set()
+    for s in sites:
+        if s["site_id"] in seen_sites:
+            continue
+        seen_sites.add(s["site_id"])
+        here = [x for x in sites if x["site_id"] == s["site_id"]]
+        e = combos.setdefault(
+            (s["tier"], s["combo"]),
+            {
+                "tier": s["tier"],
+                "combo": s["combo"],
+                "sites": 0,
+                "wind_mw": 0.0,
+                "battery_mw": 0.0,
+                "solar_mw": 0.0,
+                "planned_sites": 0,
+            },
+        )
+        e["sites"] += 1
+        e["wind_mw"] = round(e["wind_mw"] + s["wind_mw"], 1)
+        for x in here:
+            k = "battery_mw" if x["kind"] == "storage" else "solar_mw"
+            e[k] = round(e[k] + x["partner_mw"], 1)
+        e["planned_sites"] += any(x["partner_status"] == "planned" for x in here)
+    # Who combines technologies: wind award groups and partner operators.
+    by_group: dict[str, dict] = {}
+    for s in sites:
+        names = s["groups"] or []
+        for gname in names:
+            e = by_group.setdefault(
+                gname,
+                {
+                    "group": gname,
+                    "wind+battery": 0,
+                    "wind+solar": 0,
+                    "wind+solar+battery": 0,
+                    "battery_mw": 0.0,
+                    "solar_mw": 0.0,
+                },
+            )
+            e[s["combo"]] = e.get(s["combo"], 0) + 1
+            k = "battery_mw" if s["kind"] == "storage" else "solar_mw"
+            e[k] = round(e[k] + s["partner_mw"], 1)
+    by_operator: dict[str, dict] = {}
+    for s in sites:
+        if not s["operator"]:
+            continue
+        e = by_operator.setdefault(
+            s["operator"],
+            {"operator": s["operator"], "sites": 0, "battery_mw": 0.0, "solar_mw": 0.0},
+        )
+        e["sites"] += 1
+        k = "battery_mw" if s["kind"] == "storage" else "solar_mw"
+        e[k] = round(e[k] + s["partner_mw"], 1)
     out = {
         "as_of": str(as_of),
         "rules": {
@@ -200,6 +268,13 @@ def build(extract_dir: Path, out_dir: Path, as_of) -> list[dict]:
         },
         "totals": totals,
         "by_year": sorted(by_year.values(), key=lambda e: (e["kind"], e["year"])),
+        "combos": sorted(combos.values(), key=lambda e: (e["tier"], e["combo"])),
+        "by_group": sorted(by_group.values(), key=lambda e: -(e["battery_mw"] + e["solar_mw"]))[
+            :30
+        ],
+        "by_operator": sorted(
+            by_operator.values(), key=lambda e: -(e["battery_mw"] + e["solar_mw"])
+        )[:30],
         "sites": sorted(sites, key=lambda s: -s["partner_mw"]),
     }
     _validate(out)

@@ -110,6 +110,8 @@ players:
     year: 2025
     employees: {value: 11159, unit: average headcount}
     currency: EUR
+    revenue: 8104
+    revenue_label: "Revenue 2025 (down 6.6 %)"
     ebitda: {value: 569, label: Adjusted operating EBIT}
     markets: "Germany, Poland, Turkey (gas and grids); wind via Alterric in Germany, France, Greece"
     mix: "Grids, gas and electricity supply, telecoms; wind through Alterric; hydrogen projects in the north-west."
@@ -118,12 +120,16 @@ players:
     sources:
       - https://www.ewe.com/en/media-center/press-releases/2026/04/ewe-increases-investment-to-target-level-ewe-ag
       - https://www.lobbyregister.bundestag.de/media/15/34/763767/EWE-Finanzbericht-2025.pdf
+      - https://www.zfk.de/unternehmen/nachrichten/e
+
 
   - name: Statkraft
     group: null
     type: utility
     hq: Oslo, Norway
     owner: Norwegian state (100 %)
+    revenue: 47585
+    revenue_label: "Net operating revenues and other income, underlying, NOK m"
     year: 2025
     employees: {value: 6500, unit: headcount, note: "about"}
     currency: NOK
@@ -137,6 +143,8 @@ players:
     sources:
       - https://www.statkraft.com/IR/financial-key-figures/
       - https://www.energy-pedia.com/news/norway/statkraft-reports-strong-fourth-quarter-results-and-record-high-production-203091
+      - https://www.statkraft.com/globalassets/0/.com/6-investor-relations/reports-and-presentations/2026/q1/2026-q1-interim-report.pdf
+
 
   - name: LEAG
     group: LEAG
@@ -156,6 +164,12 @@ players:
   - name: Alterric
     group: Alterric
     type: ipp
+    year: 2025
+    currency: EUR
+    revenue: 342
+    revenue_label: "Group revenue 2025 (2024: 381; 2023: 506)"
+    ebitda: not_published
+    net_income: {value: -15.8, label: "Net result of Alterric GmbH (single entity) 2025"}
     hq: Aurich, Germany
     owner: EWE and Aloys Wobben Stiftung (Enercon owner), 50/50
     employees: {value: 600, unit: headcount, note: "about"}
@@ -168,6 +182,9 @@ players:
     sources:
       - https://www.alterric.com/en/pressemitteilung/aws-and-ewe-establish-joint-venture-for-project-management-and-operation/
       - https://www.cleanenergywire.org/news/new-german-company-aims-achieve-5-gw-onshore-wind-2030
+      - https://www.iwrpressedienst.de/energie-themen/pm-8954-geschaeftsbericht-2025-alterric-mit-rekordinvestitionen-und-positivem-ausblick
+      - https://www.lobbyregister.bundestag.de/media/e0/18/804213/2026-04_Jahresabschluss_Testat-Alterric-GmbH-2025_QES.pdf
+
 
   - name: Qualitas Energy
     group: Qualitas Energy
@@ -188,6 +205,9 @@ players:
   - name: Enerparc
     group: Enerparc
     type: ipp
+    currency: EUR
+    revenue: 436.4
+    revenue_label: "Revenue 2024, Enerparc AG single entity"
     hq: Hamburg, Germany
     owner: Founders (insolvency administrator in charge since Sept 2026)
     employees: {value: 700, unit: headcount, note: "nearly"}
@@ -203,9 +223,15 @@ players:
       - https://www.enerparc.de/en/company/about-us
 
   # --- Developers --------------------------------------------------------------
+      - https://www.lobbyregister.bundestag.de/media/bf/44/752058/Enerparc_AG_2024_JAP_-_1_Testat.pdf
+
+
   - name: UKA
     group: UKA
     type: developer
+    revenue: not_published
+    ebitda: not_published
+    net_debt: not_published
     hq: Meißen, Germany
     owner: Owner-managed
     markets: "Germany, US"
@@ -221,6 +247,9 @@ players:
   - name: wpd
     group: wpd
     type: developer
+    revenue: not_published
+    ebitda: not_published
+    net_debt: not_published
     hq: Bremen, Germany
     owner: Private
     year: 2025
@@ -235,10 +264,15 @@ players:
     sources:
       - https://www.wpd.de/downloads/wpd-fdf.pdf
       - https://www.renewable-energy-industry.com/companies/profile-133-wpd-gmbh
+      - https://www.wpd.de/wp-content/uploads/2026/01/20260113_wpd-Pressemitteilung_wpd-startet-mit-Rekordergebnis-ins-Jahr-2026docx-2.pdf
+
 
   - name: JUWI
     group: JUWI
     type: developer
+    year: 2025
+    currency: EUR
+    net_income: {value: -34.7, label: "Net loss of JUWI GmbH (single entity), FY to 30 Sep 2025"}
     hq: Wörrstadt, Germany
     owner: MVV Energie (Mannheim municipal utility group)
     employees: {value: 1350, unit: headcount, note: "about, in 8 countries"}
@@ -251,6 +285,8 @@ players:
     sources:
       - https://rejobs.org/de/erneuerbare-energien-jobs/arbeitgeber/juwi
       - https://www.pv-tech.org/juwi-merges-with-wind-developer-windwarts-energie
+      - https://www.lobbyregister.bundestag.de/media/c3/3b/726257/Testatsexemplar-JUWI-GmbH-30-09-2025.pdf
+
 
   - name: PNE
     group: PNE
@@ -299,6 +335,11 @@ players:
     type: developer
     hq: Wiesbaden, Germany
     owner: Listed (KGaA)
+    year: 2024
+    currency: EUR
+    revenue: 446.4
+    ebitda: {value: 65.6, label: "EBITDA 2024"}
+    net_income: {value: -170, label: "Preliminary net loss 2025 (about)"}
     employees: {value: 1200, unit: headcount, note: "about"}
     markets: "16 countries on 4 continents"
     mix: "Wind, solar, storage, hybrid and hydrogen; develops and sells (e.g. 4.4 GW Finnish wind pipeline to Fortum, 2025)."
@@ -308,10 +349,15 @@ players:
       - https://en.wikipedia.org/wiki/ABO_Energy
       - https://www.aboenergy.com/en/media-center/press/2026/2026-01-26_standstill-agreement-press-release.html
       - https://www.4investors.de/nachrichten/boerse.php?sektion=stock&ID=191334
+      - https://www.aboenergy.com/media/pdf/geschaeftsberichte/Geschaeftsbericht_ABO-Energy_2024.pdf
+      - https://www.solarserver.de/2026/01/16/abo-energy-weitet-verluste-2025-auf-170-mio-euro-aus/
+
 
   - name: ENERTRAG
     group: ENERTRAG
     type: developer
+    currency: EUR
+    net_income: {value: 34, label: "Expected net income FY 2025/26 (ENERTRAG SE)"}
     hq: Dauerthal (Uckermark), Germany
     owner: Private
     employees: {value: 1200, unit: headcount, note: "over"}
@@ -324,6 +370,8 @@ players:
     sources:
       - https://rejobs.org/en/renewable-energy-jobs/employer/enertrag-se
       - https://vietnam.enertrag.com/fileadmin/Startseite_neu/Enertrag_Corporate_Brochure_2023.pdf
+      - https://enertrag.com/news-and-press/press-releases/2026/enertrag-on-a-course-for-growth-strong-financial-year-and-new-management-structure
+
 
   - name: BayWa r.e.
     group: BayWa r.e.

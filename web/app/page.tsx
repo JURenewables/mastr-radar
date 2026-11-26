@@ -39,6 +39,12 @@ const SECTIONS: { href: string; scope: string; title: string; text: string; fact
     text: "What a solar park or rooftop system costs: investment by component, segments, sources compared, the trend since 2010 and award prices.",
   },
   {
+    href: "/hubs",
+    scope: "Germany",
+    title: "Multi-asset hubs",
+    text: "Where wind, solar, batteries, gas and hydrogen plants, electrolysers and large consumers come together, the power, gas and hydrogen networks around them, and where the next hubs fit.",
+  },
+  {
     href: "/grid",
     scope: "Germany",
     title: "Grid",

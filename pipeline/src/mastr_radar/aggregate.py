@@ -20,7 +20,7 @@ from mastr_radar import __version__
 from mastr_radar.config import PIPELINE_ROOT
 from mastr_radar.extract import ENUMS, UNITS_SCHEMA, export_date_of
 
-CONTRACT_VERSION = "1.12"
+CONTRACT_VERSION = "1.13"
 MAX_TOTAL_BYTES = 50 * 1024 * 1024  # contract v1.4
 MAP_POINT_MIN_KW = 100.0  # D5: units from 100 kW are individual points
 DEFAULT_OPERATOR_NAME_MIN_KW = 1000.0  # operator names only from 1 MW (settings)
@@ -231,6 +231,22 @@ def build(
         from mastr_radar import colocation
 
         files += colocation.build(units_path.parent, out_dir, as_of)
+    # Hubs and siting (v1.13): need the other-assets extract; the infrastructure
+    # layers are built on demand (`infra-build`) and kept between runs.
+    from mastr_radar import hubs, infra, siting
+
+    if (out_dir / infra.FILE).exists():
+        files.append(_file_entry(out_dir, infra.FILE, 0))
+    if (units_path.parent / "assets_other.parquet").exists():
+        files += hubs.build(units_path.parent, out_dir, as_of)
+        if (out_dir / infra.FILE).exists() and (out_dir / "grid" / "redispatch.json").exists():
+            files += siting.build(units_path.parent, out_dir, as_of)
+    else:
+        for name in (hubs.FILE, siting.FILE):
+            if (out_dir / name).exists():
+                files.append(_file_entry(out_dir, name, 0))
+    if (out_dir / "snapshots.json").exists():
+        files.append(_file_entry(out_dir, "snapshots.json", 0))
     from mastr_radar import redispatch as rdp
 
     # Grid API files (v1.8) are built from data/grid when present (grid run);
@@ -391,6 +407,19 @@ def check_explorer_files(
             profitability.check(out_dir)
         except profitability.ProfitabilityCheckError as exc:
             problems.append(str(exc))
+    from mastr_radar import hubs, infra, siting
+
+    for mod, err in (
+        (hubs, hubs.HubsCheckError),
+        (infra, infra.InfraCheckError),
+        (siting, siting.SitingCheckError),
+    ):
+        if (out_dir / mod.FILE).exists():
+            expected_files.add(mod.FILE)
+            try:
+                mod.check(out_dir)
+            except err as exc:
+                problems.append(str(exc))
     if (out_dir / "auctions" / "colocation.json").exists():
         from mastr_radar import colocation
 
