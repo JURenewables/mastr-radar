@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.13 (26 Nov 2026). Phase 12 built: champions on /players, technology combinations on /wind, new /hubs page (hubs, siting, power/gas/hydrogen networks). Open: more financials for private developers (WP99 follow-up), WP83 evals (budget), WP93, MCP registry listings**
+**You are here: contract v1.14 (26 Nov 2026): champions without corporate finance, lean vs heavy, battery builders. Phase 12 built: champions on /players, technology combinations on /wind, new /hubs page (hubs, siting, power/gas/hydrogen networks). Open: more financials for private developers (WP99 follow-up), WP83 evals (budget), WP93, MCP registry listings**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -442,9 +442,9 @@ correctly. Design and decisions: `docs/platform-plan.md`.
 
 ## Follow-ups noted
 
-- Players: net debt for Energiekontor and PNE, EBITDA for Alterric and the
-  2025 audited ABO figures (expected June 2026 statements) still to read from
-  the full reports; wpd and UKA publish no group figures.
+- Players: net debt for Energiekontor (€549 m) and PNE (€731 m) filled from
+  the 2025 reports; Alterric publishes no group EBITDA; ABO's audited 2025
+  figures not yet found; wpd and UKA publish no group figures.
 
 - Web dev tools: `npm audit` shows 7 moderate warnings in a linting dependency
   (minimatch via typescript-eslint); none in production packages. Fix when

@@ -5,7 +5,7 @@
 import * as Plot from "@observablehq/plot";
 import { useEffect, useMemo, useState } from "react";
 
-import { Champions, type ChampionsBlock } from "@/components/players/Champions";
+import { Batteries, type BatteryBuilder, Champions, type ChampionsBlock, Segments } from "@/components/players/Champions";
 import { PlotFigure } from "@/components/explorer/PlotFigure";
 import { Loading, Section, Segmented } from "@/components/monitor/ui";
 import { mw } from "@/lib/monitor";
@@ -51,6 +51,7 @@ interface PlayersFile {
   as_of: string;
   players: Player[];
   champions?: ChampionsBlock;
+  battery_builders?: BatteryBuilder[];
 }
 
 const TYPE_LABEL: Record<PType, string> = {
@@ -112,6 +113,8 @@ export function Players({ version }: { version: string }) {
   return (
     <>
       {data.champions && <Champions c={data.champions} asOf={asOf} />}
+      {data.champions?.segments?.length ? <Segments c={data.champions} asOf={asOf} /> : null}
+      {data.battery_builders?.length ? <Batteries b={data.battery_builders} asOf={asOf} /> : null}
       <Section
         id="size"
         eyebrow="Size vs German success"

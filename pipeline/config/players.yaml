@@ -13,6 +13,13 @@ players:
   - name: RWE
     group: RWE
     type: utility
+    segment:
+      name: "Onshore Wind/Solar segment"
+      employees: 3767
+      unit: FTE
+      mw: 16495
+      mw_note: "Renewable capacity of the segment (plus 1,316 MW batteries); Offshore Wind segment separately: 2,533 FTE, 3,515 MW"
+      year: 2025
     hq: Essen, Germany
     owner: Listed (DAX)
     year: 2025
@@ -31,10 +38,19 @@ players:
       - https://www.rwe.com/en/investor-relations/rwe-share/key-data/
       - https://www.rwe.com/en/investor-relations/financial-calendar-and-publications/news-and-ad-hoc-announcements/news/news-2025-11-12/
       - https://chemxplore.com/news/rwe-financial-performance-2025
+      - https://uk.rwe.com/-/media/RWE/documents/05-investor-relations/finanzkalendar-und-veroeffentlichungen/2025-GJ/RWE-Annual-Report-2025.pdf
+
 
   - name: EnBW
     group: EnBW
     type: utility
+    segment:
+      name: "Sustainable Generation Infrastructure segment"
+      employees: 7890
+      unit: headcount
+      mw: 11192
+      mw_note: "Whole segment incl. thermal plants and trading; 66 % renewable (about 7.4 GW)"
+      year: 2025
     hq: Karlsruhe, Germany
     owner: State of Baden-Württemberg and OEW (municipal association)
     year: 2025
@@ -53,10 +69,19 @@ players:
     sources:
       - https://www.enbw.com/geschaeftsbericht-2025/kennzahlen/
       - https://www.enbw.com/annual-report-2025/management-report/
+      - https://www.enbw.com/media/bericht/bericht-2025/downloads/zusammengefasster-lagebericht-des-enbw-konzerns-und-der-enbw-ag.pdf
+
 
   - name: Vattenfall
     group: Vattenfall
     type: utility
+    segment:
+      name: "Wind segment"
+      employees: 1849
+      unit: FTE
+      mw: 6800
+      mw_note: "4.4 GW offshore wind, 2.1 GW onshore wind, 0.3 GW solar and batteries"
+      year: 2025
     hq: Stockholm, Sweden
     owner: Swedish state (100 %)
     year: 2025
@@ -75,6 +100,8 @@ players:
     sources:
       - https://group.vattenfall.com/globalassets/com/about-us/vattenfall-in-brief/vattenfall-in-brief-onepager-2026-03.pdf
       - https://group.vattenfall.com/siteassets/corporate/investors/interim_reports/2025/q4-report-2025.pdf
+      - https://group.vattenfall.com/siteassets/corporate/investors/investor_presentations/vattenfall-corporate-factbook-2026-03.pdf
+
 
   - name: Uniper
     group: null
@@ -229,6 +256,8 @@ players:
   - name: UKA
     group: UKA
     type: developer
+    capacity_note: "350 MW commissioned in Germany in 2025 (record year); more than 1.3 GW under construction; no total built capacity published."
+    employees: {value: 1100, unit: headcount, note: "over, at 22 locations"}
     revenue: not_published
     ebitda: not_published
     net_debt: not_published
@@ -243,6 +272,8 @@ players:
       - https://www.boerse-online.de/dpa-afx/eqs-news-nordex-group-erhaelt-von-uka-auftraege-ueber-435-mw-fuer-turbinen-des-typs-n1756x-und-n1636x-fuer-projekte-in-deutschland-deutsch-454783.html
       - https://www.energyglobal.com/wind/07072026/nordex-group-receives-orders-totalling-700-mw-from-uka-in-germany/
       - https://www.uka-gruppe.de/en/
+      - https://www.uka-group.com/de/unternehmen/uka-in-zahlen/
+
 
   - name: wpd
     group: wpd
@@ -291,6 +322,9 @@ players:
   - name: PNE
     group: PNE
     type: developer
+    employees: {value: 718, unit: headcount, note: "end of 2025"}
+    net_debt_label: "Net debt 2025 (incl. non-recourse project finance)"
+    net_debt: 731.3
     hq: Cuxhaven, Germany
     owner: Listed; Morgan Stanley Infrastructure Partners largest shareholder
     year: 2025
@@ -298,7 +332,7 @@ players:
     revenue: 376.4
     revenue_label: Total operating revenue
     ebitda: {value: 87.0, label: EBITDA before special effects}
-    own_portfolio_gw: 0.5
+    own_portfolio_gw: 0.497
     markets: "Germany and Europe; exited the US, UK and Sweden"
     mix: "Onshore wind, solar, storage; growing own portfolio ('Scale up')."
     momentum: transition
@@ -307,10 +341,14 @@ players:
       - https://www.webdisclosure.com/press-release/pne-wind-ag-etr-pne3-pne-ag-closes-the-2025-financial-year-with-successful-operational-performance-and-focuses-on-core-markets-and-profitability-pRTx9VBbhOq
       - https://www.solarserver.de/2026/01/15/pne-auslandsgeschaeft-belastet-ergebnis-2025/
       - https://www.rttnews.com/3634382/pne-ag-stock-down-on-wider-fy25-loss-sees-higher-fy26-ebitda.aspx
+      - https://www.pnegroup.com/fileadmin/user_upload/Finanzberichte_ENG/2025/PNE_Geschaeftsbericht_2025_Englisch_gesch.pdf
+
 
   - name: Energiekontor
     group: Energiekontor
     type: developer
+    net_debt_label: "Net debt 2025 (financial liabilities 743.7 less cash and securities 194.6; mostly non-recourse project loans)"
+    net_debt: 549.1
     hq: Bremen, Germany
     owner: Listed
     year: 2025
@@ -318,7 +356,7 @@ players:
     currency: EUR
     revenue: 167.9
     ebitda: {value: 86.1, label: EBITDA}
-    own_portfolio_gw: 0.455
+    own_portfolio_gw: 0.448
     capacity_gw: 1.5
     capacity_note: "40 own parks (455 MW) plus about 230 MW under construction for the own portfolio; about half of projects kept, half sold."
     markets: "Germany, UK, France, Portugal, US"
@@ -329,10 +367,14 @@ players:
       - https://www.energiekontor.de/fileadmin/user_upload/IR/Praesentationen_Factsheet/2026-06_Energiekontor_Factsheet_de.pdf
       - https://www.boerse-online.de/dpa-afx/eqs-news-energiekontor-ag-energiekontor-erzielt-solides-konzernergebnis-im-geschaeftsjahr-2025-und-staerkt-basis-fuer-weiteres-wachstum-deutsch-513781.html
       - https://www.4investors.de/nachrichten/boerse.php?ID=186271
+      - https://www.energiekontor.de/fileadmin/user_upload/IR/berichte/finanzberichte/2025/2025-GJ_Energiekontor_AG_Geschaeftsbericht_s.pdf
+
 
   - name: ABO Energy
     group: ABO Energy
     type: developer
+    capacity_note: "About 6.6 GW realised since 1996, of which about 3.1 GW also built by ABO."
+    capacity_gw: 6.6
     hq: Wiesbaden, Germany
     owner: Listed (KGaA)
     year: 2024
@@ -340,7 +382,7 @@ players:
     revenue: 446.4
     ebitda: {value: 65.6, label: "EBITDA 2024"}
     net_income: {value: -170, label: "Preliminary net loss 2025 (about)"}
-    employees: {value: 1200, unit: headcount, note: "about"}
+    employees: {value: 1100, unit: headcount, note: "about"}
     markets: "16 countries on 4 continents"
     mix: "Wind, solar, storage, hybrid and hydrogen; develops and sells (e.g. 4.4 GW Finnish wind pipeline to Fortum, 2025)."
     momentum: stuck
@@ -351,6 +393,7 @@ players:
       - https://www.4investors.de/nachrichten/boerse.php?sektion=stock&ID=191334
       - https://www.aboenergy.com/media/pdf/geschaeftsberichte/Geschaeftsbericht_ABO-Energy_2024.pdf
       - https://www.solarserver.de/2026/01/16/abo-energy-weitet-verluste-2025-auf-170-mio-euro-aus/
+      - https://www.aboenergy.com/en/company/facts-figures.html
 
 
   - name: ENERTRAG

@@ -106,7 +106,8 @@ def test_champions(tmp_path):
     groups = [r["group"] for r in c["rows"]]
     assert groups[0] == "Alpha" and "Citizen wind farms" not in groups
     alpha = c["rows"][0]
-    assert alpha["technologies"] == ["solar", "wind"] and alpha["scores"]["breadth"] == 40
+    assert alpha["technologies"] == ["solar", "wind"] and alpha["scores"]["breadth"] == 67
+    assert alpha["scores"]["scale"] == 100  # leader
     assert alpha["scores"]["execution"] > c["rows"][1]["scores"]["execution"]
     assert all(v is None or 0 <= v <= 100 for r in c["rows"] for v in r["scores"].values())
 
@@ -122,3 +123,23 @@ def test_players_accept_not_published():
     players.check_data({"players": [{**base, "revenue": "not_published"}]})
     with pytest.raises(players.PlayersCheckError):
         players.check_data({"players": [{**base, "revenue": "lots"}]})
+
+
+def test_segments_use_renewables_segment_for_utilities():
+    base = {"momentum": "steady", "why": "w", "sources": ["https://x.org"], "currency": "EUR"}
+    ps = [
+        {**base, "name": "U", "group": None, "type": "utility",
+         "employees": {"value": 20000, "unit": "FTE"}, "capacity_gw": 40, "revenue": 20000,
+         "segment": {"name": "Renewables", "employees": 4000, "unit": "FTE", "mw": 16000}},
+        {**base, "name": "D", "group": "D", "type": "developer",
+         "employees": {"value": 500, "unit": "headcount"}, "capacity_gw": 3, "revenue": 250},
+    ]  # fmt: skip
+    seg = {x["name"]: x for x in players.segments(ps, {"U": 40000, "D": 3000}, {})}
+    assert seg["U"]["employees"] == 4000 and seg["U"]["mw_per_employee"] == 4.0
+    assert (
+        seg["U"]["group_mw_per_employee"] == 2.0
+        and seg["U"]["category"] == "Utility, renewables segment"
+    )
+    assert seg["U"]["revenue_per_employee_k"] == 1000
+    assert seg["D"]["revenue_per_employee_k"] == 500
+    players.check_data({"players": [{**ps[0], "momentum": "steady"}]})
