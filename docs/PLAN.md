@@ -1,6 +1,6 @@
 # MaStR Radar: roadmap
 
-**You are here: contract v1.12 (25 Nov 2026). Phase 11 built (profitability on the cost pages, co-location on the wind page); Phase 9 WP78, 81, 82, 84 built (snapshots, typed MCP tools, guardrails, /connect). Open: WP83 agent evals (needs budget), WP93 optional cost trend data, listing in public MCP registries**
+**You are here: contract v1.12 (25 Nov 2026). Phase 11 built (profitability on the cost pages, co-location on the wind page); Phase 9 WP78, 81, 82, 84 built (snapshots, typed MCP tools, guardrails, /connect). Next: Phase 12 champions, combinations, hubs (contract v1.13 draft awaits approval and data decisions). Open: WP83 evals (budget), WP93, MCP registry listings**
 
 Progress: Part 1 done (25 / 25) · Part 2: 16 / 23
 
@@ -314,6 +314,27 @@ real stress signals (line loading itself is not published).
   without award vs round volume, price direction (assessment).
 - [x] **WP88. Phone report:** daily Telegram summary and failure alert from
   the daily workflow (secrets `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`).
+
+---
+
+## Phase 12: Champions, technology combinations, multi-asset hubs
+
+Goal: "Who are the champions of the energy transition, how do players
+combine technologies, and where are (and should be) hubs that join wind,
+solar, batteries, hydrogen, gas and large consumers?" Contract v1.13.
+
+- [ ] **WP99. Champions.** Fill financials from primary sources; scoring
+  framework (scale, breadth, execution, momentum, financial strength).
+- [ ] **WP100. Technology combinations.** wind+battery (same grid location,
+  no solar), wind+solar, wind+solar+battery; by company group.
+- [ ] **WP101. More of the register.** Combustion, electrolysers, gas
+  consumers and storage, large consumers, locations (station 2).
+- [ ] **WP102. Multi-asset hubs.** Sites with ≥ 3 asset types.
+- [ ] **WP103. Siting score.** By district, adjustable weights.
+- [ ] **WP104. Infrastructure layers.** Power lines, gas, hydrogen core
+  network (decisions needed: OSM ODbL, SciGRID_gas, H2 data).
+- [ ] **WP105. Pages.** Champions on `/players`, combinations on `/wind`,
+  new `/hubs`.
 
 ---
 

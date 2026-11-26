@@ -958,6 +958,74 @@ return" (sensitivity). `/wind`: section "Wind with batteries and solar"
 (map, per year, largest sites). Header: separate "Wind costs" and "Solar
 costs". The Outlook page is unchanged.
 
+## v1.13: champions of the energy transition, technology combinations, multi-asset hubs (DRAFT, awaiting approval)
+
+### Players: champions (WP99)
+
+`players.yaml` gains filled financials from primary sources (annual reports,
+Bundesanzeiger filings, company press releases) with year, label and source
+per figure; where a company publishes nothing, the field says
+`"not_published"` instead of staying blank. `players.json` gains
+`champions`: one row per developer, IPP or utility active in Germany with
+five scores (0–100, method stated): **scale** (awarded MW in the last three
+years, wind + solar), **breadth** (technologies with meaningful capacity:
+wind, solar, storage, hybrids, hydrogen), **execution** (share of awarded MW
+in operation; months from award to operation), **momentum** (awards trend),
+**financial strength** (EBITDA margin, net debt / EBITDA where published).
+Total = weighted mean (weights shown; user can change them on the page).
+**Check:** every score in 0–100; every financial figure has a source.
+
+### Technology combinations (WP100)
+
+`auctions/colocation.json` gains `combo` per site: `wind+battery` (same grid
+location, no solar), `wind+solar`, `wind+solar+battery`, and `by_group`:
+per company group (award lists and operators ≥ 1 MW) the sites and MW per
+combination. **Check:** combos match the partner units at the site.
+
+### Station 2: more of the register (WP101)
+
+New internal `data/extract/assets_other.parquet`: combustion units (energy
+carrier, MW, CHP flag), gas producers (incl. electrolysers: technology, MW),
+gas consumers, gas storage, large electricity consumers (MW, legal entities
+only), each with location id, status, coordinates where public, operator.
+New internal `data/extract/locations.parquet`: MaStR location → linked
+units and grid connection points (voltage level). **Check:** counts per
+type plausible; every unit's location exists.
+
+### Multi-asset hubs `hubs/hubs.json` (WP102)
+
+Sites combining at least three asset types among wind, solar, battery,
+gas/CHP plant, electrolyser, gas storage, large consumer: same MaStR
+location, or a 1 km cluster. Per hub: asset types with MW (and MWh), status
+(operating / planned parts), operators (legal entities), state, district,
+lat/lon. Totals by combination. **Check:** ≥ 3 types per hub; no natural
+persons' locations.
+
+### Siting `hubs/siting.json` (WP103)
+
+Per district: renewable density (MW/km²), curtailed renewables at nearby
+TSO substations (Netztransparenz aggregates, hand-geocoded top
+substations), large consumers and gas plants, distance to the hydrogen core
+network and to the high-voltage grid (if WP104 layers are approved). Score
+0–100 with stated, adjustable weights. A screening tool, not site advice.
+
+### Infrastructure layers (WP104, needs decisions)
+
+- Power lines (≥ 110 kV) and substations: OpenStreetMap (ODbL; share-alike
+  applies to the derived layer file).
+- Gas transmission pipelines: SciGRID_gas (licence to confirm) or
+  OpenStreetMap.
+- Hydrogen core network: no open geodata; options: ask FNB Gas for data, or
+  draw a schematic from the segment list in the Bundesnetzagentur approval.
+- Fibre / internet backbone: no open data for Germany; data-centre-like large
+  consumers from MaStR as a proxy.
+
+### Website
+
+`/players`: "Champions" section (scores, matrix of technologies by company,
+filled financials). `/wind`: combinations by company. New page `/hubs`:
+map of multi-asset hubs, infrastructure layers, siting score by district.
+
 ## Version history
 
 | Version | Date | Change |
