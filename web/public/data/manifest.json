@@ -1,7 +1,7 @@
 {
   "contract_version": "1.12",
   "as_of": "2026-11-25",
-  "generated_at": "2026-11-26T00:14:12+00:00",
+  "generated_at": "2026-11-26T01:07:40+00:00",
   "pipeline_version": "0.1.0",
   "incomplete_after": {
     "biomass": "2026-07-03",
@@ -55,12 +55,12 @@
     {
       "name": "auctions/onshore.json",
       "rows": 34,
-      "bytes": 321217
+      "bytes": 321191
     },
     {
       "name": "auctions/awards.json",
       "rows": 5218,
-      "bytes": 3256721
+      "bytes": 3256718
     },
     {
       "name": "auctions/solar.json",
@@ -70,7 +70,7 @@
     {
       "name": "auctions/solar_awards.json",
       "rows": 2874,
-      "bytes": 1758850
+      "bytes": 1758861
     },
     {
       "name": "auctions/company_facts.json",
@@ -90,7 +90,7 @@
     {
       "name": "costs/profitability.json",
       "rows": 7672,
-      "bytes": 1139685
+      "bytes": 1139688
     },
     {
       "name": "auctions/runup.json",
@@ -118,14 +118,9 @@
       "bytes": 34807
     },
     {
-      "name": "auctions/players.json",
-      "rows": 18,
-      "bytes": 44424
-    },
-    {
       "name": "auctions/colocation.json",
       "rows": 564,
-      "bytes": 234196
+      "bytes": 234153
     },
     {
       "name": "hubs/hubs.json",
@@ -138,8 +133,13 @@
       "bytes": 145488
     },
     {
+      "name": "auctions/players.json",
+      "rows": 18,
+      "bytes": 44421
+    },
+    {
       "name": "hubs/infrastructure.json",
-      "rows": 2851,
+      "rows": 0,
       "bytes": 704168
     },
     {
