@@ -3,6 +3,13 @@
  "format": "tar + zstd archive with the explorer files of that day (without days/)",
  "snapshots": [
   {
+   "date": "2026-11-28",
+   "tag": "data-2026-11-28",
+   "name": "Data 2026-11-28 (contract 1.15)",
+   "published": "2026-11-28T14:24:05Z",
+   "url": "https://github.com/JURenewables/mastr-radar/releases/download/data-2026-11-28/data-2026-11-28.tar.zst"
+  },
+  {
    "date": "2026-11-27",
    "tag": "data-2026-11-27",
    "name": "Data 2026-11-27 (contract 1.15)",
